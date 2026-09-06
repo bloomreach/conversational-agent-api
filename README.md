@@ -24,4 +24,4 @@ Both clients implement the same integration contract described in `documentation
 
 1. Read `documentation.html` file (rendered) for the event model and lifecycle.
 2. Run one of the chat clients against your `apiUrl`/`projectId`/`personaId` and step through its doc-validation checklist.
-3. Reference `openapi-spec.json` for exact request/response shapes when building your own integration.
+3. Refer to the [API reference](https://documentation.bloomreach.com/clarity/reference/get-assistant-settings) and `openapi-spec.json` for exact request/response shapes when building your own integration.
