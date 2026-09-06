@@ -1,0 +1,1657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Conversational Agent API — Frontend Integration Guide</title>
+<style>
+  :root {
+    --bg: #f7f8fb;
+    --panel: #ffffff;
+    --panel-2: #f1f4f9;
+    --border: #d8dee9;
+    --text: #172033;
+    --muted: #5f6b7a;
+    --accent: #405cf5;
+    --accent-2: #0f9f8f;
+    --chip: #e9edf5;
+    --user-bubble: #405cf5;
+    --assistant-bubble: #eef2f7;
+    --danger: #d92d20;
+    --warn: #b7791f;
+    --radius: 14px;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --sidebar-w: 280px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    font-family: var(--sans);
+    background: radial-gradient(1200px 600px at 80% -10%, #eef3ff 0%, var(--bg) 60%);
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  /* ---------- Layout: sidebar + content ---------- */
+  .layout { display: flex; align-items: stretch; }
+
+  aside.sidebar {
+    width: var(--sidebar-w);
+    flex: 0 0 var(--sidebar-w);
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(6px);
+    border-right: 1px solid var(--border);
+    padding: 22px 16px 40px;
+  }
+  .sidebar .brand { display: flex; align-items: center; gap: 10px; margin: 0 6px 18px; }
+  .sidebar .brand .logo {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; overflow: hidden;
+  }
+  .sidebar .brand .logo img { width: 32px; height: 32px; display: block; object-fit: none; object-position: left center; }
+  .sidebar .brand .t { font-size: 14px; font-weight: 700; letter-spacing: -0.2px; }
+  .sidebar .brand .s { font-size: 11px; color: var(--muted); }
+
+  .nav-group { margin-bottom: 14px; }
+  .nav-group > .g-title {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.6px;
+    color: var(--muted); font-weight: 700;
+    padding: 6px 10px; display: flex; align-items: center; gap: 8px;
+  }
+  .nav-group > .g-title .gnum {
+    background: #ffd500; color: #002840; border-radius: 5px;
+    font-size: 10px; padding: 1px 6px; font-weight: 800;
+  }
+  .nav-group a {
+    display: block;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 5px 10px 5px 26px;
+    border-radius: 8px;
+    border-left: 2px solid transparent;
+    transition: 0.13s;
+  }
+  .nav-group a:hover { color: var(--text); background: var(--panel); }
+  .nav-group a.active { color: var(--text); border-left-color: #ffd500; background: var(--panel); }
+  .nav-group a.sub { padding-left: 40px; font-size: 12px; }
+
+  main {
+    flex: 1 1 auto;
+    min-width: 0;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 40px 40px 40px;
+  }
+  @media (max-width: 900px) {
+    aside.sidebar { display: none; }
+    main { padding: 24px 18px 32px; }
+  }
+  main a { color: var(--accent); text-decoration: none; }
+  main a:hover { text-decoration: underline; }
+
+  header.page h1 { margin: 0 0 10px; font-size: 32px; letter-spacing: -0.6px; }
+  header.page p.lead { margin: 0 0 6px; color: var(--text); max-width: 820px; font-size: 15px; }
+  .legend { display:flex; gap:14px; flex-wrap:wrap; margin: 18px 0 0; font-size: 12px; color: var(--muted); }
+
+  /* ---------- Chapters & sections ---------- */
+  .chapter { margin-top: 64px; scroll-margin-top: 20px; }
+  .chapter > h2.chapter-title {
+    font-size: 25px; margin: 0 0 6px; letter-spacing: -0.4px;
+    display: flex; align-items: center; gap: 12px;
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+  }
+  .chapter > h2.chapter-title .cnum {
+    font-size: 14px; background: #ffd500;
+    color: #002840; font-weight: 800; border-radius: 8px; padding: 3px 11px;
+  }
+  .chapter > p.chapter-intro { font-size: 15px; color: var(--text); max-width: 860px; margin: 12px 0 0; }
+  p.overview-p { font-size: 15px; color: var(--text); max-width: 860px; margin: 0 0 12px; }
+  h4.substep {
+    font-size: 16px; margin: 34px 0 6px; padding-top: 20px;
+    border-top: 1px solid var(--border); scroll-margin-top: 20px;
+  }
+  ul.overview-list { font-size: 14px; color: var(--text); max-width: 860px; margin: 0 0 12px; padding-left: 20px; }
+  ul.overview-list li { margin: 4px 0; }
+
+  section.block { margin-top: 38px; scroll-margin-top: 20px; }
+  .block > h3 {
+    font-size: 18px; margin: 0 0 3px;
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  }
+  .block > .evt {
+    font-family: var(--mono); font-size: 12px; color: #047d73;
+    margin: 2px 0 14px;
+  }
+  .dir {
+    display:inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
+    padding: 2px 8px; border-radius: 999px; text-transform: uppercase;
+  }
+  .dir.out { color: #1d4ed8; border: 1px solid #bfdbfe; background: #eff6ff; }
+  .dir.in  { color: #047857; border: 1px solid #bbf7d0; background: #f0fdf4; }
+  .dir.both{ color: #7e22ce; border: 1px solid #e9d5ff; background: #faf5ff; }
+
+  /* side-by-side row */
+  .row {
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 24px;
+    align-items: start;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+  @media (max-width: 820px) { .row { grid-template-columns: 1fr; } }
+
+  .mock {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    min-height: 100px;
+  }
+  .desc h4 { margin: 0 0 8px; font-size: 15px; }
+  .desc p { margin: 0 0 10px; color: var(--muted); font-size: 14px; }
+  .desc ul, .desc ol { margin: 0 0 10px; padding-left: 18px; color: var(--muted); font-size: 13.5px; }
+  .desc li { margin: 3px 0; }
+  .desc code, .inline-code,
+  .overview-p code, .overview-list code, .note code {
+    font-family: var(--mono); font-size: 12px;
+    background: #f6f8fc; border: 1px solid var(--border);
+    padding: 1px 6px; border-radius: 5px; color: #047d73;
+  }
+  .tag {
+    display: inline-block; font-size: 11px; padding: 2px 8px;
+    border-radius: 999px; margin: 4px 4px 0 0;
+    border: 1px solid var(--border); color: var(--muted);
+  }
+  .tag.feature { color: #1d4ed8; border-color: #bfdbfe; }
+  .tag.ui { color: #a16207; border-color: #fde68a; }
+  .tag.data { color: #7e22ce; border-color: #e9d5ff; }
+
+  /* code blocks */
+  pre.code {
+    font-family: var(--mono); font-size: 12.5px;
+    background: #ffffff; border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px 18px; overflow-x: auto;
+    color: var(--text); line-height: 1.55; margin: 14px 0;
+  }
+  pre.code .c { color: var(--muted); }
+  pre.code .k { color: #047d73; }
+  pre.code .s { color: #a16207; }
+
+  .tree {
+    font-family: var(--mono); font-size: 12.5px;
+    background: #ffffff; border: 1px solid var(--border);
+    border-radius: 12px; padding: 18px 20px; overflow-x: auto;
+    color: var(--text); white-space: pre; line-height: 1.6;
+  }
+  .tree .c { color: var(--muted); }
+  .tree .k { color: #047d73; }
+
+  /* callouts */
+  .note {
+    border-left: 3px solid var(--accent);
+    background: rgba(64,92,245,0.08);
+    border-radius: 0 10px 10px 0; padding: 12px 16px;
+    margin: 16px 0; font-size: 13.5px; color: var(--text);
+  }
+  .note.warn { border-left-color: var(--warn); background: rgba(183,121,31,0.10); }
+  .note.danger { border-left-color: var(--danger); background: rgba(217,45,32,0.08); }
+  .note b { color: var(--text); }
+
+  /* tables */
+  table.spec {
+    width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px;
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden;
+  }
+  table.spec th, table.spec td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  table.spec th { background: #eef2f7; color: var(--text); font-size: 12px; text-transform: uppercase; letter-spacing: 0.4px; }
+  table.spec td { color: var(--muted); }
+  table.spec td code { font-family: var(--mono); font-size: 11.5px; color: #047d73; }
+  table.spec tr:last-child td { border-bottom: none; }
+
+  /* ---------- Mock chat client pieces ---------- */
+  .device {
+    width: 100%; max-width: 340px; margin: 0 auto;
+    background: #ffffff; border: 1px solid var(--border);
+    border-radius: 18px; overflow: hidden;
+    box-shadow: 0 20px 50px rgba(17,24,39,0.12);
+  }
+  .assistant-logo {
+    width: 32px; height: 32px; object-fit: none; object-position: left center; flex: 0 0 auto;
+  }
+  .assistant-logo.large {
+    width: 32px; height: 32px; display: block; margin: 0 auto 12px;
+  }
+  .win-header {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 14px; border-bottom: 1px solid var(--border); background: var(--panel-2);
+  }
+  .win-header .meta { flex: 1; min-width: 0; }
+  .win-header .meta .n { font-size: 14px; font-weight: 600; }
+  .win-header .meta .d { font-size: 11px; color: var(--muted); }
+  .win-header .actions { display: flex; gap: 6px; color: var(--muted); }
+  .iconbtn {
+    width: 26px; height: 26px; border-radius: 7px;
+    border: 1px solid var(--border); background: #ffffff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: var(--muted);
+  }
+  .win-body { padding: 14px; background: #ffffff; }
+  .msg { display: flex; margin: 8px 0; gap: 8px; }
+  .msg.assistant { justify-content: flex-start; }
+  .msg.user { justify-content: flex-end; }
+  .msg .content { max-width: 80%; padding: 9px 12px; border-radius: 14px; font-size: 13px; }
+  .msg.assistant .content { background: var(--assistant-bubble); border-top-left-radius: 4px; }
+  .msg.user .content { background: var(--user-bubble); color: #ffffff; border-top-right-radius: 4px; }
+  .timestamp { text-align: center; font-size: 11px; color: var(--muted); margin: 10px 0 4px; }
+
+  @keyframes blink { 0%,60%,100%{opacity:.3} 30%{opacity:1} }
+
+  .notif {
+    display:inline-flex; align-items:center; gap:8px;
+    padding:8px 12px; background: var(--assistant-bubble); border-radius: 14px; font-size:12px; color: var(--muted);
+  }
+  .notif .dot { width:8px;height:8px;border-radius:50%;background:var(--accent-2);animation:blink 1s infinite;}
+
+  .qr { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .qr .chip {
+    font-size: 12px; padding: 6px 10px; border-radius: 999px;
+    background: var(--chip); border: 1px solid var(--border); color: var(--text);
+  }
+  .qr .chip.grad {
+    border: 1px solid transparent;
+    background: linear-gradient(#ffffff,#ffffff) padding-box,
+                linear-gradient(120deg, var(--accent), var(--accent-2)) border-box;
+  }
+
+  .input-bar {
+    display: flex; align-items: center; gap: 8px; padding: 10px 12px;
+    border-top: 1px solid var(--border); background: var(--panel-2);
+  }
+  .input-bar .field {
+    flex: 1; background: #f6f8fc; border: 1px solid var(--border);
+    border-radius: 999px; padding: 9px 14px; color: var(--muted); font-size: 13px;
+  }
+  .input-bar .send {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: flex; align-items: center; justify-content: center; color: #ffffff;
+  }
+
+  .card {
+    width: 140px; background: var(--panel-2); border: 1px solid var(--border);
+    border-radius: 12px; overflow: hidden; flex: 0 0 auto;
+  }
+  .card .img { height: 84px; background: linear-gradient(135deg,#eef2ff,#e0f2fe); display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:11px;}
+  .card .body { padding: 8px; }
+  .card .body .t { font-size: 12px; font-weight: 600; }
+  .card .body .p { font-size: 12px; color: #047d73; margin-top: 4px; }
+  .card .body .add { margin-top:6px; font-size:11px; text-align:center; border:1px solid var(--border); border-radius:8px; padding:4px; color: var(--text); }
+  .hscroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+  .pill { font-size: 10px; background: var(--chip); border:1px solid var(--border); border-radius:999px; padding: 2px 7px; color: var(--muted); }
+
+  .selprod { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+  .selprod .s { display:flex; align-items:center; gap:6px; font-size:11px; background: var(--chip); border:1px solid var(--border); border-radius:999px; padding:4px 8px; }
+  .selprod .s .x { color: var(--muted); }
+
+  .footer-note { text-align:center; font-size: 10px; color: var(--muted); padding: 6px; }
+  .small { font-size: 12px; color: var(--muted); }
+
+  footer.page { color: var(--muted); font-size: 12px; margin-top: 70px; padding-top: 20px; border-top: 1px solid var(--border); }
+
+  /* ---------- Wireframe mockups (SVG) ---------- */
+  .wireframes {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin: 6px 0 26px;
+  }
+  .wf-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 16px 10px;
+  }
+  .wf-card .wf-cap {
+    font-size: 13px; font-weight: 600; margin: 0 0 3px; color: var(--text);
+  }
+  .wf-card .wf-sub {
+    font-size: 12px; color: var(--muted); margin: 0 0 12px;
+  }
+  .wf-svg { width: 100%; height: auto; display: block; font-family: var(--sans); }
+  .wf-hint {
+    font-size: 11px; color: var(--muted); text-align: center;
+    margin: 8px 0 2px; display: flex; align-items: center; gap: 6px; justify-content: center;
+  }
+  .wf-hint .dotmark { width: 8px; height: 8px; border-radius: 2px; background: var(--accent); display: inline-block; }
+
+  /* outer storefront layer */
+  .wf-page { fill: #ffffff; stroke: var(--border); }
+  .wf-bar  { fill: #eef2f7; stroke: var(--border); }
+  .wf-dot  { fill: #c3ccdb; }
+  .wf-collabel { fill: var(--muted); font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px; }
+  .wf-frame.wf-layer-in { fill: #ffffff; stroke: var(--accent); stroke-width: 1.4; stroke-dasharray: 5 4; }
+
+  /* interactive SVG regions */
+  .wf-svg .hot { cursor: help; }
+  .wf-svg .hot .hit { fill: transparent; stroke: transparent; transition: stroke .12s, fill .12s; }
+  .wf-svg .hot:hover .hit {
+    fill: rgba(64,92,245,0.08);
+    stroke: var(--accent);
+    stroke-width: 1.4;
+    stroke-dasharray: 4 3;
+  }
+  .wf-frame { fill: #ffffff; stroke: var(--border); }
+  .wf-region { fill: #f1f4f9; stroke: var(--border); }
+  .wf-line { stroke: var(--border); }
+  .wf-ph-2 { fill: #d7deea; }
+  .wf-accent { fill: var(--accent); }
+  .wf-accent2 { fill: var(--accent-2); }
+  .wf-svg text { font-family: var(--sans); }
+  .wf-t   { fill: var(--muted); font-size: 9px; }
+  .wf-th  { fill: var(--text); font-size: 10px; font-weight: 600; }
+  .wf-tu  { fill: #ffffff; font-size: 9.5px; }
+  .wf-tp  { fill: #047d73; font-size: 9px; font-weight: 600; }
+  .wf-bubble-u { fill: var(--accent); }
+  .wf-bubble-a { fill: #eef2f7; stroke: var(--border); }
+  .wf-chip { fill: #ffffff; stroke: var(--border); }
+
+  /* floating tooltip */
+  #wf-tip {
+    position: fixed; z-index: 9999; pointer-events: none;
+    max-width: 280px; opacity: 0; transform: translateY(4px);
+    transition: opacity .12s ease, transform .12s ease;
+    background: #10192e; color: #eaf0fb;
+    border: 1px solid #24304d; border-radius: 10px;
+    padding: 10px 12px; font-size: 12px; line-height: 1.5;
+    box-shadow: 0 12px 34px rgba(9,14,28,0.35);
+  }
+  #wf-tip.show { opacity: 1; transform: translateY(0); }
+  #wf-tip .tt { font-weight: 700; font-size: 12.5px; margin-bottom: 4px; color: #ffffff; }
+  #wf-tip .te {
+    font-family: var(--mono); font-size: 11px; color: #6ee7d6;
+    display: inline-block; margin-bottom: 5px;
+  }
+  #wf-tip .td { color: #b9c2da; }
+  #wf-tip .dir {
+    display:inline-block; font-size: 9px; font-weight: 700; letter-spacing: 0.4px;
+    padding: 1px 6px; border-radius: 999px; text-transform: uppercase; margin-left: 6px;
+    vertical-align: middle;
+  }
+  #wf-tip .dir.out { color: #93c5fd; border: 1px solid #2b4a7a; background: #16233f; }
+  #wf-tip .dir.in  { color: #6ee7b7; border: 1px solid #21503b; background: #12271d; }
+  #wf-tip .dir.both{ color: #d8b4fe; border: 1px solid #45305e; background: #241832; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Bloomreach logo"><path d="M16.0022 32.0044C24.84 32.0044 32.0044 24.84 32.0044 16.0022C32.0044 7.16444 24.84 0 16.0022 0C7.16444 0 0 7.16444 0 16.0022C0 24.84 7.16444 32.0044 16.0022 32.0044Z" fill="#FFD500"/><path d="M19.2417 12.677L18.4581 14.6939C18.8751 14.9652 19.2164 15.3379 19.45 15.7772C19.6836 16.2164 19.8019 16.7077 19.7938 17.2051C19.7938 17.9585 19.4945 18.6811 18.9618 19.2138C18.4291 19.7465 17.7065 20.0458 16.9531 20.0458C16.1997 20.0458 15.4772 19.7465 14.9445 19.2138C14.4117 18.6811 14.1124 17.9585 14.1124 17.2051C14.0957 16.8314 14.1533 16.458 14.2817 16.1066C14.4101 15.7552 14.6069 15.4327 14.8607 15.1578C15.1145 14.8829 15.4202 14.6611 15.7603 14.505C16.1003 14.349 16.4679 14.2618 16.8418 14.2487L17.5765 12.2005C16.8746 12.0861 16.1563 12.1259 15.4714 12.3171C14.7865 12.5083 14.1514 12.8464 13.6103 13.3078C13.0693 13.7692 12.6352 14.3429 12.3382 14.989C12.0412 15.6352 11.8885 16.3382 11.8906 17.0493V22.1919H14.1169V21.3727C14.9658 21.9112 15.9523 22.1926 16.9576 22.183C18.0962 22.1987 19.2062 21.8262 20.105 21.127C21.0037 20.4278 21.6377 19.4434 21.9025 18.3359C22.1674 17.2284 22.0473 16.0638 21.562 15.0336C21.0768 14.0035 20.2553 13.1692 19.2328 12.6681L19.2417 12.677Z" fill="#002840"/><path d="M11.8828 12.4313C12.518 11.784 13.2745 11.2681 14.1091 10.9131V7.68945H11.8828V12.4313Z" fill="#002840"/></svg></div>
+      <div>
+        <div class="t">Conversational Agent API</div>
+        <div class="s">Frontend Integration Guide</div>
+      </div>
+    </div>
+
+    <nav>
+      <div class="nav-group">
+        <div class="g-title"><span class="gnum">1</span> Getting Started</div>
+        <a href="#gs-overview">Overview</a>
+        <a href="#gs-init">Initialization flow</a>
+        <a href="#gs-config" class="sub">Static setup &amp; identifiers</a>
+        <a href="#gs-surfaces" class="sub">Runtime API calls</a>
+        <a href="#gs-settings" class="sub">Step 1 · Fetch branding &amp; translations</a>
+        <a href="#gs-context" class="sub">Step 2 · Set the current context</a>
+        <a href="#gs-sync" class="sub">Step 3 · Restore existing history</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="g-title"><span class="gnum">2</span> Chat UI Architecture</div>
+        <a href="#arch-layout">Chat client layout</a>
+        <a href="#arch-sendevent">The send-event channel</a>
+        <a href="#arch-streaming">Streaming responses</a>
+        <a href="#arch-lifecycle">Request lifecycle</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="g-title"><span class="gnum">3</span> Basic Events (messages)</div>
+        <a href="#b-user-text">USER.TEXT</a>
+        <a href="#b-assistant-text">ASSISTANT.TEXT</a>
+        <a href="#b-append">APPEND_LAST_ASSISTANT</a>
+        <a href="#b-notification">ASSISTANT.NOTIFICATION</a>
+        <a href="#b-cold-start">ASSISTANT.COLD_START</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="g-title"><span class="gnum">4</span> Rich Messages</div>
+        <a href="#r-carousel">ASSISTANT.CAROUSEL</a>
+        <a href="#r-quick-reply">ASSISTANT.QUICK_REPLY</a>
+        <a href="#r-selected">SELECTED_ITEMS</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="g-title"><span class="gnum">5</span> Advanced Cases</div>
+        <a href="#a-direct-call">USER.DIRECT_CALL</a>
+        <a href="#a-gen-btn">USER.GEN_BY_BTN</a>
+        <a href="#a-set-context">FE.SET_CONTEXT</a>
+        <a href="#a-sync">SYNC_EVENT_LOG</a>
+        <a href="#a-feedback">USER.FEEDBACK</a>
+        <a href="#a-errors">Errors &amp; debug</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="g-title"><span class="gnum">6</span> Conversation Starters</div>
+        <a href="#cs-pdp">PDP questions</a>
+        <a href="#cs-plp">PLP questions</a>
+        <a href="#cs-search">Search / autosuggest</a>
+      </div>
+
+      <div class="nav-group">
+        <div class="g-title"><span class="gnum">7</span> Reference</div>
+        <a href="#ref-status">Status codes</a>
+        <a href="#ref-events">Event catalog</a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ============ CONTENT ============ -->
+  <main>
+    <header class="page">
+      <h1>Conversational Agent API — Frontend Integration Guide</h1>
+      <p class="lead">
+        What an implementer needs to know to build a chat UI on top of the Conversational agent Chat backend.
+        The <span class="inline-code">openapi-spec.json</span> is the source of truth — when this page and the spec disagree, the spec wins.
+      </p>
+    </header>
+
+    <!-- ================= CHAPTER 1 ================= -->
+    <div class="chapter" id="ch1">
+      <h2 class="chapter-title"><span class="cnum">1</span> Getting Started</h2>
+      <p class="chapter-intro">
+        The chat client first retrieves the configuration: a cached
+        <span class="inline-code">general-settings</span> call that returns branding and translations. Next, the chat client
+        exchanges messages over a single bidirectional endpoint (<span class="inline-code">send-event</span>) — one outbound
+        event per request, with a stream of inbound events in response. Before writing any UI, wire up your identifiers
+        and the persona settings fetch.
+      </p>
+
+      <section class="block" id="gs-overview">
+        <h3>Overview</h3>
+
+        <p class="overview-p">The web experience is composed of <b>two layers</b>. The <b>outer layer</b> is the merchant's own storefront page — for example a product-detail page (PDP), a product-listing/category page (PLP), or a search-results/autosuggest surface — which defines the <a href="#a-set-context">context</a>. The <b>inner layer</b> is the Conversational agent chat client UI that floats on top of it, and is everything documented in this guide.</p>
+        <p class="overview-p">The chat client itself has <b>two main views</b>. The <b>Welcome view</b> is the blank-slate state shown before the shopper says anything — it presents the agent's branding and a few actionable <b>conversation starters</b> to invite the first message. The moment a message is exchanged, the chat client switches to the <b>Active chat view</b>, a scrollable thread that renders every assistant and user turn: text replies, streaming chunks, product carousels, and quick-reply suggestions.</p>
+        <p class="overview-p"><b>Conversation starters</b> are pre-chat suggestion chips fetched from public Conversational agent Search endpoints — tuned to whatever the shopper is looking at (a product page, a listing page, or a search query). Selecting one simply sends its text as the first user message. See <a href="#ch6">Chapter&nbsp;6 · Conversation Starters</a> for the endpoints and payloads.</p>
+        <p class="overview-p">Throughout, the assistant relies on <b>context</b>: a snapshot of what is shown in the outer storefront page (product IDs, cart contents, active category or filters, and currency). Keeping this in sync is what lets replies stay relevant — e.g. answering “is it waterproof?” about the exact product on screen. Context is pushed to the backend whenever the page or cart state changes via the <a href="#a-set-context"><span class="inline-code">FE.SET_CONTEXT</span></a> event.</p>
+        <p class="overview-p">The two wireframes below show each view as the chat client docked inside the outer storefront layer. They are <b>hover-interactive</b> — point at any labelled region of the chat UI to see which event drives it and in which direction it flows.</p>
+        <div class="wireframes">
+
+          <!-- ===== WIREFRAME 1: Welcome / cold-start ===== -->
+          <div class="wf-card">
+            <div class="wf-cap">Welcome view — before the first message</div>
+            <div class="wf-sub">Outer layer: the storefront page (PDP / PLP / search). Inner layer: the Conversational agent chat client, showing branding + starter questions before any chat turn.</div>
+            <svg class="wf-svg" viewBox="0 0 620 476" role="img" aria-label="Welcome view wireframe inside a storefront page">
+              <!-- ===== OUTER LAYER: storefront page ===== -->
+              <rect class="wf-page" x="8" y="8" width="604" height="460" rx="12"/>
+              <!-- browser / nav bar -->
+              <rect class="wf-bar" x="8" y="8" width="604" height="34" rx="12"/>
+              <rect class="wf-bar" x="8" y="26" width="604" height="16"/>
+              <circle class="wf-dot" cx="26" cy="25" r="4"/>
+              <circle class="wf-dot" cx="40" cy="25" r="4"/>
+              <circle class="wf-dot" cx="54" cy="25" r="4"/>
+              <rect class="wf-region" x="72" y="18" width="420" height="14" rx="7"/>
+              <text class="wf-collabel" x="22" y="60">OUTER LAYER · STOREFRONT PAGE</text>
+              <!-- page content placeholders -->
+              <rect class="wf-ph-2" x="22" y="74" width="180" height="12" rx="6"/>
+              <rect class="wf-region" x="22" y="98" width="150" height="120" rx="8"/>
+              <text class="wf-t" x="97" y="162" text-anchor="middle">Product / hero</text>
+              <rect class="wf-region" x="186" y="98" width="120" height="120" rx="8"/>
+              <rect class="wf-ph-2" x="22" y="232" width="284" height="9" rx="4"/>
+              <rect class="wf-ph-2" x="22" y="248" width="240" height="9" rx="4"/>
+              <rect class="wf-ph-2" x="22" y="264" width="264" height="9" rx="4"/>
+              <!-- layer outline -->              <text class="wf-collabel" x="483" y="64" text-anchor="middle" fill="#405cf5">INNER LAYER · CLARITY CHAT CLIENT</text>
+
+              <!-- ===== INNER LAYER: chat client ===== -->
+              <g transform="translate(360, 72) scale(0.82)">
+              <!-- frame -->
+              <rect class="wf-frame wf-layer-in" x="8" y="8" width="284" height="436" rx="16"/>
+              <!-- header divider -->
+              <line class="wf-line" x1="8" y1="58" x2="292" y2="58"/>
+
+              <!-- Agent Logo (header) -->
+              <g class="hot" data-title="Agent Logo" data-evt="GET general-settings" data-dir="in"
+                 data-desc="Header brand mark. Rendered from the persona settings field assistantLogo (a URL, often null — fall back to a neutral placeholder).">
+                <circle class="wf-region" cx="34" cy="33" r="14"/>
+                <text class="wf-t" x="34" y="31" text-anchor="middle">Agent</text>
+                <text class="wf-t" x="34" y="41" text-anchor="middle">Logo</text>
+                <rect class="hit" x="16" y="15" width="36" height="36" rx="8"/>
+              </g>
+
+              <!-- Agent name + description -->
+              <g class="hot" data-title="Agent name &amp; description" data-evt="GET general-settings" data-dir="in"
+                 data-desc="Two lines from persona settings: assistantName (or agentPersonaName) and description. Both nullable — provide local fallbacks.">
+                <text class="wf-th" x="58" y="32">Agent name</text>
+                <text class="wf-t" x="58" y="43">Agent description</text>
+                <rect class="hit" x="56" y="20" width="140" height="30" rx="6"/>
+              </g>
+
+              <!-- New chat action -->
+              <g class="hot" data-title="New chat" data-evt="SYNC_EVENT_LOG (new chatId)" data-dir="out"
+                 data-desc="Starts a fresh conversation: rotates the chatId (new UUID v7) while keeping the same endCustomerId. No prior history is replayed for the new chat.">
+                <rect class="wf-region" x="246" y="25" width="16" height="16" rx="4"/>
+                <path class="wf-line" stroke-width="1.4" d="M254 29 v8 M250 33 h8"/>
+                <rect class="hit" x="244" y="23" width="20" height="20" rx="5"/>
+              </g>
+              <!-- Close chat action -->
+              <g class="hot" data-title="Close chat" data-evt="UI only — no event" data-dir="out"
+                 data-desc="Minimizes / closes the chat client. Local UI action only — the conversation state is preserved and no event is sent to the backend.">
+                <rect class="wf-region" x="268" y="25" width="16" height="16" rx="4"/>
+                <path class="wf-line" stroke-width="1.4" d="M272 29 l8 8 M280 29 l-8 8"/>
+                <rect class="hit" x="266" y="23" width="20" height="20" rx="5"/>
+              </g>
+
+              <!-- Large agent logo (welcome) -->
+              <g class="hot" data-title="Agent Logo (large)" data-evt="GET general-settings" data-dir="in"
+                 data-desc="The same assistantLogo shown large on the blank-slate welcome screen, above the greeting.">
+                <circle class="wf-region" cx="150" cy="104" r="24"/>
+                <text class="wf-t" x="150" y="101" text-anchor="middle">Agent</text>
+                <text class="wf-t" x="150" y="112" text-anchor="middle">Logo</text>
+                <rect class="hit" x="122" y="76" width="56" height="56" rx="12"/>
+              </g>
+
+              <!-- Welcome message -->
+              <g class="hot" data-title="Welcome message" data-evt="ADD_MESSAGE.ASSISTANT.COLD_START" data-dir="both"
+                 data-desc="Greeting text from the cold-start event (text). The cold-start event itself is not persisted when sent directly; persist it for replay via the outbound PERSIST_COLD_START event.">
+                <text class="wf-th" x="150" y="152" text-anchor="middle">Welcome message</text>
+                <text class="wf-t" x="150" y="166" text-anchor="middle">Greeting text shown before</text>
+                <text class="wf-t" x="150" y="177" text-anchor="middle">the first message</text>
+                <rect class="hit" x="58" y="138" width="184" height="48" rx="8"/>
+              </g>
+
+              <!-- Starter question 1 -->
+              <g class="hot" data-title="Starter question 1" data-evt="Conversation Starters → ADD_MESSAGE.USER.TEXT" data-dir="in"
+                 data-desc="Suggested question fetched from a Conversational agent Search endpoint (PDP / PLP / autosuggest) or the cold-start quickReply. Selecting it sends the label as ADD_MESSAGE.USER.TEXT.">
+                <rect class="wf-chip" x="46" y="204" width="208" height="30" rx="15"/>
+                <text class="wf-t" x="150" y="222" text-anchor="middle">Starter question 1</text>
+                <rect class="hit" x="46" y="204" width="208" height="30" rx="15"/>
+              </g>
+
+              <!-- Starter question 2 -->
+              <g class="hot" data-title="Starter question 2" data-evt="Conversation Starters → ADD_MESSAGE.USER.TEXT" data-dir="in"
+                 data-desc="Another pre-chat suggestion. Same source and behaviour as Starter question 1 — a QuestionDTO whose question text becomes the first user message.">
+                <rect class="wf-chip" x="46" y="242" width="208" height="30" rx="15"/>
+                <text class="wf-t" x="150" y="260" text-anchor="middle">Starter question 2</text>
+                <rect class="hit" x="46" y="242" width="208" height="30" rx="15"/>
+              </g>
+
+              <!-- Starter question 3 -->
+              <g class="hot" data-title="Starter question 3" data-evt="Conversation Starters → ADD_MESSAGE.USER.TEXT" data-dir="in"
+                 data-desc="Additional starter chip. The list length is capped by limitQuestions / max_questions on the starters call.">
+                <rect class="wf-chip" x="46" y="280" width="208" height="30" rx="15"/>
+                <text class="wf-t" x="150" y="298" text-anchor="middle">Starter question 3</text>
+                <rect class="hit" x="46" y="280" width="208" height="30" rx="15"/>
+              </g>
+
+              <!-- footer divider -->
+              <line class="wf-line" x1="8" y1="394" x2="292" y2="394"/>
+
+              <!-- Chat input box -->
+              <g class="hot" data-title="Chat input box" data-evt="ADD_MESSAGE.USER.TEXT" data-dir="out"
+                 data-desc="The message input. Submitting text sends an ADD_MESSAGE.USER.TEXT event; the placeholder comes from the translated dictionary in general-settings.">
+                <rect class="wf-region" x="24" y="408" width="224" height="24" rx="12"/>
+                <text class="wf-t" x="36" y="423">Chat input box</text>
+                <circle class="wf-accent" cx="264" cy="420" r="12"/>
+                <path fill="#ffffff" d="M259 415 l8 5 -8 5 2 -5 z"/>
+                <rect class="hit" x="24" y="406" width="252" height="30" rx="14"/>
+              </g>
+              </g>
+            </svg>
+            <div class="wf-hint"><span class="dotmark"></span> Hover any region for its full event mapping</div>
+          </div>
+
+          <!-- ===== WIREFRAME 2: Active conversation ===== -->
+          <div class="wf-card">
+            <div class="wf-cap">Active chat — messages, carousel &amp; suggestions</div>
+            <div class="wf-sub">Outer layer: the same storefront page. Inner layer: the Conversational agent chat client mid-conversation — every bubble is a projection of one inbound / outbound event.</div>
+            <svg class="wf-svg" viewBox="0 0 620 476" role="img" aria-label="Active chat wireframe inside a storefront page">
+              <!-- ===== OUTER LAYER: storefront page ===== -->
+              <rect class="wf-page" x="8" y="8" width="604" height="460" rx="12"/>
+              <rect class="wf-bar" x="8" y="8" width="604" height="34" rx="12"/>
+              <rect class="wf-bar" x="8" y="26" width="604" height="16"/>
+              <circle class="wf-dot" cx="26" cy="25" r="4"/>
+              <circle class="wf-dot" cx="40" cy="25" r="4"/>
+              <circle class="wf-dot" cx="54" cy="25" r="4"/>
+              <rect class="wf-region" x="72" y="18" width="420" height="14" rx="7"/>
+              <text class="wf-collabel" x="22" y="60">OUTER LAYER · STOREFRONT PAGE</text>
+              <rect class="wf-ph-2" x="22" y="74" width="180" height="12" rx="6"/>
+              <rect class="wf-region" x="22" y="98" width="150" height="120" rx="8"/>
+              <text class="wf-t" x="97" y="162" text-anchor="middle">Product / hero</text>
+              <rect class="wf-region" x="186" y="98" width="120" height="120" rx="8"/>
+              <rect class="wf-ph-2" x="22" y="232" width="284" height="9" rx="4"/>
+              <rect class="wf-ph-2" x="22" y="248" width="240" height="9" rx="4"/>
+              <rect class="wf-ph-2" x="22" y="264" width="264" height="9" rx="4"/>              <text class="wf-collabel" x="483" y="64" text-anchor="middle" fill="#405cf5">INNER LAYER · CLARITY CHAT CLIENT</text>
+
+              <!-- ===== INNER LAYER: chat client ===== -->
+              <g transform="translate(360, 72) scale(0.82)">
+              <rect class="wf-frame wf-layer-in" x="8" y="8" width="284" height="436" rx="16"/>
+              <line class="wf-line" x1="8" y1="58" x2="292" y2="58"/>
+
+              <!-- header logo + name (reuse mapping) -->
+              <g class="hot" data-title="Agent Logo" data-evt="GET general-settings" data-dir="in"
+                 data-desc="Header brand mark from persona settings assistantLogo.">
+                <circle class="wf-region" cx="34" cy="33" r="14"/>
+                <text class="wf-t" x="34" y="31" text-anchor="middle">Agent</text>
+                <text class="wf-t" x="34" y="41" text-anchor="middle">Logo</text>
+                <rect class="hit" x="16" y="15" width="36" height="36" rx="8"/>
+              </g>
+              <g class="hot" data-title="Agent name &amp; description" data-evt="GET general-settings" data-dir="in"
+                 data-desc="assistantName and description from persona settings.">
+                <text class="wf-th" x="58" y="32">Agent name</text>
+                <text class="wf-t" x="58" y="43">Agent description</text>
+                <rect class="hit" x="56" y="20" width="140" height="30" rx="6"/>
+              </g>
+              <!-- New chat action -->
+              <g class="hot" data-title="New chat" data-evt="SYNC_EVENT_LOG (new chatId)" data-dir="out"
+                 data-desc="Starts a fresh conversation: rotates the chatId (new UUID v7) while keeping the same endCustomerId. No prior history is replayed for the new chat.">
+                <rect class="wf-region" x="246" y="25" width="16" height="16" rx="4"/>
+                <path class="wf-line" stroke-width="1.4" d="M254 29 v8 M250 33 h8"/>
+                <rect class="hit" x="244" y="23" width="20" height="20" rx="5"/>
+              </g>
+              <!-- Close chat action -->
+              <g class="hot" data-title="Close chat" data-evt="UI only — no event" data-dir="out"
+                 data-desc="Minimizes / closes the chat client. Local UI action only — the conversation state is preserved and no event is sent to the backend.">
+                <rect class="wf-region" x="268" y="25" width="16" height="16" rx="4"/>
+                <path class="wf-line" stroke-width="1.4" d="M272 29 l8 8 M280 29 l-8 8"/>
+                <rect class="hit" x="266" y="23" width="20" height="20" rx="5"/>
+              </g>
+
+              <!-- User message bubble -->
+              <g class="hot" data-title="User message" data-evt="ADD_MESSAGE.USER.TEXT" data-dir="out"
+                 data-desc="Right-aligned bubble for what the shopper typed. Sent outbound and echoed back on the turn — de-duplicate by _id.">
+                <rect class="wf-bubble-u" x="120" y="74" width="152" height="30" rx="12"/>
+                <text class="wf-tu" x="196" y="92" text-anchor="middle">User message</text>
+                <rect class="hit" x="120" y="74" width="152" height="30" rx="12"/>
+              </g>
+
+              <!-- Assistant text bubble -->
+              <g class="hot" data-title="Assistant reply" data-evt="ADD_MESSAGE.ASSISTANT.TEXT (+ APPEND_LAST_ASSISTANT_MESSAGE)" data-dir="in"
+                 data-desc="Left-aligned markdown bubble. Starts from ASSISTANT.TEXT and grows as APPEND_LAST_ASSISTANT_MESSAGE chunks stream in.">
+                <rect class="wf-bubble-a" x="28" y="114" width="170" height="42" rx="12"/>
+                <text class="wf-th" x="40" y="130">Assistant reply</text>
+                <text class="wf-t" x="40" y="142">Markdown text, streamed</text>
+                <text class="wf-t" x="40" y="152">chunk by chunk</text>
+                <rect class="hit" x="28" y="114" width="170" height="42" rx="12"/>
+              </g>
+
+              <!-- Product carousel -->
+              <g class="hot" data-title="Product carousel" data-evt="ADD_MESSAGE.ASSISTANT.CAROUSEL" data-dir="in"
+                 data-desc="Horizontally scrollable product cards from the carousel event data: ProductItem[]. No default &quot;see all results&quot; button; a merchant may optionally configure one (e.g. to open the storefront search page).">
+                <!-- card 1 -->
+                <rect class="wf-region" x="28" y="168" width="104" height="116" rx="10"/>
+                <rect class="wf-ph-2" x="28" y="168" width="104" height="58" rx="10"/>
+                <text class="wf-t" x="80" y="201" text-anchor="middle">Product image</text>
+                <text class="wf-th" x="40" y="240">Product name</text>
+                <text class="wf-tp" x="40" y="252">Price</text>
+                <rect class="wf-chip" x="40" y="260" width="80" height="16" rx="8"/>
+                <text class="wf-t" x="80" y="271" text-anchor="middle">Add to cart</text>
+                <!-- card 2 (peeking) -->
+                <rect class="wf-region" x="142" y="168" width="104" height="116" rx="10"/>
+                <rect class="wf-ph-2" x="142" y="168" width="104" height="58" rx="10"/>
+                <text class="wf-t" x="194" y="201" text-anchor="middle">Product image</text>
+                <text class="wf-th" x="154" y="240">Product name</text>
+                <text class="wf-tp" x="154" y="252">Price</text>
+                <rect class="wf-chip" x="154" y="260" width="80" height="16" rx="8"/>
+                <text class="wf-t" x="194" y="271" text-anchor="middle">Add to cart</text>
+                <!-- card 3 edge -->
+                <rect class="wf-region" x="256" y="168" width="28" height="116" rx="10"/>
+                <rect class="hit" x="26" y="166" width="260" height="120" rx="12"/>
+              </g>
+
+              <!-- Assistant follow-up text -->
+              <g class="hot" data-title="Assistant follow-up" data-evt="ADD_MESSAGE.ASSISTANT.TEXT" data-dir="in"
+                 data-desc="A short assistant prompt that usually precedes quick replies (e.g. &quot;Want me to narrow it down?&quot;).">
+                <rect class="wf-bubble-a" x="28" y="296" width="150" height="24" rx="12"/>
+                <text class="wf-t" x="40" y="311">Assistant follow-up</text>
+                <rect class="hit" x="28" y="296" width="150" height="24" rx="12"/>
+              </g>
+
+              <!-- Quick reply chips -->
+              <g class="hot" data-title="Quick reply chips" data-evt="ADD_MESSAGE.ASSISTANT.QUICK_REPLY" data-dir="in"
+                 data-desc="Selectable suggestions from the quick-reply event data: { label, target?, payload? }[]. Any selection always sends USER.DIRECT_CALL (label as text), copying target/payload verbatim when present.">
+                <rect class="wf-chip" x="28" y="330" width="84" height="24" rx="12"/>
+                <text class="wf-t" x="70" y="345" text-anchor="middle">Quick reply 1</text>
+                <rect class="wf-chip" x="120" y="330" width="84" height="24" rx="12"/>
+                <text class="wf-t" x="162" y="345" text-anchor="middle">Quick reply 2</text>
+                <rect class="hit" x="26" y="328" width="242" height="28" rx="12"/>
+              </g>
+
+              <!-- Progress notification -->
+              <g class="hot" data-title="Progress notification" data-evt="ADD_MESSAGE.ASSISTANT.NOTIFICATION" data-dir="in"
+                 data-desc="In-place &quot;thinking&quot; indicator while streaming. Show only text (never toolName); cleared when the response turn completes (all events received).">
+                <rect class="wf-bubble-a" x="28" y="366" width="148" height="22" rx="11"/>
+                <circle class="wf-accent2" cx="41" cy="377" r="3.5"/>
+                <text class="wf-t" x="52" y="380">Progress notification</text>
+                <rect class="hit" x="28" y="366" width="148" height="22" rx="11"/>
+              </g>
+
+              <line class="wf-line" x1="8" y1="398" x2="292" y2="398"/>
+
+              <!-- Chat input box -->
+              <g class="hot" data-title="Chat input box" data-evt="ADD_MESSAGE.USER.TEXT" data-dir="out"
+                 data-desc="Message input for follow-ups. Disabled while a response streams; re-enabled when the turn completes. On FATAL_ERROR, show the safe fallback and allow retry or new chat.">
+                <rect class="wf-region" x="24" y="412" width="224" height="24" rx="12"/>
+                <text class="wf-t" x="36" y="427">Chat input box</text>
+                <circle class="wf-accent" cx="264" cy="424" r="12"/>
+                <path fill="#ffffff" d="M259 419 l8 5 -8 5 2 -5 z"/>
+                <rect class="hit" x="24" y="410" width="252" height="30" rx="14"/>
+              </g>
+              </g>
+            </svg>
+            <div class="wf-hint"><span class="dotmark"></span> Hover any region for its full event mapping</div>
+          </div>
+
+        </div>
+      </section>
+
+      <section class="block" id="gs-init">
+        <h3>Initialization flow</h3>
+        <p class="overview-p">Bringing the chat client to life is a short, ordered sequence. First, gather your <a href="#gs-config">static setup and runtime identifiers</a> — the backend URL, project/persona identifiers, storefront currency, shopper identifier, and chat identifier. Then, as the chat client mounts, run three steps in order: <a href="#gs-settings">fetch branding &amp; translations</a> so the UI is fully localized before it paints, <a href="#gs-context">push the current storefront context</a> so replies are relevant to what is shown in the outer storefront page, and — only when reopening an existing conversation — <a href="#gs-sync">hydrate the history</a> so past messages reappear.</p>
+        <p class="overview-p">From here on, every interaction is modeled as an <b>event</b>. On each chat turn, the client sends one JSON object to <code>send-event</code>: an <code>event</code>, the current page <code>url</code>, and the shopper identifier <code>endCustomerId</code>. The server responds with a streaming JSON array of inbound events that the UI renders into the conversation thread. Events flow in one of three directions:</p>
+        <ul class="overview-list">
+          <li><span class="dir out">Outbound</span> client → server.</li>
+          <li><span class="dir in">Inbound</span> server → client.</li>
+          <li><span class="dir both">Both</span> replayed from history or echoed back by the server.</li>
+        </ul>
+        <p class="overview-p">The following sections start with the required setup, then describe the runtime calls and each event type in more detail.</p>
+
+        <!-- Configuration -->
+        <h4 id="gs-config" class="substep">Static setup and runtime identifiers</h4>
+        <p class="overview-p">Everything the client needs falls into three groups, distinguished by who owns each value and when it's set.</p>
+        <table class="spec">
+          <tr><th>Bucket</th><th>Values</th><th>Notes</th></tr>
+          <tr><td><b>Bloomreach</b></td><td><code>apiUrl</code>, <code>projectId</code>, <code>personaId</code></td><td>Issued at onboarding. Go into the base URL / path.</td></tr>
+          <tr><td><b>Frontend / storefront</b></td><td><code>currency</code></td><td>ISO 4217 (<code>USD</code>, <code>GBP</code>…). Read this from your storefront or merchant configuration before initialization; use it to format prices and pass it in <code>FE.SET_CONTEXT</code>.</td></tr>
+          <tr><td><b>Runtime</b></td><td><code>endCustomerId</code>, <code>chatId</code></td><td><code>endCustomerId</code> identifies the shopper/end user, typically from a stable cookie. <code>chatId</code> identifies one conversation and is generated &amp; persisted by the client. One shopper may have many chats over time.</td></tr>
+        </table>
+        <div class="note"><b>Chat ID:</b> generate a fresh <code>chatId</code> with a UUID v7 library the first time the chat surface opens, persist it in <code>localStorage</code>, and rotate it on "New chat". <code>endCustomerId</code> never changes when a new chat starts.
+<pre class="code" style="margin:12px 0 0;"><span class="k">import</span> { v7 } <span class="k">from</span> <span class="s">'uuid'</span>
+<span class="k">const</span> chatId =
+  localStorage.getItem(<span class="s">'CHAT_ID'</span>) ??
+  (() => { <span class="k">const</span> id = v7(); localStorage.setItem(<span class="s">'CHAT_ID'</span>, id); <span class="k">return</span> id })()</pre></div>
+
+        <!-- Runtime API calls -->
+        <h4 id="gs-surfaces" class="substep">Runtime API calls</h4>
+        <p class="overview-p">The whole integration is just a couple of endpoints: a one-time settings fetch, a single streaming chat channel, and optional pre-chat <a href="#ch6">conversation starters</a> from Conversational agent Search.</p>
+        <table class="spec">
+          <tr><th>Method</th><th>Endpoint</th><th>Purpose</th></tr>
+          <tr><td><code>GET</code></td><td><code>.../persona/{personaId}/general-settings</code></td><td>Branding + full i18n dictionary. Called once on mount, cached.</td></tr>
+          <tr><td><code>POST</code></td><td><code>.../chat/{chatId}/send-event</code></td><td>The whole chat channel: one outbound event in, a stream of inbound events back.</td></tr>
+          <tr><td><code>GET</code></td><td><code>.../clarity-search/.../catalog/items/{itemId}</code></td><td><a href="#cs-pdp">PDP</a> starter questions for the product on the page.</td></tr>
+          <tr><td><code>POST</code></td><td><code>.../clarity-search/.../catalog/plp</code></td><td><a href="#cs-plp">PLP</a> category-level questions from a product list.</td></tr>
+          <tr><td><code>GET</code></td><td><code>.../clarity-search/.../suggestions?q=…</code></td><td><a href="#cs-search">Search</a> autosuggest questions for a typed query.</td></tr>
+        </table>
+        <p class="overview-p">The first two are the <b>core</b> surface; the three <code>clarity-search</code> paths are optional <b>conversation starters</b> shown before the first message. See <a href="#ch6">Chapter&nbsp;6</a> for their request/response details.</p>
+
+        <!-- Step 1: general-settings -->
+        <h4 id="gs-settings" class="substep">Step 1 — Fetch branding &amp; translations <span class="dir in">Inbound</span></h4>
+        <div class="evt">GET .../persona/{personaId}/general-settings</div>
+        <p class="overview-p">Call <code>general-settings</code> once on mount and cache it for the session. It returns persona branding (<code>assistantLogo</code>, <code>assistantName</code>, <code>agentPersonaName</code>, <code>description</code> — all nullable) plus the full <code>translated</code> dictionary for every UI string. Apply it before rendering so the header, placeholders, buttons and error messages are all localized.</p>
+        <pre class="code"><span class="k">const</span> getGeneralSettingsCached = <span class="k">async</span> () => {
+  <span class="k">const</span> cached = readCache(<span class="s">'SETTINGS'</span>, PROJECT_ID, PERSONA_ID)  <span class="c">// 6h TTL</span>
+  <span class="k">if</span> (cached) <span class="k">return</span> cached
+  <span class="k">const</span> res = <span class="k">await</span> fetch(
+    <span class="s">`${apiUrl}/cocoaas/public/api/projectId/${PROJECT_ID}`</span> +
+    <span class="s">`/persona/${PERSONA_ID}/general-settings`</span>)
+  <span class="k">const</span> settings = <span class="k">await</span> res.json()
+  writeCache(<span class="s">'SETTINGS'</span>, settings)
+  <span class="k">return</span> settings
+}
+
+applyBrandingAndI18n(<span class="k">await</span> getGeneralSettingsCached())</pre>
+        <ul class="overview-list">
+          <li>Always provide neutral local fallbacks — branding fields are often <code>null</code>.</li>
+          <li><code>assistantLogo</code> is a <b>URL</b>, not base64.</li>
+          <li><code>staticReplies.notificationThinking</code> is the "Thinking…" placeholder before streaming starts.</li>
+          <li><code>translated.errorMsg</code> is the fallback shown on <code>FATAL_ERROR</code> — never show raw error text.</li>
+          <li><code>customerSettings.customized_ui_attributes</code> lists extra product attributes to render on cards / mini-PDPs.</li>
+        </ul>
+        <div class="note"><b>Cache</b> the response in <code>localStorage</code> for up to <b>6 hours</b>, keyed by <code>projectId</code>+<code>personaId</code>. On failure, fall back to a stale entry rather than losing branding.</div>
+
+        <!-- Step 2: FE.SET_CONTEXT -->
+        <h4 id="gs-context" class="substep">Step 2 — Set the current context <span class="dir out">Outbound</span></h4>
+        <div class="evt">FE.SET_CONTEXT via send-event</div>
+        <p class="overview-p">Tell the assistant what is shown in the outer storefront page so replies stay relevant. Pass the configured <code>currency</code> here, plus whatever the surface knows about (product IDs, cart contents, category, filters). See <a href="#a-set-context"><code>FE.SET_CONTEXT</code></a> for the full field list.</p>
+        <p class="overview-p">Steps 2 and 3 both post to <code>send-event</code>, so define one small helper to reuse:</p>
+        <pre class="code"><span class="k">const</span> sendEvent = (eventBody) =>
+  fetch(<span class="s">`${apiUrl}/cocoaas/public/api/projectId/${PROJECT_ID}`</span> +
+        <span class="s">`/persona/${PERSONA_ID}/chat/${chatId}/send-event`</span>, {
+    method: <span class="s">'POST'</span>,
+    headers: { <span class="s">'Content-Type'</span>: <span class="s">'application/json'</span> },
+    body: JSON.stringify({
+      event: { _id: v7(), sentDate: <span class="k">new</span> Date().toISOString(), ...eventBody },
+      url: window.location.href,
+      endCustomerId,
+    }),
+  })</pre>
+        <pre class="code">sendEvent({
+  type: <span class="s">'FE.SET_CONTEXT'</span>,
+  currentItemIds: [<span class="s">'prod-123'</span>],
+  currentItemIdsType: <span class="s">'product_id'</span>,
+  currency: <span class="s">'USD'</span>,
+})</pre>
+
+        <!-- Step 3: SYNC_EVENT_LOG -->
+        <h4 id="gs-sync" class="substep">Step 3 — Restore existing history <span class="dir out">Outbound</span></h4>
+        <div class="evt">SYNC_EVENT_LOG via send-event</div>
+        <p class="overview-p">Use this when the shopper reopens a previously started conversation and the client already has an existing <code>chatId</code>. Ask the server to replay past events so the thread is restored. <b>Skip this for a freshly rotated (brand-new) <code>chatId</code></b> since there is nothing to replay. De-duplicate replayed events by <code>_id</code>. See <a href="#a-sync"><code>SYNC_EVENT_LOG</code></a> for details.</p>
+        <pre class="code"><span class="k">if</span> (!isBrandNewChat) {
+  sendEvent({ type: <span class="s">'SYNC_EVENT_LOG'</span> })
+}</pre>
+      </section>
+    </div>
+
+    <!-- ================= CHAPTER 2 ================= -->
+    <div class="chapter" id="ch2">
+      <h2 class="chapter-title"><span class="cnum">2</span> Chat UI Architecture</h2>
+      <p class="chapter-intro">
+        Conceptually the chat client is a header, a scrollable message thread, and a message input. Everything the thread
+        shows is derived from the ordered event log — each event type maps to one renderer.
+      </p>
+
+      <section class="block" id="arch-layout">
+        <h3>Chat client layout</h3>
+        <div class="row">
+          <div class="mock">
+            <div class="device">
+              <div class="win-header">
+                <svg class="assistant-logo" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Bloomreach logo"><path d="M16.0022 32.0044C24.84 32.0044 32.0044 24.84 32.0044 16.0022C32.0044 7.16444 24.84 0 16.0022 0C7.16444 0 0 7.16444 0 16.0022C0 24.84 7.16444 32.0044 16.0022 32.0044Z" fill="#FFD500"/><path d="M19.2417 12.677L18.4581 14.6939C18.8751 14.9652 19.2164 15.3379 19.45 15.7772C19.6836 16.2164 19.8019 16.7077 19.7938 17.2051C19.7938 17.9585 19.4945 18.6811 18.9618 19.2138C18.4291 19.7465 17.7065 20.0458 16.9531 20.0458C16.1997 20.0458 15.4772 19.7465 14.9445 19.2138C14.4117 18.6811 14.1124 17.9585 14.1124 17.2051C14.0957 16.8314 14.1533 16.458 14.2817 16.1066C14.4101 15.7552 14.6069 15.4327 14.8607 15.1578C15.1145 14.8829 15.4202 14.6611 15.7603 14.505C16.1003 14.349 16.4679 14.2618 16.8418 14.2487L17.5765 12.2005C16.8746 12.0861 16.1563 12.1259 15.4714 12.3171C14.7865 12.5083 14.1514 12.8464 13.6103 13.3078C13.0693 13.7692 12.6352 14.3429 12.3382 14.989C12.0412 15.6352 11.8885 16.3382 11.8906 17.0493V22.1919H14.1169V21.3727C14.9658 21.9112 15.9523 22.1926 16.9576 22.183C18.0962 22.1987 19.2062 21.8262 20.105 21.127C21.0037 20.4278 21.6377 19.4434 21.9025 18.3359C22.1674 17.2284 22.0473 16.0638 21.562 15.0336C21.0768 14.0035 20.2553 13.1692 19.2328 12.6681L19.2417 12.677Z" fill="#002840"/><path d="M11.8828 12.4313C12.518 11.784 13.2745 11.2681 14.1091 10.9131V7.68945H11.8828V12.4313Z" fill="#002840"/></svg>
+                <div class="meta"><div class="n">Bloomreach</div><div class="d">AI shopping assistant</div></div>
+                <div class="actions"><div class="iconbtn">↻</div><div class="iconbtn">✕</div></div>
+              </div>
+              <div class="win-body">
+                <div class="timestamp">Today, 14:02</div>
+                <div class="msg assistant"><div class="content">Hi! How can I help?</div></div>
+                <div class="msg user"><div class="content">Show me trail shoes</div></div>
+              </div>
+              <div class="qr" style="padding:8px 12px;background:var(--panel-2);"><span class="chip">Under $100</span><span class="chip">Waterproof</span></div>
+              <div class="input-bar"><div class="field">Type a message…</div><div class="send">➤</div></div>
+              <div class="footer-note">Powered by Bloomreach · Legal notice</div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>Three regions</h4>
+            <ul>
+              <li><b>Header</b> — assistant logo/avatar, name, description (from <code>general-settings</code>), plus actions (new chat, close).</li>
+              <li><b>Thread</b> — the message list rendered from the event log; implement auto-scroll to the newest message if that is desired for your UI.</li>
+              <li><b>Message input</b> — text input, optional footer quick-reply chips, and file/voice affordances.</li>
+            </ul>
+            <p>The thread is a pure projection of an ordered event array keyed by <code>_id</code>. Rendering is a switch on <code>event.type</code>. The following chapters describe each event type.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="arch-sendevent">
+        <h3>The send-event channel</h3>
+        <div class="evt">POST .../chat/{chatId}/send-event</div>
+        <div class="row">
+          <div class="mock">
+            <div class="tree"><span class="c">// request body</span>
+{
+  <span class="k">event</span>: { _id, type, sentDate, … },
+  <span class="k">url</span>: <span class="s">"https://shop/pdp"</span>,   <span class="c">// required</span>
+  <span class="k">endCustomerId</span>: <span class="s">"cookie"</span>,
+  localeTime?, conversationId?,
+  directToAgent?, agentPayload?
+}</div>
+          </div>
+          <div class="desc">
+            <h4>One outbound event per request</h4>
+            <p>For merchant integrations, send <code>event</code>, <code>url</code>, and <code>endCustomerId</code> on every request. The OpenAPI schema marks only <code>event</code> and <code>url</code> as strictly required, but omitting <code>endCustomerId</code> prevents stable shopper-level conversation tracking.</p>
+            <table class="spec">
+              <tr><th>Field</th><th>Description</th></tr>
+              <tr><td><code>event</code></td><td>The single event (discriminated union).</td></tr>
+              <tr><td><code>url</code></td><td>Current outer storefront page URL.</td></tr>
+              <tr><td><code>endCustomerId</code></td><td>Stable shopper/end-user identifier, usually a cookie value.</td></tr>
+              <tr><td><code>directToAgent</code> / <code>agentPayload</code></td><td>Skip routing and dispatch straight to a named agent.</td></tr>
+            </table>
+            <p>Some product-carousel events include <code>_metadata.queries</code>: the exact search queries the assistant used. There is no "See all results" button by default; if a merchant has configured one, pass those queries to your storefront search page so it can show the same result set. Treat other metadata fields, such as <code>engVer</code>, as diagnostic and do not render them to shoppers.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="arch-streaming">
+        <h3>Streaming responses</h3>
+        <div class="row">
+          <div class="mock">
+            <div class="tree"><span class="c">// server writes a growing JSON array</span>
+[
+  {"type":"...NOTIFICATION",...},
+  {"type":"...ASSISTANT.TEXT",...},
+  {"type":"APPEND_...",...},
+  {"type":"...CAROUSEL",...}
+]  <span class="c">← ] closes the turn</span></div>
+          </div>
+          <div class="desc">
+            <h4>Parse a single growing array incrementally</h4>
+            <p>The response body is one JSON array written character-by-character. Parse it as it arrives and render only newly received items.</p>
+            <pre class="code"><span class="k">const</span> reader = response.body.getReader()
+<span class="k">let</span> buffer = <span class="s">''</span>, lastIndex = -1, parsed = []
+<span class="k">for</span> (;;) {
+  <span class="k">const</span> { done, value } = <span class="k">await</span> reader.read()
+  <span class="k">if</span> (done) <span class="k">break</span>
+  buffer += decoder.decode(value)
+  <span class="k">try</span> { parsed = JSON.parse(buffer) }
+  <span class="k">catch</span> { <span class="k">try</span> { parsed = JSON.parse(buffer + <span class="s">']'</span>) } <span class="k">catch</span> { <span class="k">continue</span> } }
+  <span class="k">while</span> (lastIndex + 1 &lt; parsed.length) <span class="k">await</span> onItem(parsed[++lastIndex])
+}</pre>
+            <p class="small">Try <code>JSON.parse(buffer)</code> (closed array), else <code>JSON.parse(buffer + ']')</code> (in-flight). When done, the buffer must end with <code>]</code> or the stream is malformed.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="arch-lifecycle">
+        <h3>Request lifecycle — one in-flight at a time</h3>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:300px;">
+              <div class="win-body">
+                <div class="msg user"><div class="content">Compare these two</div></div>
+                <div class="msg assistant"><div class="content"><span class="notif"><span class="dot"></span> Comparing products…</span></div></div>
+              </div>
+              <div class="input-bar" style="opacity:.5;"><div class="field">Message input disabled…</div><div class="send">➤</div></div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>Disable while streaming</h4>
+            <ol>
+              <li>On submit, disable the message input and visible quick replies.</li>
+              <li>Show <code>staticReplies.notificationThinking</code> immediately.</li>
+              <li>Render incoming events; <code>NOTIFICATION</code> replaces the progress indicator in place.</li>
+              <li>When the stream completes (all response events received), clear the progress indicator and re-enable the input. If a <code>FATAL_ERROR</code> arrives, show the safe fallback error message and let the shopper try again or start a new chat.</li>
+            </ol>
+            <div class="note warn"><b>Timeout:</b> the backend holds the connection up to <b>60&nbsp;seconds</b>. Match it with an <code>AbortController</code> so a stalled stream can't lock the UI.</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= CHAPTER 3 ================= -->
+    <div class="chapter" id="ch3">
+      <h2 class="chapter-title"><span class="cnum">3</span> Basic Event Types (messages)</h2>
+      <p class="chapter-intro">
+        The everyday building blocks: the shopper's text, the assistant's text and its streaming chunks, the
+        in-place progress indicator, and the welcome message.
+      </p>
+
+      <section class="block" id="b-user-text">
+        <h3>User text message <span class="dir out">Outbound</span> <span class="dir both">echoed</span></h3>
+        <div class="evt">ADD_MESSAGE.USER.TEXT</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:320px;">
+              <div class="win-body">
+                <div class="msg user"><div class="content">Show me waterproof trail shoes under $100</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>The shopper types a message</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"ADD_MESSAGE.USER.TEXT"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  text: string }</pre>
+            <p>Right-aligned bubble. The server echoes this same event back on the turn — if you render optimistically, de-duplicate the echoed copy by <code>_id</code>.</p>
+            <p>Quick-reply selections do <b>not</b> use this event — they are always sent as <code>ADD_MESSAGE.USER.DIRECT_CALL</code> (see <a href="#r-quick-reply">Quick replies</a>), even when the option has no <code>target</code>/<code>payload</code>.</p>
+            <span class="tag ui">Bubble</span><span class="tag feature">Send</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="b-assistant-text">
+        <h3>Assistant text message <span class="dir in">Inbound</span></h3>
+        <div class="evt">ADD_MESSAGE.ASSISTANT.TEXT</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:340px;">
+              <div class="win-body">
+                <div class="msg assistant"><div class="content">Here are some great options. The <span style="color:var(--accent-2);">Trail Runner X</span> is waterproof and well under budget.</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>A complete (or starting) assistant message</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"ADD_MESSAGE.ASSISTANT.TEXT"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  text: string,
+  agent?: string,
+  marker?: string,
+  skipToneOfVoice?: boolean,
+  product_id_link_mapping?: string[] }</pre>
+            <p>Render as GitHub Flavored Markdown (links, tables, lists). It may be the seed that later <code>APPEND</code> chunks fold into. <code>product_id_link_mapping</code> helps rewrite inline product links to PDP URLs.</p>
+            <span class="tag ui">Markdown bubble</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="b-append">
+        <h3>Streaming chunk <span class="dir in">Inbound</span></h3>
+        <div class="evt">APPEND_LAST_ASSISTANT_MESSAGE</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:340px;">
+              <div class="win-body">
+                <div class="msg assistant"><div class="content">Here are some great options<span style="opacity:.5;">▌</span></div></div>
+                <div class="small" style="text-align:center;">text arrives chunk by chunk</div>
+              </div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>Fold into the previous assistant bubble</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"APPEND_LAST_ASSISTANT_MESSAGE"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  text: string }</pre>
+            <p>Append <code>text</code> to the most recent <code>ASSISTANT.TEXT</code> bubble. If an <code>APPEND</code> arrives with no prior text message, start a new one from it.</p>
+            <pre class="code"><span class="k">case</span> <span class="s">'APPEND_LAST_ASSISTANT_MESSAGE'</span>:
+  <span class="k">if</span> (lastAssistantMsg) { lastAssistantMsg.text += event.text; update() }
+  <span class="k">else</span> { lastAssistantMsg = {...event, type: <span class="s">'ADD_MESSAGE.ASSISTANT.TEXT'</span>}; append() }</pre>
+            <span class="tag feature">Streaming</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="b-notification">
+        <h3>Progress notification <span class="dir in">Inbound</span></h3>
+        <div class="evt">ADD_MESSAGE.ASSISTANT.NOTIFICATION</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:320px;">
+              <div class="win-body">
+                <div class="msg user"><div class="content">Find a waterproof one</div></div>
+                <div class="msg assistant"><div class="content"><span class="notif"><span class="dot"></span> Searching catalog…</span></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>In-place progress update</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"ADD_MESSAGE.ASSISTANT.NOTIFICATION"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  toolName: string,              <span class="c">// internal — DO NOT display</span>
+  text: string }                 <span class="c">// what the user sees</span></pre>
+            <ul>
+              <li><b>Show only <code>text</code></b> — <code>toolName</code> is internal.</li>
+              <li><b>Replace, don't append</b> — one in-place element, not a bubble per notification.</li>
+              <li><b>Clear when the turn completes</b> — keep it visible while messages stream in; remove it only after the request finishes and all response events have been received.</li>
+              <li><b>Initial state</b> — show <code>notificationThinking</code> the moment the user submits; the first notification overwrites it.</li>
+            </ul>
+            <span class="tag ui">Progress</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="b-cold-start">
+        <h3>Welcome / cold start <span class="dir both">Both</span></h3>
+        <div class="evt">ADD_MESSAGE.ASSISTANT.COLD_START</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:320px;">
+              <div class="win-body" style="text-align:center;padding:24px 16px;">
+                <svg class="assistant-logo large" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" role="img" aria-label="Bloomreach logo"><path d="M16.0022 32.0044C24.84 32.0044 32.0044 24.84 32.0044 16.0022C32.0044 7.16444 24.84 0 16.0022 0C7.16444 0 0 7.16444 0 16.0022C0 24.84 7.16444 32.0044 16.0022 32.0044Z" fill="#FFD500"/><path d="M19.2417 12.677L18.4581 14.6939C18.8751 14.9652 19.2164 15.3379 19.45 15.7772C19.6836 16.2164 19.8019 16.7077 19.7938 17.2051C19.7938 17.9585 19.4945 18.6811 18.9618 19.2138C18.4291 19.7465 17.7065 20.0458 16.9531 20.0458C16.1997 20.0458 15.4772 19.7465 14.9445 19.2138C14.4117 18.6811 14.1124 17.9585 14.1124 17.2051C14.0957 16.8314 14.1533 16.458 14.2817 16.1066C14.4101 15.7552 14.6069 15.4327 14.8607 15.1578C15.1145 14.8829 15.4202 14.6611 15.7603 14.505C16.1003 14.349 16.4679 14.2618 16.8418 14.2487L17.5765 12.2005C16.8746 12.0861 16.1563 12.1259 15.4714 12.3171C14.7865 12.5083 14.1514 12.8464 13.6103 13.3078C13.0693 13.7692 12.6352 14.3429 12.3382 14.989C12.0412 15.6352 11.8885 16.3382 11.8906 17.0493V22.1919H14.1169V21.3727C14.9658 21.9112 15.9523 22.1926 16.9576 22.183C18.0962 22.1987 19.2062 21.8262 20.105 21.127C21.0037 20.4278 21.6377 19.4434 21.9025 18.3359C22.1674 17.2284 22.0473 16.0638 21.562 15.0336C21.0768 14.0035 20.2553 13.1692 19.2328 12.6681L19.2417 12.677Z" fill="#002840"/><path d="M11.8828 12.4313C12.518 11.784 13.2745 11.2681 14.1091 10.9131V7.68945H11.8828V12.4313Z" fill="#002840"/></svg>
+                <div style="font-size:15px;font-weight:600;">Hi, I'm Bloomreach 👋</div>
+                <div class="small" style="margin-bottom:12px;">Ask me anything about our products.</div>
+                <div class="qr" style="justify-content:center;">
+                  <span class="chip">Find a gift</span><span class="chip">Best sellers</span><span class="chip">Track order</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>The blank-slate welcome screen</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"ADD_MESSAGE.ASSISTANT.COLD_START"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  text: string,
+  engText?: string,
+  areCartProducts?: boolean,
+  productIdsToShow?: string[],
+  initialContext?: object,
+  quickReply?: { label: string; target?: string; payload?: object }[] }</pre>
+            <p>Rendered before the first real message. Carries a welcome <code>text</code>, optional starter <code>quickReply</code> chips, and products to show. This is the actual welcome message object saved for replay, but sending <code>ADD_MESSAGE.ASSISTANT.COLD_START</code> directly does not persist it in conversation history. Persist welcome state for replay by sending the outbound <code>PERSIST_COLD_START</code> event with the cold-start message in its <code>events</code> payload.</p>
+            <span class="tag ui">Empty state</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= CHAPTER 4 ================= -->
+    <div class="chapter" id="ch4">
+      <h2 class="chapter-title"><span class="cnum">4</span> Rich Messages</h2>
+      <p class="chapter-intro">
+        Beyond plain text, the assistant emits structured product carousels, selectable quick replies, and
+        selection state that ties into the message input's "compare" flow.
+      </p>
+
+      <section class="block" id="r-carousel">
+        <h3>Product carousel <span class="dir in">Inbound</span></h3>
+        <div class="evt">ADD_MESSAGE.ASSISTANT.CAROUSEL</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:340px;">
+              <div class="win-body">
+                <div class="hscroll">
+                  <div class="card"><div class="img">image</div><div class="body"><div class="pill">New</div><div class="t">Trail Runner X</div><div class="p">$89.00</div><div class="add">Add to cart</div></div></div>
+                  <div class="card"><div class="img">image</div><div class="body"><div class="t">Peak Hiker</div><div class="p">$119.00</div><div class="add">Add to cart</div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>A list of products</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"ADD_MESSAGE.ASSISTANT.CAROUSEL"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  data: ProductItem[],           <span class="c">// required</span>
+  categoryName?: string,
+  rephrasedQuery?: string,
+  _metadata?: { engVer?: string; queries?: string[] } }</pre>
+            <p>Render product cards (image, title, price, tags, add-to-cart). There is no default "See all results" button; a merchant may optionally configure one to route shoppers to a storefront search page, using <code>_metadata.queries</code> to reproduce the result set.</p>
+            <p class="small"><b>ProductItem:</b> <code>id</code> (required), <code>url</code>, <code>title</code>, <code>image</code>, <code>price</code>, <code>originalPrice</code>, <code>currency</code>, <code>description</code>, <code>variantAttributeList</code>, <code>questions</code>, <code>variants</code>, <code>__categories</code>, <code>extraVariantFields</code>. Format prices with the context currency when <code>currency</code> is omitted.</p>
+            <span class="tag ui">Cards</span><span class="tag feature">Add to cart</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="r-quick-reply">
+        <h3>Quick replies <span class="dir in">Inbound</span></h3>
+        <div class="evt">ADD_MESSAGE.ASSISTANT.QUICK_REPLY</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:320px;">
+              <div class="win-body">
+                <div class="msg assistant"><div class="content">Want me to narrow it down?</div></div>
+                <div class="qr"><span class="chip grad">Compare selected</span><span class="chip">Under $100</span><span class="chip">Show more</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>Selectable suggestion buttons</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"ADD_MESSAGE.ASSISTANT.QUICK_REPLY"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  data: {                        <span class="c">// required</span>
+    label: string,
+    target?: string,
+    payload?: object
+  }[],
+  text?: string }</pre>
+            <div class="note"><b>On select:</b> always send an <code>ADD_MESSAGE.USER.DIRECT_CALL</code> with the <code>label</code> as <code>text</code>, regardless of the <code>target</code>/<code>payload</code> value. When the option carries a <code>target</code>/<code>payload</code>, copy it <b>verbatim</b>; when it does not, still send <code>DIRECT_CALL</code> with just the <code>label</code> (never <code>USER.TEXT</code>).</div>
+            <span class="tag ui">Buttons</span><span class="tag feature">Routing</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="r-selected">
+        <h3>Selected items <span class="dir both">Both</span></h3>
+        <div class="evt">SELECTED_ITEMS</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:320px;">
+              <div style="padding:12px;background:var(--panel-2);">
+                <div class="selprod">
+                  <span class="s">Trail Runner X <span class="x">✕</span></span>
+                  <span class="s">Peak Hiker <span class="x">✕</span></span>
+                </div>
+                <div class="input-bar" style="border-top:none;padding:0;background:transparent;">
+                  <div class="field">Ask about these products…</div><div class="send">➤</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>The shopper picked items (e.g. from a carousel)</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"SELECTED_ITEMS"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  ids: string[],                 <span class="c">// required</span>
+  data?: ProductItem[],
+  generatedFromAI?: boolean,     <span class="c">// true when created by the assistant</span>
+  isSelectedFromLastBotResponse?: boolean }</pre>
+            <p>Drives the "compare" chips above the message input. Sent outbound when the user selects; also replayed inbound to restore selection state. Same object both directions.</p>
+            <span class="tag ui">Compare chips</span><span class="tag data">Selection</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= CHAPTER 5 ================= -->
+    <div class="chapter" id="ch5">
+      <h2 class="chapter-title"><span class="cnum">5</span> Advanced Cases</h2>
+      <p class="chapter-intro">
+        Direct calls triggered by quick replies, context synchronization, history restoration, feedback, and error
+        handling. These power the richer flows and keep the UI in sync with the backend.
+      </p>
+
+      <section class="block" id="a-direct-call">
+        <h3>Direct call <span class="dir out">Outbound</span> <span class="dir both">echoed</span></h3>
+        <div class="evt">ADD_MESSAGE.USER.DIRECT_CALL</div>
+        <div class="row">
+          <div class="mock">
+            <div class="tree"><span class="k">target</span> ─ <span class="s">&lt;server-provided string&gt;</span>
+
+<span class="c">// copied verbatim from the quick-reply</span>
+<span class="c">// option Conversational agent sent — never invented</span>
+<span class="c">// or hardcoded by the client</span></div>
+          </div>
+          <div class="desc">
+            <h4>Return a server-provided quick-reply target</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"ADD_MESSAGE.USER.DIRECT_CALL"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  target?: string,
+  source?: string,
+  text?: string,
+  invisible?: boolean,
+  payload?: object }</pre>
+            <p>Sent for <b>every</b> quick-reply selection — always <code>DIRECT_CALL</code>, never <code>USER.TEXT</code> — whether or not the option carries a <code>target</code>/<code>payload</code>. The client should not invent targets; copy any server-provided <code>target</code>/<code>payload</code> back <b>verbatim</b>, preserving unknown fields. <code>invisible: true</code> hides it from history.</p>
+            <div class="note"><b>Public integration rule:</b> treat <code>target</code> values as server-owned routing hints. Your client should only return values it received from Conversational agent in a quick reply; do not hardcode or expose an independent picker of backend targets.</div>
+            <span class="tag feature">Routing</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="a-gen-btn">
+        <h3>Built-in button action <span class="dir out">Outbound</span> <span class="dir both">echoed</span></h3>
+        <div class="evt">ADD_MESSAGE.USER.GEN_BY_BTN · ADD_MESSAGE.USER.COMPARE</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:320px;">
+              <div class="win-body">
+                <div class="qr"><span class="chip grad">Show similar</span><span class="chip">Compare</span></div>
+                <div class="msg user"><div class="content" style="opacity:.85;">Compare Trail Runner X &amp; Peak Hiker</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>API event sent after selecting a built-in UI action</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"ADD_MESSAGE.USER.GEN_BY_BTN"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  text: <span class="s">"SHOW_SIMILAR"</span> | <span class="s">"COMPARISON"</span>,
+  label?: string }
+
+<span class="c">// replay-only:</span>
+{ _id: string,
+  type: <span class="s">"ADD_MESSAGE.USER.COMPARE"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  ids: string[] }</pre>
+            <p><code>GEN_BY_BTN</code> is the API event for a small set of built-in actions such as "show similar" or "compare". The UI label can be shopper-friendly, but the event text carries the fixed intent value expected by the backend. Like other user events, it is echoed back on the turn — de-duplicate the streamed copy by <code>_id</code>. <code>COMPARE</code> is a replay-only user event surfaced during history restoration.</p>
+            <span class="tag feature">Actions</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="a-set-context">
+        <h3>Set context <span class="dir both">Both</span></h3>
+        <div class="evt">FE.SET_CONTEXT</div>
+        <div class="row">
+          <div class="mock">
+            <div class="tree"><span class="c">// tell the assistant what's on screen</span>
+{
+  currentItemIds: [<span class="s">"prod-123"</span>],
+  currentItemIdsType: <span class="s">"product_id"</span>,
+  cartItemIds: […],
+  currency: <span class="s">"USD"</span>,
+  plpCategoryName?, miniPageProduct?,
+  remove?: [<span class="s">"pageList"</span>, …]
+}</div>
+          </div>
+          <div class="desc">
+            <h4>Sync the shopper's current view</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"FE.SET_CONTEXT"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  currentItemIds?: string[],
+  currentItemIdsType?: <span class="s">"product_id"</span> | <span class="s">"item_id"</span>,
+  currentItemId?: string,
+  cartItemIds?: string[],
+  miniPageProduct?: ProductItem,
+  userContextFilter?: object,
+  currency?: string,             <span class="c">// ISO 4217, e.g. "USD"</span>
+  plpCategoryName?: string,
+  plpCategoryDescription?: string,
+  urlQueryParams?: object,
+  remove?: string[],
+  uid?: string }</pre>
+            <p>Send whenever page / cart / filter state changes so responses stay relevant. Pass the FE-configured <code>currency</code> here. Use <code>remove</code> to clear previously sent context groups, such as page-list or cart state. The server may also assert context state back with the same object — apply it to local state.</p>
+            <span class="tag data">Context</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="a-sync">
+        <h3>History restoration <span class="dir out">Outbound</span></h3>
+        <div class="evt">SYNC_EVENT_LOG · PERSIST_COLD_START</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:320px;">
+              <div class="win-body">
+                <div class="timestamp">Yesterday</div>
+                <div class="msg user"><div class="content">Track my order</div></div>
+                <div class="msg assistant"><div class="content">Your order ships tomorrow 📦</div></div>
+                <div class="small" style="text-align:center;">↑ replayed from server</div>
+              </div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>Replay past events</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"SYNC_EVENT_LOG"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  lastProcessedEventId?: string,
+  welcomeUnnecessary?: boolean }</pre>
+            <p>Send on initial mount only when reopening an existing <code>chatId</code>. The server replays past events back through the response stream — including user messages. De-duplicate by <code>_id</code> since they may already exist locally. Skip this for a brand-new chat.</p>
+            <p><code>PERSIST_COLD_START</code> stores welcome-screen events so they can be replayed later. Use it to persist the <code>ADD_MESSAGE.ASSISTANT.COLD_START</code> welcome message; sending the cold-start event itself does not save it.</p>
+            <span class="tag feature">Hydration</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="a-feedback">
+        <h3>Feedback <span class="dir out">Outbound</span></h3>
+        <div class="evt">ADD_MESSAGE.USER.FEEDBACK</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:300px;padding:16px;">
+              <div style="text-align:center;">
+                <div class="small">How was your experience?</div>
+                <div style="font-size:20px;letter-spacing:5px;color:var(--accent-2);margin:8px 0;">★ ★ ★ ★ ☆</div>
+                <div class="field" style="text-align:left;margin:8px 0;">Tell us more (optional)…</div>
+                <div class="qr" style="justify-content:center;"><span class="chip grad">Submit</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>Rate a response or the conversation</h4>
+            <pre class="code">{ _id: string,
+  type: <span class="s">"ADD_MESSAGE.USER.FEEDBACK"</span>,
+  sentDate: string,              <span class="c">// ISO date-time</span>
+  score?: number,
+  text?: string,
+  messages?: string[] }</pre>
+            <p>Powers both per-message thumbs up/down and the survey overlay. <code>score</code> is the rating, <code>text</code> the optional free-text, <code>messages</code> the message IDs being rated.</p>
+            <span class="tag feature">Feedback</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="a-errors">
+        <h3>Errors <span class="dir in">Inbound</span></h3>
+        <div class="evt">ERROR · FATAL_ERROR</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:320px;">
+              <div class="win-body">
+                <div class="msg assistant"><div class="content" style="border:1px solid var(--danger);color:var(--danger);">Something went wrong. Please try again.</div></div>
+                <div class="small" style="text-align:center;">↑ translated.errorMsg on FATAL_ERROR</div>
+              </div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>Error events</h4>
+            <pre class="code">{ _id?: string,
+  type: <span class="s">"ERROR"</span> | <span class="s">"FATAL_ERROR"</span>,
+  sentDate?: string,             <span class="c">// ISO date-time</span>
+  text?: string,
+  exception?: object,
+  request?: object }</pre>
+            <div class="note"><b><code>ERROR</code></b> — backend telemetry, <b>not user-facing</b>. Ignore in the UI (a debug panel is fine). The stream continues normally.</div>
+            <div class="note danger"><b><code>FATAL_ERROR</code></b> — show <code>translated.errorMsg</code> (never <code>event.text</code>), stop the current stream, and allow the shopper to try again or start a new chat.</div>
+            <span class="tag feature">Error handling</span>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= CHAPTER 6 ================= -->
+    <div class="chapter" id="ch6">
+      <h2 class="chapter-title"><span class="cnum">6</span> Conversation Starters</h2>
+      <p class="chapter-intro">
+        Pre-chat suggestions from public Conversational agent Search APIs. Call these <b>before</b> the first
+        <code>send-event</code>. When the shopper selects one, send its text as a normal
+        <code>ADD_MESSAGE.USER.TEXT</code>. These paths use a different prefix and no <code>projectId</code>:
+        <span class="inline-code">.../clarity-search/v1/personas/{personaId}/...</span>
+      </p>
+
+      <section class="block" id="cs-pdp">
+        <h3>PDP — product detail page <span class="dir in">Inbound</span></h3>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:300px;padding:14px;">
+              <div class="card" style="width:100%;"><div class="img">product image</div>
+                <div class="body"><div class="t">Trail Runner X</div><div class="p">$89.00</div></div></div>
+              <div class="qr" style="margin-top:10px;"><span class="chip">Is it waterproof?</span><span class="chip">Runs true to size?</span></div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>Questions for the item being viewed</h4>
+            <table class="spec">
+              <tr><th>Operation</th><th>Endpoint · questions at</th></tr>
+              <tr><td><code>getProductById</code></td><td><code>GET /catalog/items/{itemId}</code> → <code>item._questions</code></td></tr>
+              <tr><td><code>getProductsById</code></td><td><code>POST /catalog/items</code> → <code>items[]._questions</code></td></tr>
+              <tr><td><code>getProductQuestionsById</code></td><td><code>GET /catalog/items/{itemId}/questions</code> → <code>questions</code></td></tr>
+              <tr><td><code>getParentProduct</code></td><td><code>GET /catalog/parent_product/{product_id}</code> → <code>parent_product.questions</code></td></tr>
+              <tr><td><code>getParentProducts</code></td><td><code>POST /catalog/parent_products</code> → <code>parent_products[].questions</code></td></tr>
+            </table>
+            <p class="small">Common controls: <code>skipQuestionSelection</code> (default false), <code>limitQuestions</code> (default 5), plus <code>includeVariants</code>, <code>includeImplicitFilter</code>, <code>fields</code>, <code>limitVariants</code>.</p>
+            <span class="tag data">Pre-chat</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="cs-plp">
+        <h3>PLP — product listing page <span class="dir in">Inbound</span></h3>
+        <div class="evt">POST /catalog/plp · getPlpQuestions</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:320px;padding:14px;">
+              <div class="hscroll">
+                <div class="card"><div class="img"></div><div class="body"><div class="t">Shoe A</div></div></div>
+                <div class="card"><div class="img"></div><div class="body"><div class="t">Shoe B</div></div></div>
+              </div>
+              <div class="qr" style="margin-top:10px;"><span class="chip">Which is best for trails?</span><span class="chip">Compare top picks</span></div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>Category-level questions from a product list</h4>
+            <pre class="code">POST /catalog/plp
+{ <span class="k">product_ids</span>: [<span class="s">"product-1"</span>, <span class="s">"product-2"</span>],
+  <span class="k">max_questions</span>: 5, plp_name? }</pre>
+            <p>At least one of <code>item_ids</code> or <code>product_ids</code> is required. Questions at <code>response.plp.questions</code>; contributing categories at <code>response.plp.categories</code>.</p>
+            <span class="tag data">Pre-chat</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="cs-search">
+        <h3>Search / autosuggest <span class="dir in">Inbound</span></h3>
+        <div class="evt">GET /suggestions · getSuggestions</div>
+        <div class="row">
+          <div class="mock">
+            <div class="device" style="max-width:320px;padding:14px;">
+              <div class="input-bar" style="border:none;padding:0;background:transparent;"><div class="field">leather boot|</div><div class="send">🔍</div></div>
+              <div class="qr" style="margin-top:10px;"><span class="chip">Are they waterproof?</span><span class="chip">leather chelsea boots</span><span class="chip">leather ankle boots</span></div>
+            </div>
+          </div>
+          <div class="desc">
+            <h4>Suggestions for the shopper's typed query</h4>
+            <pre class="code">GET /suggestions?q=leather+boot
+  &amp;include_keywords=true&amp;limit_questions=5&amp;limit_keywords=5</pre>
+            <p><b>Autosuggest</b> means suggestions shown while the shopper is typing in a search box, before they submit a full search. <code>q</code> is <b>required</b> — this endpoint is not a source of empty-page defaults. For an empty generic search chat, use local fallback placeholders instead. With <code>include_keywords=true</code> it returns <code>response.suggestions.questions</code> and <code>response.suggestions.keywords</code>.</p>
+            <p class="small">Params: <code>q</code> (req), <code>query_type</code> (default keyword), <code>include_products</code>, <code>include_keywords</code>, <code>limit_questions</code>, <code>limit_products</code>, <code>limit_keywords</code>.</p>
+            <span class="tag data">Pre-chat</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="block">
+        <h3>Shared question type</h3>
+        <pre class="code"><span class="c">// QuestionDTO</span>
+{ identifier?: string,
+  question?: string,
+  answer?: string,
+  weight?: number,
+  topic?: string,
+  subtopic?: string,
+  mini_question?: string }</pre>
+        <p class="small"><code>question</code> is the shopper-facing text. <code>answer</code> may be empty until enrichment completes. <code>topic</code>/<code>subtopic</code>/<code>mini_question</code> are optional display/grouping metadata.</p>
+      </section>
+    </div>
+
+    <!-- ================= CHAPTER 7 ================= -->
+    <div class="chapter" id="ch7">
+      <h2 class="chapter-title"><span class="cnum">7</span> Reference</h2>
+
+      <section class="block" id="ref-status">
+        <h3>Status codes</h3>
+        <table class="spec">
+          <tr><th>Code</th><th>Meaning</th><th>Action</th></tr>
+          <tr><td><code>200</code></td><td>Stream of events. Read until <code>]</code>.</td><td>Parse the streaming JSON array; render events as they arrive.</td></tr>
+          <tr><td><code>400</code></td><td>Invalid event format / missing field.</td><td>Send valid event objects and required request fields.</td></tr>
+          <tr><td><code>404</code></td><td>Unknown <code>projectId</code>, <code>personaId</code>, or <code>chatId</code>.</td><td>Verify the identifiers.</td></tr>
+          <tr><td><code>409</code></td><td>Conflict with current resource state.</td><td>Re-check context; retry only after the state changes.</td></tr>
+          <tr><td><code>429</code></td><td>Rate-limited.</td><td>Back off; don't retry in a tight loop.</td></tr>
+          <tr><td><code>500</code></td><td>Backend error (may still emit <code>ERROR</code>/<code>FATAL_ERROR</code>).</td><td>Contact Bloomreach if it persists.</td></tr>
+        </table>
+        <p class="small">Network drops are normal during streaming — handle <code>TypeError: network error</code> (e.g. on page refresh) silently.</p>
+      </section>
+
+      <section class="block" id="ref-events">
+        <h3>Event catalog</h3>
+        <table class="spec">
+          <tr><th>Event type</th><th>Direction</th><th>Purpose</th></tr>
+          <tr><td><code>ADD_MESSAGE.USER.TEXT</code></td><td><span class="dir out">Out</span> <span class="dir both">echo</span></td><td>Shopper types a message.</td></tr>
+          <tr><td><code>ADD_MESSAGE.USER.GEN_BY_BTN</code></td><td><span class="dir out">Out</span> <span class="dir both">echo</span></td><td>Built-in action selected from the UI (SHOW_SIMILAR / COMPARISON).</td></tr>
+          <tr><td><code>ADD_MESSAGE.USER.DIRECT_CALL</code></td><td><span class="dir out">Out</span> <span class="dir both">echo</span></td><td>Quick-reply selection; always sent as DIRECT_CALL, copying a server-provided target/payload when present.</td></tr>
+          <tr><td><code>ADD_MESSAGE.USER.COMPARE</code></td><td><span class="dir both">Replay</span></td><td>Replay-only compare selection.</td></tr>
+          <tr><td><code>ADD_MESSAGE.USER.FEEDBACK</code></td><td><span class="dir out">Out</span></td><td>Rate a response / conversation.</td></tr>
+          <tr><td><code>SYNC_EVENT_LOG</code></td><td><span class="dir out">Out</span></td><td>Request conversation history replay.</td></tr>
+          <tr><td><code>PERSIST_COLD_START</code></td><td><span class="dir out">Out</span></td><td>Persist welcome state for replay.</td></tr>
+          <tr><td><code>FE.SET_CONTEXT</code></td><td><span class="dir both">Both</span></td><td>Current page / cart / filter / currency state.</td></tr>
+          <tr><td><code>SELECTED_ITEMS</code></td><td><span class="dir both">Both</span></td><td>Selected products (compare).</td></tr>
+          <tr><td><code>ADD_MESSAGE.ASSISTANT.TEXT</code></td><td><span class="dir in">In</span></td><td>Assistant text message (markdown).</td></tr>
+          <tr><td><code>APPEND_LAST_ASSISTANT_MESSAGE</code></td><td><span class="dir in">In</span></td><td>Streaming chunk to fold into last text.</td></tr>
+          <tr><td><code>ADD_MESSAGE.ASSISTANT.NOTIFICATION</code></td><td><span class="dir in">In</span></td><td>In-place progress indicator.</td></tr>
+          <tr><td><code>ADD_MESSAGE.ASSISTANT.COLD_START</code></td><td><span class="dir both">Both</span></td><td>Welcome / initial message.</td></tr>
+          <tr><td><code>ADD_MESSAGE.ASSISTANT.CAROUSEL</code></td><td><span class="dir in">In</span></td><td>List of products.</td></tr>
+          <tr><td><code>ADD_MESSAGE.ASSISTANT.QUICK_REPLY</code></td><td><span class="dir in">In</span></td><td>Selectable suggestion buttons.</td></tr>
+          <tr><td><code>ERROR</code></td><td><span class="dir in">In</span></td><td>Non-fatal telemetry — do not surface.</td></tr>
+          <tr><td><code>FATAL_ERROR</code></td><td><span class="dir in">In</span></td><td>User-facing error → show <code>errorMsg</code>.</td></tr>
+        </table>
+      </section>
+    </div>
+
+    <footer class="page">
+      Documentation companion to <span class="inline-code">openapi-spec.json</span> (Conversational Agent API v0.1.0-beta.3). The OpenAPI spec is the source of truth — when this page and the spec disagree, the spec wins.
+    </footer>
+  </main>
+</div>
+
+<div id="wf-tip" role="tooltip"></div>
+
+<script>
+  // ---- Wireframe hover tooltips ----
+  (function () {
+    const tip = document.getElementById('wf-tip');
+    const dirLabel = { out: 'Outbound', in: 'Inbound', both: 'Both' };
+
+    function show(el, evt) {
+      const title = el.getAttribute('data-title') || '';
+      const event = el.getAttribute('data-evt') || '';
+      const dir = el.getAttribute('data-dir') || '';
+      const desc = el.getAttribute('data-desc') || '';
+      const dirHtml = dir ? ' <span class="dir ' + dir + '">' + (dirLabel[dir] || dir) + '</span>' : '';
+      tip.innerHTML =
+        '<div class="tt">' + title + dirHtml + '</div>' +
+        (event ? '<span class="te">' + event + '</span><br/>' : '') +
+        '<span class="td">' + desc + '</span>';
+      tip.classList.add('show');
+      move(evt);
+    }
+    function move(evt) {
+      const pad = 14;
+      const r = tip.getBoundingClientRect();
+      let x = evt.clientX + pad;
+      let y = evt.clientY + pad;
+      if (x + r.width > window.innerWidth - 8) x = evt.clientX - r.width - pad;
+      if (y + r.height > window.innerHeight - 8) y = evt.clientY - r.height - pad;
+      tip.style.left = Math.max(8, x) + 'px';
+      tip.style.top = Math.max(8, y) + 'px';
+    }
+    function hide() { tip.classList.remove('show'); }
+
+    document.querySelectorAll('.wf-svg .hot').forEach(function (el) {
+      el.addEventListener('mouseenter', function (e) { show(el, e); });
+      el.addEventListener('mousemove', move);
+      el.addEventListener('mouseleave', hide);
+      el.addEventListener('focus', function () {
+        const b = el.getBoundingClientRect();
+        show(el, { clientX: b.left + b.width / 2, clientY: b.top + b.height / 2 });
+      });
+      el.addEventListener('blur', hide);
+      el.setAttribute('tabindex', '0');
+    });
+  })();
+
+  // Highlight the active section in the sidebar as you scroll.
+  const links = Array.from(document.querySelectorAll('.nav-group a'));
+  const map = new Map(links.map(a => [a.getAttribute('href').slice(1), a]));
+  const targets = Array.from(map.keys())
+    .map(id => document.getElementById(id))
+    .filter(Boolean);
+
+  function setActive(id) {
+    const a = map.get(id);
+    if (!a) return;
+    links.forEach(l => l.classList.remove('active'));
+    a.classList.add('active');
+  }
+
+  // Scroll-position based scrollspy: pick the last section whose top has
+  // passed a line near the top of the viewport. This always resolves to a
+  // single, correct target — unlike an "on-enter" observer, small anchored
+  // headings (e.g. #gs-config) can never be skipped or fought over.
+  function updateActive() {
+    const line = 120; // px from top of viewport
+    let current = targets[0];
+    for (const t of targets) {
+      if (t.getBoundingClientRect().top - line <= 0) current = t;
+      else break;
+    }
+    if (current) setActive(current.id);
+  }
+
+  let ticking = false;
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { updateActive(); ticking = false; });
+  }, { passive: true });
+  window.addEventListener('resize', updateActive);
+  updateActive();
+</script>
+
+</body>
+</html>

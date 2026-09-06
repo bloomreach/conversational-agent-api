@@ -1,0 +1,1498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Conversational Agent Chat — Test Client</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --border: #e3e5e8;
+      --text: #111827;
+      --text-muted: #6b7280;
+      --user-bubble: #2563eb;
+      --user-bubble-text: #ffffff;
+      --assistant-bubble: #ffffff;
+      --system-bubble: #f3f4f6;
+      --error-bg: #fee2e2;
+      --error-text: #991b1b;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --radius: 12px;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    .screen { display: none; }
+    .screen.active { display: flex; flex-direction: column; height: 100vh; }
+
+    /* ===== Onboarding ===== */
+    .screen.onboarding { justify-content: center; align-items: center; padding: 16px; }
+    .onboarding-form {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      width: 100%;
+      max-width: 460px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    }
+    .onboarding-form h1 { font-size: 18px; margin: 0 0 4px; }
+    .onboarding-form .hint { color: var(--text-muted); font-size: 13px; margin: 0 0 20px; }
+    .onboarding-form label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+    .onboarding-form input,
+    .onboarding-form select {
+      width: 100%;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 14px;
+      margin-top: 4px;
+      font-family: inherit;
+      background: var(--surface);
+    }
+    .onboarding-form input:focus,
+    .onboarding-form select:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: -1px;
+      border-color: transparent;
+    }
+    .onboarding-form .field-note { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .onboarding-form button {
+      width: 100%;
+      padding: 11px;
+      border: none;
+      background: var(--primary);
+      color: white;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+    .onboarding-form button:hover { background: var(--primary-hover); }
+    .onboarding-form .error {
+      color: var(--error-text);
+      background: var(--error-bg);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .onboarding-form .error.shown { display: block; }
+
+    /* ===== Chat ===== */
+    .chat-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .chat-header .avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #f3f4f6;
+      flex-shrink: 0;
+    }
+    .chat-header .avatar-fallback {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+    .chat-header .name { font-weight: 600; font-size: 14px; }
+    .chat-header .agent-badge { font-size: 11px; color: var(--text-muted); margin-top: 2px; min-height: 14px; }
+    .chat-header .info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+    .chat-header .actions { display: flex; gap: 6px; flex-shrink: 0; }
+    .chat-header button {
+      background: transparent;
+      border: 1px solid var(--border);
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      color: var(--text);
+    }
+    .chat-header button:hover { background: #f3f4f6; }
+
+    .chat-messages {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .message {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: var(--radius);
+      font-size: 14px;
+      line-height: 1.45;
+      word-wrap: break-word;
+      white-space: pre-wrap;
+    }
+    .message.user {
+      align-self: flex-end;
+      background: var(--user-bubble);
+      color: var(--user-bubble-text);
+      border-bottom-right-radius: 4px;
+    }
+    .message.assistant {
+      align-self: flex-start;
+      background: var(--assistant-bubble);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+    .message.system {
+      align-self: center;
+      background: var(--system-bubble);
+      color: var(--text-muted);
+      font-size: 12px;
+      padding: 6px 12px;
+      max-width: 90%;
+      text-align: center;
+    }
+    .message.error {
+      align-self: stretch;
+      background: var(--error-bg);
+      color: var(--error-text);
+      border-radius: 8px;
+      font-size: 13px;
+      max-width: 100%;
+    }
+    .message.error.fatal { font-weight: 600; }
+
+    .progress {
+      align-self: flex-start;
+      background: #eff6ff;
+      color: var(--primary-hover);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 12px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .progress::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--primary-hover);
+      animation: pulse 1s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    body.inflight .quick-reply-btn,
+    body.inflight .suggestion-btn {
+      opacity: 0.5;
+      pointer-events: none;
+    }
+
+    .carousel-wrap {
+      position: relative;
+      align-self: stretch;
+    }
+    .carousel-wrap::after {
+      /* subtle right-edge fade so users know there's more to scroll */
+      content: "";
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 32px;
+      pointer-events: none;
+      background: linear-gradient(to right, transparent, var(--bg));
+      opacity: 0.9;
+    }
+    .carousel-wrap[data-no-overflow="true"]::after { display: none; }
+    .carousel {
+      display: flex;
+      gap: 10px;
+      overflow-x: auto;
+      padding: 4px 0;
+      scroll-snap-type: x mandatory;
+      scroll-padding: 8px;
+    }
+    .carousel-card {
+      flex: 0 0 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      scroll-snap-align: start;
+    }
+    .carousel-card img {
+      width: 100%;
+      aspect-ratio: 3 / 4;
+      object-fit: cover;
+      background: #f3f4f6;
+      display: block;
+    }
+    .carousel-card .card-title {
+      padding: 8px 10px 2px;
+      font-size: 13px;
+      font-weight: 500;
+      line-height: 1.3;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .carousel-card .card-meta {
+      padding: 0 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 6px;
+    }
+    .carousel-card .card-price { color: var(--text); font-size: 13px; font-weight: 600; }
+    .carousel-card .card-color {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: capitalize;
+    }
+    .carousel-card .card-link {
+      display: block;
+      padding: 8px;
+      font-size: 12px;
+      color: var(--primary);
+      text-decoration: none;
+      text-align: center;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+    .carousel-card .card-link:hover { background: #eff6ff; }
+    .carousel-empty {
+      align-self: flex-start;
+      font-size: 12px;
+      color: var(--text-muted);
+      font-style: italic;
+      padding: 4px 0;
+    }
+
+    .quick-replies { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 0; }
+    .quick-reply-btn {
+      background: var(--surface);
+      border: 1px solid var(--primary);
+      color: var(--primary);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .quick-reply-btn:hover:not(:disabled) { background: #eff6ff; }
+    .quick-reply-btn:disabled { opacity: 0.5; cursor: default; }
+
+    .composer-area {
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+    }
+    .composer {
+      display: flex;
+      gap: 8px;
+      padding: 12px;
+      align-items: flex-end;
+    }
+    .composer textarea {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-family: inherit;
+      font-size: 14px;
+      resize: none;
+      height: 44px;
+      max-height: 120px;
+      line-height: 1.4;
+    }
+    .composer textarea:focus {
+      outline: 2px solid var(--primary);
+      outline-offset: -1px;
+      border-color: transparent;
+    }
+    .composer textarea:disabled { background: #f3f4f6; }
+    .composer button {
+      background: var(--primary);
+      color: white;
+      border: none;
+      padding: 0 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      height: 44px;
+      font-family: inherit;
+    }
+    .composer button:hover:not(:disabled) { background: var(--primary-hover); }
+    .composer button:disabled { opacity: 0.5; cursor: default; }
+
+    .conversation-starters {
+      display: none;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 0 12px 12px;
+      align-items: center;
+    }
+    .conversation-starters.shown { display: flex; }
+    .conversation-starters-label {
+      width: 100%;
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-bottom: 2px;
+    }
+    .suggestion-btn {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: var(--primary-hover);
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      text-align: left;
+    }
+    .suggestion-btn:hover:not(:disabled) { background: #dbeafe; }
+    .suggestion-btn:disabled { opacity: 0.5; cursor: default; }
+
+    .debug-panel {
+      display: none;
+      background: #1f2937;
+      color: #f9fafb;
+      padding: 8px 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-family: ui-monospace, "SF Mono", Monaco, monospace;
+      font-size: 11px;
+      border-top: 1px solid var(--border);
+    }
+    .debug-panel.open { display: block; }
+    .debug-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 8px; color: #d1d5db; }
+    .debug-actions button { padding: 3px 8px; border: 1px solid #4b5563; border-radius: 6px; background: #374151; color: #f9fafb; cursor: pointer; font: inherit; }
+    .debug-actions button:hover { background: #4b5563; }
+    .debug-panel pre { margin: 0; white-space: pre-wrap; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <!-- Onboarding -->
+  <div id="screen-onboarding" class="screen onboarding">
+    <form id="onboarding-form" class="onboarding-form">
+      <h1>Conversational Agent Chat — Test Client</h1>
+      <p class="hint">Enter the onboarding details provided by Bloomreach.</p>
+      <div id="onboarding-error" class="error"></div>
+      <label>
+        apiUrl
+        <input id="f-apiUrl" type="url" required placeholder="https://api.example.com" autocomplete="off" />
+      </label>
+      <label>
+        projectId
+        <input id="f-projectId" required autocomplete="off" />
+      </label>
+      <label>
+        personaId
+        <input id="f-personaId" required autocomplete="off" />
+      </label>
+      <label>
+        currency
+        <select id="f-currency" required>
+          <option value="GBP">GBP — £</option>
+          <option value="USD">USD — $</option>
+          <option value="EUR">EUR — €</option>
+          <option value="JPY">JPY — ¥</option>
+          <option value="AUD">AUD — A$</option>
+          <option value="CAD">CAD — C$</option>
+          <option value="CHF">CHF</option>
+          <option value="SEK">SEK</option>
+          <option value="NOK">NOK</option>
+          <option value="DKK">DKK</option>
+        </select>
+        <span class="field-note">used for price formatting and passed to the backend via FE.SET_CONTEXT</span>
+      </label>
+      <label>
+        endCustomerId <span class="field-note">(optional — auto-generated if blank)</span>
+        <input id="f-endCustomerId" autocomplete="off" />
+      </label>
+      <button type="submit">Start chat</button>
+    </form>
+  </div>
+
+  <!-- Chat -->
+  <div id="screen-chat" class="screen">
+    <header class="chat-header">
+      <img id="assistant-logo" class="avatar" alt="" hidden />
+      <div id="assistant-fallback" class="avatar-fallback">A</div>
+      <div class="info">
+        <div id="assistant-name" class="name">Assistant</div>
+        <div id="agent-badge" class="agent-badge"></div>
+      </div>
+      <div class="actions">
+        <button id="new-chat-btn" type="button">New chat</button>
+        <button id="debug-btn" type="button">Debug</button>
+        <button id="reset-btn" type="button">Reset</button>
+      </div>
+    </header>
+
+    <main id="messages" class="chat-messages"></main>
+
+    <div class="composer-area">
+      <footer class="composer">
+        <textarea id="composer-input" rows="1" placeholder="Type a message…"></textarea>
+        <button id="composer-send" type="button">Send</button>
+      </footer>
+      <div id="conversation-starters" class="conversation-starters" aria-label="Conversation starter suggestions"></div>
+    </div>
+
+    <aside id="debug-panel" class="debug-panel">
+      <div class="debug-actions" aria-label="HTTP error simulation controls">
+        <span>Simulate HTTP error:</span>
+        <button id="simulate-400-btn" type="button">400</button>
+        <button id="simulate-429-btn" type="button">429</button>
+        <button id="simulate-500-btn" type="button">500</button>
+      </div>
+      <pre id="debug-log"></pre>
+    </aside>
+  </div>
+
+  <script type="module">
+    // =====================================================================
+    // localStorage keys
+    // =====================================================================
+    const LS = {
+      onboarding: 'clarityTest.onboarding',
+      endCustomerId: 'clarityTest.endCustomerId',
+      chatId: 'clarityTest.chatId',
+      chatHistory: 'clarityTest.chatHistory',
+      settings: 'clarityTest.settings',
+    };
+
+    // Fetch search-triggered conversation-starter suggestions after the user pauses typing.
+    const SUGGESTIONS_DEBOUNCE_MS = 300;
+    const SUGGESTIONS_LIMIT = 5;
+    // Search-sample fallback placeholders shown before chat starts on an empty
+    // search/autosuggest surface. PDP and PLP clients should use the contextual
+    // conversation-starter endpoints instead of these hard-coded sample values.
+    const SEARCH_FALLBACK_STARTER_QUESTIONS = [
+      'What can you help me find?',
+      'What are your most popular products?',
+      'Can you recommend something for me?',
+      'How do I choose the right product?',
+      'What should I know before buying?',
+    ];
+
+    // general-settings is stable per persona; cache for 6 hours.
+    const SETTINGS_TTL_MS = 6 * 60 * 60 * 1000;
+
+    // Stay a few seconds below the backend's 60-second connection timeout.
+    const REQUEST_TIMEOUT_MS = 55 * 1000;
+    const SEND_EVENT_RETRY_ATTEMPTS = 2;
+
+    const CURRENCY_OPTIONS = ['GBP', 'USD', 'EUR', 'JPY', 'AUD', 'CAD', 'CHF', 'SEK', 'NOK', 'DKK'];
+
+    // =====================================================================
+    // App state
+    // =====================================================================
+    const state = {
+      onboarding: null,           // { apiUrl, projectId, personaId, currency }
+      endCustomerId: null,
+      chatId: null,
+      settings: null,
+      lastAssistantBubble: null,
+      progressEl: null,           // current in-place progress indicator
+      composerInflight: false,    // a send-event request is currently in flight
+      composerFatal: false,       // composer disabled due to FATAL_ERROR
+      suggestionsTimer: null,
+      suggestionsAbort: null,
+      suggestionsSeq: 0,
+    };
+
+    // =====================================================================
+    // Boot
+    // =====================================================================
+    init();
+
+    function init() {
+      state.onboarding = readJSON(LS.onboarding);
+      state.endCustomerId = readOrCreate(LS.endCustomerId, () => uuid());
+
+      // Older onboarding records may not have `currency` (added later).
+      // Re-prompt so the user picks one rather than silently defaulting.
+      const isComplete = state.onboarding
+        && state.onboarding.apiUrl
+        && state.onboarding.projectId
+        && state.onboarding.personaId
+        && state.onboarding.currency;
+
+      if (isComplete) {
+        startChat();
+      } else {
+        startOnboarding();
+      }
+    }
+
+    // =====================================================================
+    // Onboarding screen
+    // =====================================================================
+    function startOnboarding() {
+      showScreen('screen-onboarding');
+      const form = document.getElementById('onboarding-form');
+      const errorEl = document.getElementById('onboarding-error');
+
+      if (state.onboarding) {
+        document.getElementById('f-apiUrl').value = state.onboarding.apiUrl || '';
+        document.getElementById('f-projectId').value = state.onboarding.projectId || '';
+        document.getElementById('f-personaId').value = state.onboarding.personaId || '';
+        if (state.onboarding.currency) {
+          document.getElementById('f-currency').value = state.onboarding.currency;
+        }
+      }
+      document.getElementById('f-endCustomerId').value = state.endCustomerId || '';
+
+      form.onsubmit = (e) => {
+        e.preventDefault();
+        errorEl.classList.remove('shown');
+        const apiUrl = document.getElementById('f-apiUrl').value.trim().replace(/\/$/, '');
+        const projectId = document.getElementById('f-projectId').value.trim();
+        const personaId = document.getElementById('f-personaId').value.trim();
+        const currency = document.getElementById('f-currency').value.trim();
+        const ecid = document.getElementById('f-endCustomerId').value.trim();
+
+        if (!apiUrl || !projectId || !personaId || !currency) {
+          showOnboardingError('All four onboarding fields are required.');
+          return;
+        }
+        try { new URL(apiUrl); } catch {
+          showOnboardingError('apiUrl must be a valid URL (including protocol).');
+          return;
+        }
+        if (!CURRENCY_OPTIONS.includes(currency)) {
+          showOnboardingError(`currency must be one of: ${CURRENCY_OPTIONS.join(', ')}.`);
+          return;
+        }
+
+        state.onboarding = { apiUrl, projectId, personaId, currency };
+        writeJSON(LS.onboarding, state.onboarding);
+
+        if (ecid && ecid !== state.endCustomerId) {
+          state.endCustomerId = ecid;
+          localStorage.setItem(LS.endCustomerId, ecid);
+        }
+
+        startChat();
+      };
+
+      function showOnboardingError(msg) {
+        errorEl.textContent = msg;
+        errorEl.classList.add('shown');
+      }
+    }
+
+    // =====================================================================
+    // Chat screen
+    // =====================================================================
+    async function startChat() {
+      showScreen('screen-chat');
+      state.chatId = readOrCreate(LS.chatId, () => uuid());
+      state.lastAssistantBubble = null;
+      bindChatControls();
+
+      try {
+        await fetchGeneralSettings();
+        applyBranding();
+      } catch (err) {
+        // Bad onboarding values, network, or CORS. Return to onboarding.
+        wipeOnboarding({ keepEndCustomerId: true });
+        startOnboarding();
+        const errorEl = document.getElementById('onboarding-error');
+        errorEl.textContent = `Could not load persona settings: ${err.message}. Verify apiUrl/projectId/personaId.`;
+        errorEl.classList.add('shown');
+        return;
+      }
+
+      // Tell the backend the FE-configured currency (used for response shaping)
+      // before we sync history. Best-effort — don't block startup on this.
+      if (state.onboarding.currency) {
+        try {
+          await sendEvent({
+            type: 'FE.SET_CONTEXT',
+            currency: state.onboarding.currency,
+          }, { showOptimistic: false, userInitiated: false });
+        } catch (err) {
+          console.warn('FE.SET_CONTEXT failed; continuing without it', err);
+        }
+      }
+
+      // Hydrate any existing conversation. For a brand-new chatId the
+      // server typically replies with a cold start; for an existing one
+      // it replays the history.
+      await sendEvent({ type: 'SYNC_EVENT_LOG' }, { showOptimistic: false, userInitiated: false });
+      renderDefaultConversationStartersIfEmpty();
+
+      document.getElementById('composer-input').focus();
+    }
+
+    function bindChatControls() {
+      document.getElementById('new-chat-btn').onclick = newChat;
+      document.getElementById('debug-btn').onclick = toggleDebug;
+      document.getElementById('reset-btn').onclick = onResetClicked;
+      document.getElementById('simulate-400-btn').onclick = () => simulateHttpError(400);
+      document.getElementById('simulate-429-btn').onclick = () => simulateHttpError(429);
+      document.getElementById('simulate-500-btn').onclick = () => simulateHttpError(500);
+
+      const input = document.getElementById('composer-input');
+      const sendBtn = document.getElementById('composer-send');
+      const submit = () => {
+        const text = input.value.trim();
+        if (!text || state.composerInflight || state.composerFatal) return;
+        input.value = '';
+        clearConversationStarters();
+        sendEvent({ type: 'ADD_MESSAGE.USER.TEXT', text });
+      };
+      sendBtn.onclick = submit;
+      input.oninput = () => scheduleConversationStarterFetch(input.value.trim());
+      input.onkeydown = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault();
+          submit();
+        }
+      };
+    }
+
+    function newChat() {
+      const prev = state.chatId;
+      const next = uuid();
+      localStorage.setItem(LS.chatId, next);
+      state.chatId = next;
+
+      const history = readJSON(LS.chatHistory) || [];
+      history.push({ chatId: prev, archivedAt: new Date().toISOString() });
+      writeJSON(LS.chatHistory, history);
+
+      document.getElementById('messages').innerHTML = '';
+      state.lastAssistantBubble = null;
+      state.progressEl = null;
+      clearConversationStarters();
+      setAgentBadge('');
+      resetComposerState();
+
+      sendEvent({ type: 'SYNC_EVENT_LOG' }, { showOptimistic: false, userInitiated: false })
+        .finally(() => renderDefaultConversationStartersIfEmpty());
+      document.getElementById('composer-input').focus();
+    }
+
+    function onResetClicked() {
+      if (!confirm('Reset onboarding? This clears apiUrl, projectId, and personaId, and starts a fresh chat. Your endCustomerId is preserved.')) return;
+      wipeOnboarding({ keepEndCustomerId: true });
+      startOnboarding();
+    }
+
+    function wipeOnboarding({ keepEndCustomerId }) {
+      localStorage.removeItem(LS.onboarding);
+      localStorage.removeItem(LS.chatId);
+      if (!keepEndCustomerId) localStorage.removeItem(LS.endCustomerId);
+      state.onboarding = null;
+      state.chatId = null;
+      state.settings = null;
+      state.lastAssistantBubble = null;
+    }
+
+    function toggleDebug() {
+      document.getElementById('debug-panel').classList.toggle('open');
+    }
+
+    // =====================================================================
+    // general-settings
+    // =====================================================================
+    async function fetchGeneralSettings() {
+      const { apiUrl, projectId, personaId } = state.onboarding;
+      const cached = readJSON(LS.settings);
+      const cacheMatches = cached
+        && cached.projectId === projectId
+        && cached.personaId === personaId
+        && typeof cached.cachedAt === 'number';
+
+      // Fresh-enough cache → skip the network call entirely.
+      if (cacheMatches && Date.now() - cached.cachedAt < SETTINGS_TTL_MS) {
+        state.settings = cached.data;
+        return;
+      }
+
+      // Otherwise fetch fresh. On failure, fall back to a stale cache.
+      const url = `${apiUrl}/cocoaas/public/api/projectId/${encodeURIComponent(projectId)}/persona/${encodeURIComponent(personaId)}/general-settings`;
+      try {
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        state.settings = await res.json();
+        writeJSON(LS.settings, {
+          cachedAt: Date.now(),
+          projectId,
+          personaId,
+          data: state.settings,
+        });
+      } catch (err) {
+        if (cacheMatches) {
+          console.warn('general-settings fetch failed; serving stale cache', err);
+          state.settings = cached.data;
+          return;
+        }
+        throw err;
+      }
+    }
+
+    function applyBranding() {
+      const s = state.settings || {};
+      const logo = document.getElementById('assistant-logo');
+      const fallback = document.getElementById('assistant-fallback');
+      const name = s.assistantName || 'Assistant';
+
+      if (s.assistantLogo) {
+        logo.src = s.assistantLogo;
+        logo.hidden = false;
+        fallback.style.display = 'none';
+      } else {
+        logo.hidden = true;
+        fallback.style.display = '';
+        fallback.textContent = name.charAt(0).toUpperCase();
+      }
+      document.getElementById('assistant-name').textContent = name;
+      document.getElementById('composer-input').placeholder = t('inputPlaceholder', 'Type a message…');
+    }
+
+    function t(key, fallback) {
+      return state.settings?.translated?.[key] || fallback;
+    }
+
+    // =====================================================================
+    // send-event
+    // =====================================================================
+    async function sendEvent(eventBody, opts = {}) {
+      const { showOptimistic = true, userInitiated = undefined } = opts;
+      const { apiUrl, projectId, personaId } = state.onboarding;
+
+      // Default heuristic: any ADD_MESSAGE.USER.* event is user-initiated.
+      // Callers (startChat) can override for housekeeping events that
+      // shouldn't disable the composer.
+      const isUserInitiated = userInitiated !== undefined
+        ? userInitiated
+        : eventBody.type?.startsWith('ADD_MESSAGE.USER.');
+
+      // Guard: never let two user-initiated requests run concurrently.
+      if (isUserInitiated && state.composerInflight) {
+        console.warn('Ignoring user event while a request is in flight');
+        return;
+      }
+
+      const event = {
+        _id: uuid(),
+        sentDate: new Date().toISOString(),
+        ...eventBody,
+      };
+
+      if (showOptimistic && event.type.startsWith('ADD_MESSAGE.USER.')) {
+        renderUserBubble(event);
+      }
+
+      if (isUserInitiated) {
+        setComposerInflight(true);
+        // Show initial "Thinking…" indicator immediately, before any
+        // NOTIFICATION event arrives.
+        showProgress(t('notificationThinking',
+          state.settings?.staticReplies?.notificationThinking || 'Thinking…'));
+      }
+
+      const abort = new AbortController();
+      const timer = setTimeout(() => abort.abort('timeout'), REQUEST_TIMEOUT_MS);
+
+      try {
+        const endpoint = `${apiUrl}/cocoaas/public/api/projectId/${encodeURIComponent(projectId)}/persona/${encodeURIComponent(personaId)}/chat/${encodeURIComponent(state.chatId)}/send-event`;
+        let lastHttpError = null;
+
+        for (let attempt = 0; attempt <= SEND_EVENT_RETRY_ATTEMPTS; attempt += 1) {
+          const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+              event,
+              url: window.location.href,
+              localeTime: new Date().toLocaleString(),
+              endCustomerId: state.endCustomerId,
+            }),
+            signal: abort.signal,
+          });
+
+          if (res.ok) {
+            await jsonArrayStreamFetchReader(res, (item) => {
+              logDebug(item);
+              handleInboundEvent(item);
+            });
+            lastHttpError = null;
+            break;
+          }
+
+          const httpError = await makeHttpError(res);
+          if (res.status >= 500 && attempt < SEND_EVENT_RETRY_ATTEMPTS) {
+            lastHttpError = httpError;
+            await sleep(400 * (2 ** attempt));
+            continue;
+          }
+          throw httpError;
+        }
+
+        if (lastHttpError) throw lastHttpError;
+      } catch (err) {
+        console.error('send-event request failed', err);
+        renderError(getUserFacingErrorMessage(err), false);
+      } finally {
+        clearTimeout(timer);
+        // Clear the progress indicator now that the whole turn is complete
+        // (all response events received). It is intentionally kept visible
+        // while messages stream in, so this is the single place it is removed.
+        clearProgress();
+        if (isUserInitiated) {
+          setComposerInflight(false);
+        }
+      }
+    }
+
+    function getUserFacingErrorMessage(err) {
+      if (err?.isHttpError) {
+        if (err.status === 429) return 'Something went wrong, please try again in a minute.';
+        if (err.status >= 500) return 'Something went wrong, please try again later.';
+        if (err.status === 400) {
+          console.error('Bad send-event request generated by sample client', err);
+          return t('tryAgain', 'Please try again.');
+        }
+        return t('errorMsg', 'Something went wrong. Please try again.');
+      }
+
+      const isTimeout = err?.name === 'AbortError' || (err instanceof DOMException && err.name === 'AbortError');
+      if (isTimeout) return t('errorMsg', 'The assistant took too long to respond. Please try again.');
+
+      const isLikelyCors = err instanceof TypeError && /fetch/i.test(err.message);
+      if (isLikelyCors) return `${err.message}. This may be a CORS issue — see the README for guidance.`;
+
+      return err?.message || 'Unknown error';
+    }
+
+    async function makeHttpError(response) {
+      let responseText;
+      try { responseText = await response.text(); } catch { responseText = undefined; }
+      return {
+        isHttpError: true,
+        name: 'HttpError',
+        status: response.status,
+        statusText: response.statusText,
+        responseText,
+        message: `HTTP ${response.status}${response.statusText ? ` ${response.statusText}` : ''}`,
+      };
+    }
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function simulateHttpError(status) {
+      const statusText = status === 429 ? 'Too Many Requests' : 'Simulated';
+      renderError(getUserFacingErrorMessage({ isHttpError: true, status, statusText }), false);
+    }
+
+    // =====================================================================
+    // Search-triggered conversation starter suggestions
+    // =====================================================================
+    function scheduleConversationStarterFetch(query) {
+      if (state.suggestionsTimer) clearTimeout(state.suggestionsTimer);
+      if (state.suggestionsAbort) {
+        state.suggestionsAbort.abort();
+        state.suggestionsAbort = null;
+      }
+
+      if (!query) {
+        renderDefaultConversationStartersIfEmpty();
+        return;
+      }
+
+      if (query.length < 2 || state.composerFatal) {
+        clearConversationStarters();
+        return;
+      }
+
+      state.suggestionsTimer = setTimeout(() => {
+        fetchConversationStarters(query).catch((err) => {
+          if (err?.name === 'AbortError') return;
+          // Suggestions are a progressive enhancement; keep chat usable if the
+          // endpoint is unavailable, unprocessed, disabled, or blocked by CORS.
+          console.warn('conversation-starter suggestions failed', err);
+          clearConversationStarters();
+        });
+      }, SUGGESTIONS_DEBOUNCE_MS);
+    }
+
+    async function fetchConversationStarters(query) {
+      const { apiUrl, personaId } = state.onboarding;
+      const seq = ++state.suggestionsSeq;
+      const abort = new AbortController();
+      state.suggestionsAbort = abort;
+
+      const endpoint = `${apiUrl}/cocoaas/public/api/clarity-search/v1/personas/${encodeURIComponent(personaId)}/suggestions`;
+      const params = new URLSearchParams({
+        q: query,
+        limit_questions: String(SUGGESTIONS_LIMIT),
+        limit_keywords: '0',
+      });
+
+      const res = await fetch(`${endpoint}?${params}`, {
+        headers: { 'Accept': 'application/json' },
+        signal: abort.signal,
+      });
+      if (!res.ok) throw await makeHttpError(res);
+
+      const body = await res.json();
+      const questions = body?.response?.suggestions?.questions || [];
+
+      // Ignore stale responses if the user typed more while the request was in flight.
+      const currentQuery = document.getElementById('composer-input').value.trim();
+      if (seq !== state.suggestionsSeq || currentQuery !== query) return;
+
+      renderConversationStarters(questions);
+    }
+
+    function renderConversationStarters(questions) {
+      const starters = (Array.isArray(questions) ? questions : [])
+        .map((q) => ({
+          text: q?.question || q?.mini_question || '',
+          label: q?.mini_question || q?.question || '',
+        }));
+
+      renderConversationStarterButtons(starters, 'Conversation starters');
+    }
+
+    function renderDefaultConversationStartersIfEmpty() {
+      const input = document.getElementById('composer-input');
+      if (state.composerFatal || input.value.trim() || !isChatEmptyForStarters()) return;
+      renderConversationStarterButtons(
+        SEARCH_FALLBACK_STARTER_QUESTIONS.map((text) => ({ text, label: text })),
+        'Try asking'
+      );
+    }
+
+    function isChatEmptyForStarters() {
+      return messagesEl().children.length === 0;
+    }
+
+    function renderConversationStarterButtons(suggestions, heading) {
+      const wrap = document.getElementById('conversation-starters');
+      wrap.innerHTML = '';
+
+      const valid = (Array.isArray(suggestions) ? suggestions : [])
+        .filter((q) => q.text && q.label)
+        .slice(0, SUGGESTIONS_LIMIT);
+
+      if (valid.length === 0) {
+        wrap.classList.remove('shown');
+        return;
+      }
+
+      const label = document.createElement('div');
+      label.className = 'conversation-starters-label';
+      label.textContent = heading;
+      wrap.appendChild(label);
+
+      for (const suggestion of valid) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'suggestion-btn';
+        btn.textContent = suggestion.label;
+        btn.title = suggestion.text;
+        btn.onclick = () => {
+          if (state.composerInflight || state.composerFatal) return;
+          document.getElementById('composer-input').value = '';
+          clearConversationStarters();
+          sendEvent({ type: 'ADD_MESSAGE.USER.TEXT', text: suggestion.text });
+        };
+        wrap.appendChild(btn);
+      }
+      wrap.classList.add('shown');
+    }
+
+    function clearConversationStarters() {
+      if (state.suggestionsTimer) {
+        clearTimeout(state.suggestionsTimer);
+        state.suggestionsTimer = null;
+      }
+      if (state.suggestionsAbort) {
+        state.suggestionsAbort.abort();
+        state.suggestionsAbort = null;
+      }
+      state.suggestionsSeq += 1;
+      const wrap = document.getElementById('conversation-starters');
+      if (wrap) {
+        wrap.innerHTML = '';
+        wrap.classList.remove('shown');
+      }
+    }
+
+    // =====================================================================
+    // Streaming reader — JSON-array-stream pattern from DOCUMENTATION.md
+    // =====================================================================
+    async function jsonArrayStreamFetchReader(response, onItem) {
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let lastIndex = -1;
+      let parsed = [];
+
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        try {
+          parsed = JSON.parse(buffer);
+        } catch {
+          try { parsed = JSON.parse(buffer + ']'); } catch { continue; }
+        }
+        while (lastIndex + 1 < parsed.length) {
+          await onItem(parsed[++lastIndex]);
+        }
+      }
+
+      buffer += decoder.decode();
+      try { parsed = JSON.parse(buffer); } catch { /* let the trailing check warn */ }
+      while (lastIndex + 1 < parsed.length) {
+        await onItem(parsed[++lastIndex]);
+      }
+      if (!buffer.trim().endsWith(']')) {
+        console.warn('Stream did not terminate with closing bracket');
+      }
+    }
+
+    // =====================================================================
+    // Inbound event handler
+    // =====================================================================
+    function handleInboundEvent(event) {
+      switch (event.type) {
+        case 'ADD_MESSAGE.ASSISTANT.NOTIFICATION':
+          // In-place progress update — replaces the previous indicator.
+          // Show only event.text (ignore event.toolName).
+          showProgress(event.text || '');
+          break;
+
+        case 'ADD_MESSAGE.ASSISTANT.TEXT':
+          state.lastAssistantBubble = renderAssistantBubble(event);
+          break;
+
+        case 'APPEND_LAST_ASSISTANT_MESSAGE':
+          if (state.lastAssistantBubble) {
+            state.lastAssistantBubble.textContent += (event.text || '');
+            scrollToBottom();
+          } else {
+            state.lastAssistantBubble = renderAssistantBubble(event);
+          }
+          break;
+
+        case 'ADD_MESSAGE.ASSISTANT.COLD_START':
+          state.lastAssistantBubble = renderAssistantBubble(event);
+          break;
+
+        case 'ADD_MESSAGE.ASSISTANT.CAROUSEL':
+          state.lastAssistantBubble = null;
+          try {
+            renderCarousel(event);
+          } catch (err) {
+            console.error('Carousel render failed', err, event);
+            renderError('Failed to render product carousel: ' + err.message, false);
+          }
+          break;
+
+        case 'ADD_MESSAGE.ASSISTANT.QUICK_REPLY':
+          state.lastAssistantBubble = null;
+          renderQuickReply(event);
+          break;
+
+        case 'ADD_MESSAGE.USER.TEXT':
+        case 'ADD_MESSAGE.USER.GEN_BY_BTN':
+        case 'ADD_MESSAGE.USER.DIRECT_CALL':
+        case 'ADD_MESSAGE.USER.COMPARE':
+          state.lastAssistantBubble = null;
+          if (!document.querySelector(`[data-event-id="${event._id}"]`)) {
+            renderUserBubble(event);
+          }
+          break;
+
+        case 'METADATA.SELECT_AGENT':
+          if (event.agent) setAgentBadge(`agent: ${event.agent}`);
+          break;
+
+        // Accepted silently; available in debug panel
+        case 'METADATA':
+        case 'HISTORY_METADATA':
+        case 'FE.SET_CONTEXT':
+        case 'SELECTED_ITEMS':
+          break;
+
+        case 'ERROR':
+          // Non-fatal backend warning (e.g. AGENT.ERROR). Do NOT surface to
+          // end-users. The event is already visible in the debug panel.
+          break;
+
+        case 'FATAL_ERROR': {
+          // Show the persona's fallback message from general-settings.
+          // Never display event.text — that's internal detail.
+          clearProgress();
+          const fallback = t('errorMsg', 'Something went wrong. Please try again.');
+          renderError(fallback, true);
+          setComposerFatal(true);
+          break;
+        }
+
+        case 'DEBUG':
+          break;
+
+        default:
+          // Unknown — debug panel only
+          break;
+      }
+
+      // The progress indicator is NOT cleared when content arrives. Keep it
+      // visible (trailing the freshly rendered content) for the whole turn;
+      // it is removed only after the request completes and all response
+      // events have been received — see the finally block in sendEvent().
+      keepProgressAtBottom();
+    }
+
+    // =====================================================================
+    // Renderers
+    // =====================================================================
+    function messagesEl() { return document.getElementById('messages'); }
+    function scrollToBottom() {
+      const m = messagesEl();
+      m.scrollTop = m.scrollHeight;
+    }
+
+    function renderUserBubble(event) {
+      const el = document.createElement('div');
+      el.className = 'message user';
+      el.dataset.eventId = event._id;
+      el.textContent = userEventText(event);
+      messagesEl().appendChild(el);
+      scrollToBottom();
+      return el;
+    }
+
+    function userEventText(event) {
+      if (event.text) return event.text;
+      if (event.label) return event.label;
+      if (Array.isArray(event.ids)) return `[selected ${event.ids.length} item${event.ids.length === 1 ? '' : 's'}]`;
+      return '[user action]';
+    }
+
+    function renderAssistantBubble(event) {
+      const el = document.createElement('div');
+      el.className = 'message assistant';
+      el.dataset.eventId = event._id;
+      el.textContent = event.text || '';
+      messagesEl().appendChild(el);
+      scrollToBottom();
+      return el;
+    }
+
+    function renderCarousel(event) {
+      const data = Array.isArray(event.data) ? event.data : [];
+      if (data.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'carousel-empty';
+        empty.textContent = t('noProductsFound', 'No products to show.');
+        messagesEl().appendChild(empty);
+        console.warn('Carousel event arrived with no items', event);
+        scrollToBottom();
+        return;
+      }
+
+      const wrap = document.createElement('div');
+      wrap.className = 'carousel-wrap';
+
+      const row = document.createElement('div');
+      row.className = 'carousel';
+
+      let rendered = 0;
+      for (const p of data) {
+        try {
+          const card = makeCard(p);
+          if (card) {
+            row.appendChild(card);
+            rendered++;
+          }
+        } catch (err) {
+          // One bad product shouldn't kill the whole row
+          console.error('Skipping malformed product', err, p);
+        }
+      }
+
+      if (rendered === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'carousel-empty';
+        empty.textContent = t('noProductsFound', 'No products to show.');
+        messagesEl().appendChild(empty);
+        console.warn('Carousel event had items but none rendered', event);
+        scrollToBottom();
+        return;
+      }
+
+      wrap.appendChild(row);
+      messagesEl().appendChild(wrap);
+
+      // After layout, hide the right-edge fade if the row doesn't actually overflow
+      requestAnimationFrame(() => {
+        wrap.dataset.noOverflow = String(row.scrollWidth <= row.clientWidth + 1);
+      });
+
+      scrollToBottom();
+    }
+
+    function makeCard(p) {
+      if (!p || typeof p !== 'object') return null;
+
+      const card = document.createElement('div');
+      card.className = 'carousel-card';
+
+      if (p.image) {
+        const img = document.createElement('img');
+        img.src = p.image;
+        img.alt = p.title || '';
+        img.loading = 'lazy';
+        img.onerror = () => { img.style.visibility = 'hidden'; };
+        card.appendChild(img);
+      }
+
+      if (p.title) {
+        const titleEl = document.createElement('div');
+        titleEl.className = 'card-title';
+        titleEl.textContent = p.title;
+        card.appendChild(titleEl);
+      }
+
+      const color = pickFirstColor(p);
+      const hasPrice = p.price != null && p.price !== '';
+      if (hasPrice || color) {
+        const meta = document.createElement('div');
+        meta.className = 'card-meta';
+        if (hasPrice) {
+          const price = document.createElement('span');
+          price.className = 'card-price';
+          price.textContent = formatPrice(p.price, p.currency);
+          meta.appendChild(price);
+        }
+        if (color) {
+          const col = document.createElement('span');
+          col.className = 'card-color';
+          col.textContent = color;
+          meta.appendChild(col);
+        }
+        card.appendChild(meta);
+      }
+
+      if (p.url) {
+        const link = document.createElement('a');
+        link.href = p.url;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.textContent = 'View';
+        link.className = 'card-link';
+        card.appendChild(link);
+      }
+
+      return card;
+    }
+
+    const CURRENCY_SYMBOLS = {
+      GBP: '£', USD: '$', EUR: '€', JPY: '¥', AUD: 'A$', CAD: 'C$', CHF: 'CHF ', SEK: 'kr ', NOK: 'kr ', DKK: 'kr ',
+    };
+    function formatPrice(price, currency) {
+      // Backend may return currency: null. Fall back to the FE-configured
+      // currency from onboarding.
+      const effective = currency || state.onboarding?.currency || '';
+      const sym = effective
+        ? (CURRENCY_SYMBOLS[String(effective).toUpperCase()] || `${effective} `)
+        : '';
+      return `${sym}${price}`;
+    }
+
+    function pickFirstColor(p) {
+      const cv = p?.extraVariantFields?.color;
+      if (Array.isArray(cv) && cv.length) return String(cv[0]);
+      if (typeof cv === 'string' && cv) return cv;
+      return null;
+    }
+
+    function renderQuickReply(event) {
+      if (event.text) {
+        const bubble = document.createElement('div');
+        bubble.className = 'message assistant';
+        bubble.textContent = event.text;
+        messagesEl().appendChild(bubble);
+      }
+      const row = document.createElement('div');
+      row.className = 'quick-replies';
+      for (const opt of event.data || []) {
+        const btn = document.createElement('button');
+        btn.className = 'quick-reply-btn';
+        btn.type = 'button';
+        btn.textContent = opt.label;
+        btn.onclick = () => {
+          row.querySelectorAll('button').forEach(b => b.disabled = true);
+          // Quick-reply selections are ALWAYS sent as DIRECT_CALL — never
+          // USER.TEXT — regardless of the target/payload value. Copy any
+          // server-provided target/payload back verbatim; send just the
+          // label when the option carries neither.
+          sendEvent({
+            type: 'ADD_MESSAGE.USER.DIRECT_CALL',
+            target: opt.target || null,
+            payload: opt.payload || null,
+            text: opt.label,
+          });
+        };
+        row.appendChild(btn);
+      }
+      messagesEl().appendChild(row);
+      scrollToBottom();
+    }
+
+    function renderError(text, fatal) {
+      const el = document.createElement('div');
+      el.className = 'message error' + (fatal ? ' fatal' : '');
+      el.textContent = (fatal ? '⛔ ' : '⚠ ') + text;
+      messagesEl().appendChild(el);
+      scrollToBottom();
+    }
+
+    function setComposerInflight(inflight) {
+      state.composerInflight = inflight;
+      syncComposer();
+    }
+    function setComposerFatal(fatal) {
+      state.composerFatal = fatal;
+      syncComposer();
+    }
+    function resetComposerState() {
+      state.composerInflight = false;
+      state.composerFatal = false;
+      syncComposer();
+    }
+    function syncComposer() {
+      const disabled = state.composerInflight || state.composerFatal;
+      document.getElementById('composer-input').disabled = disabled;
+      document.getElementById('composer-send').disabled = disabled;
+      document.body.classList.toggle('inflight', state.composerInflight);
+    }
+
+    function setAgentBadge(text) {
+      document.getElementById('agent-badge').textContent = text || '';
+    }
+
+    // =====================================================================
+    // Progress indicator — single in-place element used for both
+    // "Thinking…" and ADD_MESSAGE.ASSISTANT.NOTIFICATION events.
+    // =====================================================================
+    function showProgress(text) {
+      if (!state.progressEl) {
+        state.progressEl = document.createElement('div');
+        state.progressEl.className = 'progress';
+        messagesEl().appendChild(state.progressEl);
+      }
+      state.progressEl.textContent = text;
+      scrollToBottom();
+    }
+    function clearProgress() {
+      if (state.progressEl) {
+        state.progressEl.remove();
+        state.progressEl = null;
+      }
+    }
+    // Move the in-place progress indicator to the end of the thread so it
+    // stays below any content rendered during the turn. No-op once cleared.
+    function keepProgressAtBottom() {
+      if (state.progressEl) {
+        messagesEl().appendChild(state.progressEl);
+        scrollToBottom();
+      }
+    }
+
+    // =====================================================================
+    // Debug panel
+    // =====================================================================
+    function logDebug(item) {
+      const pre = document.getElementById('debug-log');
+      pre.textContent += JSON.stringify(item) + '\n';
+      pre.scrollTop = pre.scrollHeight;
+    }
+
+    // =====================================================================
+    // Screen switching
+    // =====================================================================
+    function showScreen(id) {
+      document.querySelectorAll('.screen').forEach((el) => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    // =====================================================================
+    // Helpers
+    // =====================================================================
+    function uuid() {
+      // crypto.randomUUID emits UUID v4. The Conversational agent docs recommend v7 for
+      // sortable IDs, but v4 is acceptable for a test client — the server
+      // does not validate the UUID version.
+      if (crypto && crypto.randomUUID) return crypto.randomUUID();
+      // Fallback (very old browsers)
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    }
+
+    function readJSON(key) {
+      try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+    }
+    function writeJSON(key, value) {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+    function readOrCreate(key, factory) {
+      let v = localStorage.getItem(key);
+      if (!v) {
+        v = factory();
+        localStorage.setItem(key, v);
+      }
+      return v;
+    }
+  </script>
+</body>
+</html>

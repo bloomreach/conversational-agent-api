@@ -1,0 +1,6364 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "version": "v0.1.0-beta.3",
+    "title": "Conversational Agent API"
+  },
+  "servers": [
+    {
+      "url": "{apiUrl}",
+      "description": "Backend URL provided to the merchant during onboarding.",
+      "variables": {
+        "apiUrl": {
+          "default": "https://example.com",
+          "description": "Replace with the apiUrl provided by Bloomreach."
+        }
+      }
+    }
+  ],
+  "paths": {
+    "/cocoaas/public/api/projectId/{projectId}/persona/{personaId}/general-settings": {
+      "get": {
+        "summary": "Get assistant settings",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "personaId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "translated",
+                    "staticReplies"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "assistantLogo": {
+                      "nullable": true,
+                      "type": "string",
+                      "description": "Optional persona branding field configured in CoCoAaS/admin. May be null when not configured; clients should fall back to default/local branding."
+                    },
+                    "assistantName": {
+                      "nullable": true,
+                      "type": "string",
+                      "description": "Optional persona branding field configured in CoCoAaS/admin. May be null when not configured; clients should fall back to default/local branding."
+                    },
+                    "agentPersonaName": {
+                      "nullable": true,
+                      "type": "string",
+                      "description": "Optional agent/persona display name from customer settings. May be null when not configured; clients should fall back to default/local branding."
+                    },
+                    "description": {
+                      "nullable": true,
+                      "type": "string",
+                      "description": "Optional persona branding field configured in CoCoAaS/admin. May be null when not configured; clients should fall back to default/local branding."
+                    },
+                    "translated": {
+                      "required": [
+                        "liveChat",
+                        "addToCart",
+                        "adding",
+                        "added",
+                        "addToCartFailed",
+                        "back",
+                        "carouselAsk",
+                        "close",
+                        "cancel",
+                        "followup",
+                        "description",
+                        "showMore",
+                        "select",
+                        "selected",
+                        "selectAll",
+                        "selectModeMessage",
+                        "unreadMessages",
+                        "findSimilar",
+                        "add",
+                        "feedbackThank",
+                        "goToProductPage",
+                        "showSimilar",
+                        "showSimilarSingle",
+                        "showSimilarFull",
+                        "compare",
+                        "compareFull",
+                        "compareSelected",
+                        "andXMore",
+                        "clearChat",
+                        "giveFeedback",
+                        "debugMode",
+                        "legalNotice",
+                        "today",
+                        "yesterday",
+                        "inputPlaceholder",
+                        "inputFollowUp",
+                        "detail",
+                        "selectedProduct",
+                        "selectedProoducts",
+                        "deselectAll",
+                        "noProductsFound",
+                        "optionAvailable",
+                        "optionsAvailable",
+                        "optional",
+                        "personalExpert",
+                        "tellUsMore",
+                        "tryAgain",
+                        "errorMsg",
+                        "rawError",
+                        "nicerLines",
+                        "aboutClarity",
+                        "clearPageText",
+                        "skip",
+                        "submit",
+                        "feedback_placeholder",
+                        "welcomeMessage",
+                        "surveyFeedback_satisfied",
+                        "surveyFeedback_notSatisfied",
+                        "surveyFeedback_rateConversation",
+                        "surveyFeedback_shareThoughts",
+                        "surveyFeedback_inputPlaceholder",
+                        "surveyFeedback_thankYou",
+                        "surveyFeedback_thankYouSubtext",
+                        "view",
+                        "fileNumberError",
+                        "fileSizeError",
+                        "connectingToLiveAgent",
+                        "connectedToLiveAgent",
+                        "backWithAssistant",
+                        "uploadFile",
+                        "endConversation",
+                        "seeAllResults"
+                      ],
+                      "type": "object",
+                      "properties": {
+                        "liveChat": {
+                          "type": "string"
+                        },
+                        "addToCart": {
+                          "type": "string"
+                        },
+                        "adding": {
+                          "type": "string"
+                        },
+                        "added": {
+                          "type": "string"
+                        },
+                        "addToCartFailed": {
+                          "type": "string"
+                        },
+                        "back": {
+                          "type": "string"
+                        },
+                        "carouselAsk": {
+                          "type": "string"
+                        },
+                        "close": {
+                          "type": "string"
+                        },
+                        "cancel": {
+                          "type": "string"
+                        },
+                        "followup": {
+                          "type": "string"
+                        },
+                        "description": {
+                          "type": "string"
+                        },
+                        "showMore": {
+                          "type": "string"
+                        },
+                        "select": {
+                          "type": "string"
+                        },
+                        "selected": {
+                          "type": "string"
+                        },
+                        "selectAll": {
+                          "type": "string"
+                        },
+                        "selectModeMessage": {
+                          "type": "string"
+                        },
+                        "unreadMessages": {
+                          "type": "string"
+                        },
+                        "findSimilar": {
+                          "type": "string"
+                        },
+                        "add": {
+                          "type": "string"
+                        },
+                        "feedbackThank": {
+                          "type": "string"
+                        },
+                        "goToProductPage": {
+                          "type": "string"
+                        },
+                        "showSimilar": {
+                          "type": "string"
+                        },
+                        "showSimilarSingle": {
+                          "type": "string"
+                        },
+                        "showSimilarFull": {
+                          "type": "string"
+                        },
+                        "compare": {
+                          "type": "string"
+                        },
+                        "compareFull": {
+                          "type": "string"
+                        },
+                        "compareSelected": {
+                          "type": "string"
+                        },
+                        "andXMore": {
+                          "type": "string"
+                        },
+                        "clearChat": {
+                          "type": "string"
+                        },
+                        "giveFeedback": {
+                          "type": "string"
+                        },
+                        "debugMode": {
+                          "type": "string"
+                        },
+                        "legalNotice": {
+                          "type": "string"
+                        },
+                        "today": {
+                          "type": "string"
+                        },
+                        "yesterday": {
+                          "type": "string"
+                        },
+                        "inputPlaceholder": {
+                          "type": "string"
+                        },
+                        "inputFollowUp": {
+                          "type": "string"
+                        },
+                        "detail": {
+                          "type": "string"
+                        },
+                        "selectedProduct": {
+                          "type": "string"
+                        },
+                        "selectedProoducts": {
+                          "type": "string"
+                        },
+                        "deselectAll": {
+                          "type": "string"
+                        },
+                        "noProductsFound": {
+                          "type": "string"
+                        },
+                        "optionAvailable": {
+                          "type": "string"
+                        },
+                        "optionsAvailable": {
+                          "type": "string"
+                        },
+                        "optional": {
+                          "type": "string"
+                        },
+                        "personalExpert": {
+                          "type": "string"
+                        },
+                        "tellUsMore": {
+                          "type": "string"
+                        },
+                        "tryAgain": {
+                          "type": "string"
+                        },
+                        "errorMsg": {
+                          "type": "string"
+                        },
+                        "rawError": {
+                          "type": "string"
+                        },
+                        "nicerLines": {
+                          "type": "string"
+                        },
+                        "aboutClarity": {
+                          "type": "string"
+                        },
+                        "clearPageText": {
+                          "type": "string"
+                        },
+                        "skip": {
+                          "type": "string"
+                        },
+                        "submit": {
+                          "type": "string"
+                        },
+                        "feedback_placeholder": {
+                          "type": "string"
+                        },
+                        "welcomeMessage": {
+                          "type": "string"
+                        },
+                        "surveyFeedback_satisfied": {
+                          "type": "string"
+                        },
+                        "surveyFeedback_notSatisfied": {
+                          "type": "string"
+                        },
+                        "surveyFeedback_rateConversation": {
+                          "type": "string"
+                        },
+                        "surveyFeedback_shareThoughts": {
+                          "type": "string"
+                        },
+                        "surveyFeedback_inputPlaceholder": {
+                          "type": "string"
+                        },
+                        "surveyFeedback_thankYou": {
+                          "type": "string"
+                        },
+                        "surveyFeedback_thankYouSubtext": {
+                          "type": "string"
+                        },
+                        "view": {
+                          "type": "string"
+                        },
+                        "fileNumberError": {
+                          "type": "string"
+                        },
+                        "fileSizeError": {
+                          "type": "string"
+                        },
+                        "connectingToLiveAgent": {
+                          "type": "string"
+                        },
+                        "connectedToLiveAgent": {
+                          "type": "string"
+                        },
+                        "backWithAssistant": {
+                          "type": "string"
+                        },
+                        "uploadFile": {
+                          "type": "string"
+                        },
+                        "endConversation": {
+                          "type": "string"
+                        },
+                        "seeAllResults": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "menuSettings": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "showGetHelp": {
+                          "nullable": true,
+                          "type": "boolean"
+                        },
+                        "getHelpLabel": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "getHelpLink": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "showLearnAboutClarity": {
+                          "nullable": true,
+                          "type": "boolean"
+                        }
+                      }
+                    },
+                    "customerSettings": {
+                      "nullable": true,
+                      "type": "object",
+                      "properties": {
+                        "category_attr_name_for_logging": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "use_text_notification": {
+                          "nullable": true,
+                          "type": "boolean"
+                        },
+                        "enable_agent_orchestrator": {
+                          "nullable": true,
+                          "type": "boolean"
+                        },
+                        "customized_ui_attributes": {
+                          "nullable": true,
+                          "type": "object",
+                          "properties": {
+                            "miniPDPAttrs": {
+                              "nullable": true,
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "miniPDPTagAttrs": {
+                              "nullable": true,
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "productCardAttrs": {
+                              "nullable": true,
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            },
+                            "productCardTagAttrs": {
+                              "nullable": true,
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        },
+                        "stock_attr_names": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          },
+                          "description": "Names of product attributes the backend uses to convey stock information. Observed in live responses but not formally in the spec; documented here for completeness."
+                        }
+                      }
+                    },
+                    "staticReplies": {
+                      "type": "object",
+                      "properties": {
+                        "notificationThinking": {
+                          "nullable": true,
+                          "type": "string"
+                        }
+                      }
+                    }
+                  },
+                  "description": "Persona settings, UI translations, and optional branding. Branding fields (assistantLogo, assistantName, agentPersonaName, description) are optional persona/customer-settings values; clients should provide default/local branding fallbacks."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request — invalid request parameters."
+          },
+          "404": {
+            "description": "Not Found — unknown projectId or personaId."
+          },
+          "429": {
+            "description": "Too Many Requests — rate limit exceeded. Back off before retrying."
+          },
+          "500": {
+            "description": "Internal Server Error — backend error."
+          }
+        },
+        "tags": [
+          "Core"
+        ]
+      }
+    },
+    "/cocoaas/public/api/projectId/{projectId}/persona/{personaId}/chat/{chatId}/send-event": {
+      "post": {
+        "summary": "Send an event",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "personaId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "chatId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "required": [
+                  "event",
+                  "url"
+                ],
+                "type": "object",
+                "properties": {
+                  "event": {
+                    "$ref": "#/components/schemas/OutboundEvent"
+                  },
+                  "url": {
+                    "type": "string"
+                  },
+                  "localeTime": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "endCustomerId": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "conversationId": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "directToAgent": {
+                    "nullable": true,
+                    "type": "boolean"
+                  },
+                  "agentPayload": {
+                    "nullable": true,
+                    "type": "object",
+                    "properties": {
+                      "attachments": {
+                        "nullable": true,
+                        "type": "array",
+                        "items": {
+                          "required": [
+                            "type",
+                            "data"
+                          ],
+                          "type": "object",
+                          "properties": {
+                            "type": {
+                              "type": "string",
+                              "enum": [
+                                "custom",
+                                "file"
+                              ]
+                            },
+                            "data": {
+                              "type": "object",
+                              "additionalProperties": {}
+                            }
+                          }
+                        }
+                      },
+                      "variables": {
+                        "nullable": true,
+                        "type": "object",
+                        "additionalProperties": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InboundEvent"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request — invalid event format or missing required field."
+          },
+          "404": {
+            "description": "Not Found — unknown projectId, personaId, or chatId."
+          },
+          "429": {
+            "description": "Too Many Requests — rate limit exceeded. Back off before retrying."
+          },
+          "500": {
+            "description": "Internal Server Error — backend error."
+          }
+        },
+        "description": "Send one event to the chat and receive a streaming JSON array of events in response./nOnly one send-event request should be in flight per chat at a time — disable user input until the stream completes. The backend will hold the connection open for up to 60 seconds; clients should match this with an AbortController to avoid stalled connections locking the UI. The response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same _id to avoid showing the shopper's message twice.",
+        "tags": [
+          "Core"
+        ]
+      }
+    },
+    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/items": {
+      "post": {
+        "tags": [
+          "Conversation Starters"
+        ],
+        "operationId": "getProductsById",
+        "parameters": [
+          {
+            "name": "personaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skipQuestionSelection",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Return all stored questions unselected. PDP endpoints only."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProductRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseBody"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get multiple products (items) by id"
+      }
+    },
+    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/items/{itemId}": {
+      "get": {
+        "tags": [
+          "Conversation Starters"
+        ],
+        "operationId": "getProductById",
+        "parameters": [
+          {
+            "name": "personaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeVariants",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "limitVariants",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "limitQuestions",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeImplicitFilter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "skipQuestionSelection",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Return all stored questions unselected. PDP endpoints only."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResponseBody"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get product (item) by id"
+      }
+    },
+    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/items/{itemId}/questions": {
+      "get": {
+        "tags": [
+          "Conversation Starters"
+        ],
+        "operationId": "getProductQuestionsById",
+        "parameters": [
+          {
+            "name": "personaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limitQuestions",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          },
+          {
+            "name": "skipQuestionSelection",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Return all stored questions unselected. PDP endpoints only."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionsResponseBody"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get conversation-starter questions for an item"
+      }
+    },
+    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/parent_product/{product_id}": {
+      "get": {
+        "tags": [
+          "Conversation Starters"
+        ],
+        "operationId": "getParentProduct",
+        "parameters": [
+          {
+            "name": "personaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "product_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limitQuestions",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeVariants",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "includeImplicitFilter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true
+            }
+          },
+          {
+            "name": "skipQuestionSelection",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Return all stored questions unselected. PDP endpoints only."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParentProductResponseBody"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get parent product by id"
+      }
+    },
+    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/parent_products": {
+      "post": {
+        "tags": [
+          "Conversation Starters"
+        ],
+        "operationId": "getParentProducts",
+        "parameters": [
+          {
+            "name": "personaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "skipQuestionSelection",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            },
+            "description": "Return all stored questions unselected. PDP endpoints only."
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ParentProductRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ParentProductResponseBody"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get multiple parent products"
+      }
+    },
+    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/plp": {
+      "post": {
+        "tags": [
+          "Conversation Starters"
+        ],
+        "operationId": "getPlpQuestions",
+        "parameters": [
+          {
+            "name": "personaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PlpRequestBody"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlpResponseBody"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get category conversation-starter questions for a product listing page"
+      }
+    },
+    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/suggestions": {
+      "get": {
+        "tags": [
+          "Conversation Starters"
+        ],
+        "operationId": "getSuggestions",
+        "parameters": [
+          {
+            "name": "personaId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "query_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "keyword"
+            }
+          },
+          {
+            "name": "include_products",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "include_keywords",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "limit_questions",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          },
+          {
+            "name": "limit_products",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          },
+          {
+            "name": "limit_keywords",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SuggestionsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "405": {
+            "description": "Method Not Allowed",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorBody"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get search-triggered suggestions (questions + keywords)"
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "ProductReviewFilters": {
+        "type": "object",
+        "properties": {
+          "rating_base": {
+            "maximum": 5,
+            "minimum": 1,
+            "type": "integer",
+            "format": "int32",
+            "default": 1
+          },
+          "verified_purchaser": {
+            "type": "boolean"
+          },
+          "helpful_votes": {
+            "type": "boolean"
+          },
+          "inappropriate_votes": {
+            "type": "boolean"
+          },
+          "is_featured": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProductReviewsConfigUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "enable_daily_sync": {
+            "type": "boolean"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/ProductReviewFilters"
+          }
+        }
+      },
+      "ProductReviewsConfigResponse": {
+        "type": "object",
+        "properties": {
+          "last_sync_timestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enable_daily_sync": {
+            "type": "boolean"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/ProductReviewFilters"
+          }
+        }
+      },
+      "KnowledgeBaseDocumentUpdateRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "KnowledgeBaseDocumentDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "state": {
+            "type": "string"
+          },
+          "creationTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastUpdateTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "KnowledgeBaseSearchRequest": {
+        "type": "object",
+        "properties": {
+          "search_query": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "KnowledgeBaseSearchChunkDTO": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "document_id": {
+            "type": "string"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "chunk_index": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "KnowledgeBaseSearchResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "chunks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeBaseSearchChunkDTO"
+            }
+          }
+        }
+      },
+      "DocumentsByLabelsRequest": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "labelsBlacklist": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "DocumentsCountData": {
+        "type": "object",
+        "properties": {
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "DocumentsCountResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/DocumentsCountData"
+          }
+        }
+      },
+      "DocumentContentDTO": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "personaId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "DocumentsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DocumentContentDTO"
+            }
+          }
+        }
+      },
+      "DocumentsByIdsRequest": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "BoostAddition": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "addition": {
+            "type": "number",
+            "format": "double"
+          },
+          "offset": {
+            "type": "number",
+            "format": "double"
+          },
+          "factor": {
+            "type": "number",
+            "format": "double"
+          },
+          "value_mapping": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ValueMapping"
+            }
+          }
+        }
+      },
+      "BoostConfiguration": {
+        "type": "object",
+        "properties": {
+          "boost_top_k": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "beta": {
+            "type": "number",
+            "format": "float"
+          },
+          "boost_rules": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BoostRule"
+            }
+          },
+          "logistic_squash": {
+            "$ref": "#/components/schemas/LogisticSquash"
+          }
+        }
+      },
+      "BoostRule": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "conditions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Condition"
+            }
+          },
+          "logical_operator": {
+            "type": "string"
+          },
+          "boost_addition": {
+            "$ref": "#/components/schemas/BoostAddition"
+          }
+        }
+      },
+      "Condition": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "operator": {
+            "type": "string"
+          },
+          "value": {
+            "type": "object"
+          }
+        }
+      },
+      "JsonNode": {
+        "type": "object"
+      },
+      "LogisticSquash": {
+        "type": "object",
+        "properties": {
+          "min_effective_boost": {
+            "type": "number",
+            "format": "double"
+          },
+          "max_effective_boost": {
+            "type": "number",
+            "format": "double"
+          },
+          "factor_min": {
+            "type": "number",
+            "format": "double"
+          },
+          "factor_max": {
+            "type": "number",
+            "format": "double"
+          },
+          "saturation_target": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "OrderBy": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "direction": {
+            "type": "string"
+          }
+        }
+      },
+      "Range": {
+        "type": "object",
+        "properties": {
+          "min": {
+            "type": "number",
+            "format": "double"
+          },
+          "max": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "SearchBody": {
+        "type": "object",
+        "properties": {
+          "filter": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number",
+            "format": "float"
+          },
+          "trace": {
+            "type": "boolean"
+          },
+          "embedding": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            }
+          },
+          "query": {
+            "type": "string"
+          },
+          "subSchema": {
+            "type": "boolean"
+          },
+          "subSchemaSampleSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderBy": {
+            "$ref": "#/components/schemas/OrderBy"
+          },
+          "user_context_filter": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boost_config": {
+            "$ref": "#/components/schemas/BoostConfiguration"
+          },
+          "limit_questions": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ValueMapping": {
+        "type": "object",
+        "properties": {
+          "range": {
+            "$ref": "#/components/schemas/Range"
+          },
+          "addition": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "OptionEntry": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "ProductDTO": {
+        "type": "object",
+        "properties": {
+          "pointId": {
+            "type": "string"
+          },
+          "itemId": {
+            "type": "string"
+          },
+          "_parsedPrice": {
+            "type": "number",
+            "format": "double"
+          },
+          "__categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "_questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionDTO"
+            }
+          },
+          "_review": {
+            "$ref": "#/components/schemas/ReviewDTO"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "_score": {
+            "type": "number",
+            "format": "float"
+          },
+          "_query_boost": {
+            "type": "number",
+            "format": "float"
+          },
+          "_query_boost_factor": {
+            "type": "number",
+            "format": "float"
+          },
+          "_index_boost_factor": {
+            "type": "number",
+            "format": "double"
+          },
+          "variants": {
+            "type": "array",
+            "description": "Product variants",
+            "items": {
+              "$ref": "#/components/schemas/ProductDTO"
+            }
+          }
+        }
+      },
+      "QuartileBoundary": {
+        "type": "object",
+        "properties": {
+          "min": {
+            "type": "number",
+            "format": "double"
+          },
+          "max": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "Quartiles": {
+        "type": "object",
+        "properties": {
+          "q1": {
+            "$ref": "#/components/schemas/QuartileBoundary"
+          },
+          "q2": {
+            "$ref": "#/components/schemas/QuartileBoundary"
+          },
+          "q3": {
+            "$ref": "#/components/schemas/QuartileBoundary"
+          },
+          "q4": {
+            "$ref": "#/components/schemas/QuartileBoundary"
+          }
+        }
+      },
+      "QuestionDTO": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number",
+            "format": "double"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "subtopic": {
+            "type": "string"
+          },
+          "mini_question": {
+            "type": "string"
+          }
+        }
+      },
+      "Relaxed": {
+        "type": "object",
+        "properties": {
+          "relaxed_query": {
+            "type": "string"
+          },
+          "dropped_constraints": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductDTO"
+            }
+          }
+        }
+      },
+      "ResponseBody": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "response": {
+            "$ref": "#/components/schemas/ResponseBodyResult"
+          }
+        }
+      },
+      "ResponseBodyResult": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductDTO"
+            }
+          },
+          "item": {
+            "$ref": "#/components/schemas/ProductDTO"
+          },
+          "relaxed": {
+            "$ref": "#/components/schemas/Relaxed"
+          },
+          "sub_schema": {
+            "$ref": "#/components/schemas/Schema"
+          },
+          "trace": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Trace"
+            }
+          }
+        }
+      },
+      "ReviewDTO": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "averageRating": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "Schema": {
+        "type": "object",
+        "properties": {
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SchemaEntry"
+            }
+          },
+          "derived_properties": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/SchemaEntry"
+            }
+          }
+        }
+      },
+      "SchemaEntry": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "subType": {
+            "type": "string"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/OptionEntry"
+            }
+          },
+          "min": {
+            "type": "number",
+            "format": "double"
+          },
+          "max": {
+            "type": "number",
+            "format": "double"
+          },
+          "quartiles": {
+            "$ref": "#/components/schemas/Quartiles"
+          }
+        }
+      },
+      "Trace": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string"
+          },
+          "duration": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "GroupSearchBody": {
+        "type": "object",
+        "properties": {
+          "filter": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number",
+            "format": "float"
+          },
+          "trace": {
+            "type": "boolean"
+          },
+          "embedding": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            }
+          },
+          "query": {
+            "type": "string"
+          },
+          "subSchema": {
+            "type": "boolean"
+          },
+          "subSchemaSampleSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderBy": {
+            "$ref": "#/components/schemas/OrderBy"
+          },
+          "user_context_filter": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boost_config": {
+            "$ref": "#/components/schemas/BoostConfiguration"
+          },
+          "limit_questions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "group_by": {
+            "type": "string"
+          },
+          "group_size": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Group": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductDTO"
+            }
+          }
+        }
+      },
+      "ResponseGroupBody": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/SearchGroupResult"
+          }
+        }
+      },
+      "SearchGroupResult": {
+        "type": "object",
+        "properties": {
+          "groups": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Group"
+            }
+          }
+        }
+      },
+      "TopCategories": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopCategory"
+            }
+          }
+        }
+      },
+      "TopCategory": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "get_score": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "TopAttributesRequestBody": {
+        "type": "object",
+        "properties": {
+          "filter": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number",
+            "format": "float"
+          },
+          "trace": {
+            "type": "boolean"
+          },
+          "embedding": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            }
+          },
+          "query": {
+            "type": "string"
+          },
+          "subSchema": {
+            "type": "boolean"
+          },
+          "subSchemaSampleSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderBy": {
+            "$ref": "#/components/schemas/OrderBy"
+          },
+          "user_context_filter": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boost_config": {
+            "$ref": "#/components/schemas/BoostConfiguration"
+          },
+          "limit_questions": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "TopAttribute": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopAttributeValue"
+            }
+          }
+        }
+      },
+      "TopAttributeValue": {
+        "type": "object",
+        "properties": {
+          "term": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "get_score": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "FacetRequestBody": {
+        "type": "object",
+        "properties": {
+          "filter": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number",
+            "format": "float"
+          },
+          "trace": {
+            "type": "boolean"
+          },
+          "embedding": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "format": "float"
+            }
+          },
+          "query": {
+            "type": "string"
+          },
+          "subSchema": {
+            "type": "boolean"
+          },
+          "subSchemaSampleSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "orderBy": {
+            "$ref": "#/components/schemas/OrderBy"
+          },
+          "exact": {
+            "type": "boolean"
+          },
+          "skipImplicitFilter": {
+            "type": "boolean"
+          },
+          "user_context_filter": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boost_config": {
+            "$ref": "#/components/schemas/BoostConfiguration"
+          },
+          "limit_questions": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "field_limits": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "RecommendRequestBody": {
+        "type": "object",
+        "properties": {
+          "filter": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "string"
+          },
+          "threshold": {
+            "type": "number",
+            "format": "float"
+          },
+          "trace": {
+            "type": "boolean"
+          },
+          "positives": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "negatives": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "positiveItemIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "negativeItemIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "strict": {
+            "type": "boolean"
+          },
+          "strategy": {
+            "type": "string"
+          },
+          "user_context_filter": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "boost_config": {
+            "$ref": "#/components/schemas/BoostConfiguration"
+          },
+          "limit_questions": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "RecommendResponseBody": {
+        "type": "object",
+        "properties": {
+          "strategy": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "response": {
+            "$ref": "#/components/schemas/RecommendResult"
+          }
+        }
+      },
+      "RecommendResult": {
+        "type": "object",
+        "properties": {
+          "recommendations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RecommendationDTO"
+            }
+          }
+        }
+      },
+      "RecommendationDTO": {
+        "type": "object",
+        "properties": {
+          "itemId": {
+            "type": "string"
+          },
+          "recommended": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductDTO"
+            }
+          },
+          "error": {
+            "type": "string"
+          }
+        }
+      },
+      "PlpRequestBody": {
+        "type": "object",
+        "properties": {
+          "trace": {
+            "type": "boolean",
+            "default": false
+          },
+          "plp_name": {
+            "type": "string"
+          },
+          "item_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "product_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "max_questions": {
+            "type": "integer",
+            "format": "int32",
+            "default": 5
+          }
+        },
+        "anyOf": [
+          {
+            "required": [
+              "item_ids"
+            ]
+          },
+          {
+            "required": [
+              "product_ids"
+            ]
+          }
+        ]
+      },
+      "PlpDTO": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionDTO"
+            }
+          }
+        }
+      },
+      "PlpResponseBody": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/PlpResult"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "PlpResult": {
+        "type": "object",
+        "properties": {
+          "plp": {
+            "$ref": "#/components/schemas/PlpDTO"
+          }
+        }
+      },
+      "ParentProductRequestBody": {
+        "type": "object",
+        "properties": {
+          "product_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "item_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "include_variants": {
+            "type": "boolean",
+            "default": false
+          },
+          "fields_variants": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "include_implicit_filter_variants": {
+            "type": "boolean"
+          },
+          "filter_variants": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "user_context_filter_variants": {
+            "$ref": "#/components/schemas/JsonNode"
+          },
+          "limit_variants": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limit_questions": {
+            "type": "integer",
+            "format": "int32",
+            "default": 5
+          }
+        },
+        "anyOf": [
+          {
+            "required": [
+              "product_ids"
+            ]
+          },
+          {
+            "required": [
+              "item_ids"
+            ]
+          }
+        ]
+      },
+      "ParentProductDTO": {
+        "type": "object",
+        "properties": {
+          "pointId": {
+            "type": "string"
+          },
+          "product_id": {
+            "type": "string"
+          },
+          "item_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionDTO"
+            }
+          },
+          "_review": {
+            "$ref": "#/components/schemas/ReviewDTO"
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductDTO"
+            }
+          }
+        }
+      },
+      "ParentProductResponseBody": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/ParentProductResult"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ParentProductResult": {
+        "type": "object",
+        "properties": {
+          "parent_products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ParentProductDTO"
+            }
+          },
+          "parent_product": {
+            "$ref": "#/components/schemas/ParentProductDTO"
+          }
+        }
+      },
+      "ProductRequestBody": {
+        "type": "object",
+        "properties": {
+          "itemIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "minItems": 1
+          },
+          "strict": {
+            "type": "boolean",
+            "default": false
+          },
+          "includeVariants": {
+            "type": "boolean",
+            "default": false
+          },
+          "limitVariants": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "limitQuestions": {
+            "type": "integer",
+            "format": "int32",
+            "default": 5
+          },
+          "includeImplicitFilter": {
+            "type": "boolean",
+            "default": false
+          },
+          "boost_config": {
+            "$ref": "#/components/schemas/BoostConfiguration"
+          },
+          "fields": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "itemIds"
+        ]
+      },
+      "FacetField": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetValue"
+            }
+          }
+        }
+      },
+      "FacetResponseBody": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "response": {
+            "$ref": "#/components/schemas/FacetResult"
+          }
+        }
+      },
+      "FacetResult": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FacetField"
+            }
+          }
+        }
+      },
+      "FacetValue": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Job": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "RUNNING",
+              "DIED",
+              "RETRY",
+              "RESUME",
+              "FAILED",
+              "INTERRUPTING",
+              "INTERRUPTED",
+              "COMPLETED",
+              "ABORTED"
+            ]
+          },
+          "jobType": {
+            "type": "string",
+            "enum": [
+              "BOOTSTRAP_JOB",
+              "STANDARD_JOB",
+              "SYNC_JOB",
+              "EMBEDDING_JOB",
+              "ENRICHMENT_JOB",
+              "PRODUCT_QUESTIONS_JOB",
+              "QUERIES_JOB",
+              "QUESTION_WEIGHTS_JOB",
+              "PRODUCT_REVIEWS_SUMMARIZATION_JOB",
+              "BAZAAR_VOICE_FULL_SYNC_JOB",
+              "BAZAAR_VOICE_DELTA_SYNC_JOB",
+              "KB_DOCUMENT_SYNC_JOB",
+              "KNOWLEDGE_BASE_MANIFEST_JOB"
+            ]
+          },
+          "personaId": {
+            "type": "string"
+          },
+          "creator": {
+            "type": "string"
+          },
+          "owner": {
+            "type": "string"
+          },
+          "workerVersion": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "description": {
+            "type": "string"
+          },
+          "lastUpdateTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "creationTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "startTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "finishTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "jobTasks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JobTask"
+            }
+          },
+          "jobLogs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JobLog"
+            }
+          },
+          "exceptionDetails": {
+            "type": "string"
+          },
+          "attempt": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "JobLog": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "stackTrace": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "LOG",
+              "ERROR"
+            ]
+          },
+          "timeStamp": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "JobTask": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "BOOTSTRAP_QDRANT",
+              "COMPUTE_SCHEMA_AND_SYNC_TO_MONGO",
+              "SYNC_SCHEMA_TO_QDRANT",
+              "ENRICH_PRODUCTS",
+              "SYNC_PRODUCTS_TO_QDRANT",
+              "SYNC_PARENT_PRODUCTS",
+              "SYNC_ATTRIBUTES",
+              "SYNC_TAXONOMIES",
+              "SET_OPTIMIZED_CATEGORY_PRODUCTS",
+              "SET_MULTI_CATEGORIES_PRODUCTS",
+              "INDEX_CATEGORIES",
+              "COLLAPSE_CATEGORIES",
+              "RECOMPUTE_CATEGORY_COUNTS",
+              "GENERATE_CATEGORY_QUESTIONS",
+              "ENRICH_LLM_SEARCH_TEXT",
+              "GENERATE_QUESTIONS",
+              "INDEX_QUERIES",
+              "GENERATE_QUERY_QUESTIONS",
+              "APPLY_QUESTION_WEIGHTS",
+              "PRODUCT_REVIEWS_SUMMARIZATION",
+              "FETCH_BAZAAR_VOICE_FULL",
+              "FETCH_BAZAAR_VOICE_DELTA",
+              "DOCUMENT_ADD_SYNC",
+              "DOCUMENT_DELETE_SYNC",
+              "DOCUMENT_QDRANT_SYNC",
+              "KNOWLEDGE_BASE_MANIFEST_SYNC"
+            ]
+          },
+          "force": {
+            "type": "boolean"
+          },
+          "reset": {
+            "type": "boolean"
+          },
+          "startTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "finishTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "totalTimeSeconds": {
+            "type": "number",
+            "format": "double"
+          },
+          "cursor": {
+            "type": "string"
+          }
+        }
+      },
+      "ReviewSyncResponse": {
+        "type": "object",
+        "properties": {
+          "created": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "skipped": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "failed": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SyncFeature": {
+        "type": "object",
+        "properties": {
+          "reset": {
+            "type": "boolean"
+          },
+          "force": {
+            "type": "boolean"
+          },
+          "description": {
+            "type": "string"
+          },
+          "jobType": {
+            "type": "string",
+            "enum": [
+              "SYNC",
+              "SYNC_PRODUCTS",
+              "SYNC_PARENT_PRODUCTS",
+              "SYNC_ATTRIBUTES_AND_TAXONOMIES",
+              "ENRICHMENT",
+              "PRODUCT_QUESTIONS",
+              "QUERY_QUESTIONS",
+              "QUESTION_WEIGHTS",
+              "PRODUCT_REVIEWS_SUMMARIZATION",
+              "BAZAAR_VOICE_FULL_SYNC",
+              "BAZAAR_VOICE_DELTA_SYNC"
+            ]
+          }
+        }
+      },
+      "AttributeValues": {
+        "type": "object",
+        "properties": {
+          "vectorSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distance": {
+            "type": "string"
+          },
+          "collectionName": {
+            "type": "string"
+          },
+          "vectorsCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pointsCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "m": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "payloadSchema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PayloadSchemaField"
+            }
+          },
+          "ef_construct": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Catalog": {
+        "type": "object",
+        "properties": {
+          "vectorSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distance": {
+            "type": "string"
+          },
+          "collectionName": {
+            "type": "string"
+          },
+          "vectorsCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pointsCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "m": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "payloadSchema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PayloadSchemaField"
+            }
+          },
+          "ef_construct": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Categories": {
+        "type": "object",
+        "properties": {
+          "vectorSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distance": {
+            "type": "string"
+          },
+          "collectionName": {
+            "type": "string"
+          },
+          "vectorsCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pointsCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "m": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "payloadSchema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PayloadSchemaField"
+            }
+          },
+          "ef_construct": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "Documents": {
+        "type": "object",
+        "properties": {
+          "vectorSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distance": {
+            "type": "string"
+          },
+          "collectionName": {
+            "type": "string"
+          },
+          "vectorsCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pointsCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "m": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "payloadSchema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PayloadSchemaField"
+            }
+          },
+          "ef_construct": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ParentProductCollection": {
+        "type": "object",
+        "properties": {
+          "vectorSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distance": {
+            "type": "string"
+          },
+          "collectionName": {
+            "type": "string"
+          },
+          "vectorsCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pointsCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "m": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "payloadSchema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PayloadSchemaField"
+            }
+          },
+          "ef_construct": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "PayloadSchemaField": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "onDisk": {
+            "type": "boolean"
+          },
+          "points": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "QdrantPersona": {
+        "required": [
+          "personaId"
+        ],
+        "type": "object",
+        "properties": {
+          "personaId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "catalogId": {
+            "type": "string"
+          },
+          "catalog": {
+            "$ref": "#/components/schemas/Catalog"
+          },
+          "parentProductCollection": {
+            "$ref": "#/components/schemas/ParentProductCollection"
+          },
+          "categories": {
+            "$ref": "#/components/schemas/Categories"
+          },
+          "attributeValues": {
+            "$ref": "#/components/schemas/AttributeValues"
+          },
+          "queries": {
+            "$ref": "#/components/schemas/Queries"
+          },
+          "documents": {
+            "$ref": "#/components/schemas/Documents"
+          },
+          "searchBackend": {
+            "type": "string"
+          },
+          "unavailableInMongoDb": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Queries": {
+        "type": "object",
+        "properties": {
+          "vectorSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "distance": {
+            "type": "string"
+          },
+          "collectionName": {
+            "type": "string"
+          },
+          "vectorsCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pointsCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "m": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "payloadSchema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PayloadSchemaField"
+            }
+          },
+          "ef_construct": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "HnswConfig": {
+        "type": "object",
+        "properties": {
+          "onDisk": {
+            "type": "boolean"
+          },
+          "m": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "ef_construct": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "OptimizersConfig": {
+        "type": "object",
+        "properties": {
+          "maxOptimizationThreads": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "indexing_threshold": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "flush_interval_sec": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "QdrantCollectionConfigDTO": {
+        "type": "object",
+        "properties": {
+          "targetPersonaId": {
+            "type": "string"
+          },
+          "inMemoryPayloadIndex": {
+            "type": "boolean"
+          },
+          "hnsw_config": {
+            "$ref": "#/components/schemas/HnswConfig"
+          },
+          "optimizer_config": {
+            "$ref": "#/components/schemas/OptimizersConfig"
+          },
+          "quantization_config": {
+            "$ref": "#/components/schemas/QuantizationConfig"
+          }
+        }
+      },
+      "QuantizationConfig": {
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "always_ram": {
+            "type": "boolean"
+          }
+        }
+      },
+      "CategorySearchRequest": {
+        "required": [
+          "query"
+        ],
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CategoryDTO": {
+        "type": "object",
+        "properties": {
+          "pointId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "representant": {
+            "type": "string"
+          },
+          "multi_categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "string"
+              }
+            }
+          },
+          "score": {
+            "type": "number",
+            "format": "float"
+          }
+        }
+      },
+      "CategorySearchResponse": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryDTO"
+            }
+          }
+        }
+      },
+      "ReviewUploadRequest": {
+        "required": [
+          "file",
+          "headerMapping"
+        ],
+        "type": "object",
+        "properties": {
+          "file": {
+            "type": "string",
+            "format": "binary"
+          },
+          "headerMapping": {
+            "type": "string",
+            "description": "JSON string mapping review fields to CSV column names. Must include all required fields: reviewId, productId, title, content, rating, submissionTimestamp, verifiedPurchaser. See ReviewHeaderMapping for complete structure.",
+            "format": "json",
+            "example": "{\"reviewId\":\"Review ID\",\"productId\":\"Product ID\",\"title\":\"Review title\",\"content\":\"Review text\",\"rating\":\"Rating\",\"submissionTimestamp\":\"Submission date\",\"verifiedPurchaser\":\"VerifiedPurchaser\"}"
+          }
+        },
+        "description": "Product reviews CSV upload request with header mapping"
+      },
+      "ParseError": {
+        "type": "object",
+        "properties": {
+          "lineNumber": {
+            "type": "integer",
+            "description": "CSV line number where error occurred",
+            "format": "int32",
+            "example": 5
+          },
+          "message": {
+            "type": "string",
+            "description": "Error description",
+            "example": "Invalid rating: 'abc'"
+          },
+          "truncatedLine": {
+            "type": "string",
+            "description": "First 100 characters of problematic CSV line"
+          }
+        },
+        "description": "CSV parse error information"
+      },
+      "ReviewUploadResponse": {
+        "type": "object",
+        "properties": {
+          "jobId": {
+            "type": "string",
+            "description": "Job ID for async processing (only present if new job created)",
+            "nullable": true,
+            "example": "job-12345-abc"
+          },
+          "totalRows": {
+            "type": "integer",
+            "description": "Total CSV rows processed (excluding header)",
+            "format": "int64",
+            "example": 2950
+          },
+          "insertedReviews": {
+            "type": "integer",
+            "description": "New reviews inserted into database",
+            "format": "int64",
+            "example": 2100
+          },
+          "updatedReviews": {
+            "type": "integer",
+            "description": "Existing reviews updated",
+            "format": "int64",
+            "example": 650
+          },
+          "duplicateReviews": {
+            "type": "integer",
+            "description": "Duplicate reviews skipped (same content hash - no changes needed)",
+            "format": "int64",
+            "example": 100
+          },
+          "parseErrors": {
+            "type": "integer",
+            "description": "Rows with parse errors (not stored)",
+            "format": "int64",
+            "example": 100
+          },
+          "errorRate": {
+            "type": "number",
+            "description": "Error rate as percentage (parseErrors / totalRows * 100)",
+            "format": "double",
+            "example": 3.39
+          },
+          "errors": {
+            "type": "array",
+            "description": "Detailed parse error information (limited to avoid bloat)",
+            "items": {
+              "$ref": "#/components/schemas/ParseError"
+            }
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable upload result message"
+          }
+        },
+        "description": "Product reviews upload response with processing statistics"
+      },
+      "SearchReviewsRequest": {
+        "type": "object",
+        "properties": {
+          "product_id": {
+            "type": "string"
+          },
+          "review_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "PROCESSING",
+              "PROCESSED"
+            ]
+          },
+          "moderation_status": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "PENDING",
+              "REJECTED"
+            ]
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "csv",
+              "bazaar_voice"
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "AdminReviewDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "persona_id": {
+            "type": "string"
+          },
+          "review_id": {
+            "type": "string"
+          },
+          "product_id": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "raw_content": {
+            "type": "string"
+          },
+          "rating": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "submission_timestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "verified_purchaser": {
+            "type": "boolean"
+          },
+          "photo_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "badges": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "moderation_status": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "PENDING",
+              "REJECTED"
+            ]
+          },
+          "would_recommend": {
+            "type": "boolean"
+          },
+          "locale": {
+            "type": "string"
+          },
+          "helpful_votes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "not_helpful_votes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "inappropriate_votes": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "comment_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "is_featured": {
+            "type": "boolean"
+          },
+          "is_incentivized": {
+            "type": "boolean"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "PROCESSING",
+              "PROCESSED"
+            ]
+          },
+          "upload_timestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "processing_timestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "processed_timestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "content_hash": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string"
+          },
+          "last_modification_time": {
+            "type": "integer",
+            "format": "int64"
+          }
+        }
+      },
+      "ReviewSearchResponse": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminReviewDTO"
+            }
+          }
+        }
+      },
+      "BulkDeleteReviewsRequest": {
+        "type": "object",
+        "properties": {
+          "review_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "product_id": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "PROCESSING",
+              "PROCESSED"
+            ]
+          },
+          "moderation_status": {
+            "type": "string",
+            "enum": [
+              "APPROVED",
+              "PENDING",
+              "REJECTED"
+            ]
+          }
+        }
+      },
+      "BulkDeleteReviewsResponse": {
+        "type": "object",
+        "properties": {
+          "deleted_count": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "deleted_review_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "CreateQuestionRequest": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "product",
+              "category",
+              "query"
+            ]
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "QuestionResponse": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "product",
+              "category",
+              "query"
+            ]
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "SearchQuestionsRequest": {
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "product",
+              "category",
+              "query"
+            ]
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "QuestionDetail": {
+        "type": "object",
+        "properties": {
+          "identifier": {
+            "type": "string"
+          },
+          "question": {
+            "type": "string"
+          },
+          "answer": {
+            "type": "string"
+          },
+          "weight": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "QuestionMatch": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "entity_id": {
+            "type": "string"
+          },
+          "entity_name": {
+            "type": "string"
+          },
+          "question": {
+            "$ref": "#/components/schemas/QuestionDetail"
+          }
+        }
+      },
+      "QuestionSearchResponse": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionMatch"
+            }
+          }
+        }
+      },
+      "JobMessageResponse": {
+        "type": "object",
+        "properties": {
+          "msg": {
+            "type": "string"
+          },
+          "jobId": {
+            "type": "string"
+          }
+        }
+      },
+      "CatalogConfig": {
+        "type": "object",
+        "properties": {
+          "filterItemCondition": {
+            "$ref": "#/components/schemas/FilterItemCondition"
+          },
+          "keyNameMapper": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "categoriesToProcess": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "FieldOptions": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer",
+                  "format": "int32"
+                },
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "number",
+                  "format": "double"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "FilterItemCondition": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "required": {
+            "type": "boolean"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FieldOptions"
+            }
+          }
+        }
+      },
+      "KnowledgeBaseManifestResponse": {
+        "type": "object",
+        "properties": {
+          "manifest": {
+            "type": "string"
+          },
+          "documentsChecksum": {
+            "type": "string"
+          },
+          "manifestGenerationStrategy": {
+            "type": "string"
+          },
+          "lastGeneratedTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "CURRENT",
+              "STALE"
+            ]
+          }
+        }
+      },
+      "EnrichmentMetadataDTO": {
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
+          }
+        }
+      },
+      "KnowledgeBaseDocumentDetailDTO": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "contentChecksum": {
+            "type": "string"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "personaId": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "enrichmentMetadata": {
+            "$ref": "#/components/schemas/EnrichmentMetadataDTO"
+          },
+          "qdrantChunks": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QdrantChunkDTO"
+            }
+          }
+        }
+      },
+      "KnowledgeBaseDocumentDetailResponse": {
+        "type": "object",
+        "properties": {
+          "document": {
+            "$ref": "#/components/schemas/KnowledgeBaseDocumentDetailDTO"
+          }
+        }
+      },
+      "QdrantChunkDTO": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "chunkIndex": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "chunkType": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "Keyword": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "count": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Suggestions": {
+        "type": "object",
+        "properties": {
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionDTO"
+            }
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Keyword"
+            }
+          }
+        }
+      },
+      "SuggestionsResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          },
+          "response": {
+            "$ref": "#/components/schemas/SuggestionsResponseResult"
+          }
+        }
+      },
+      "SuggestionsResponseResult": {
+        "type": "object",
+        "properties": {
+          "suggestions": {
+            "$ref": "#/components/schemas/Suggestions"
+          }
+        }
+      },
+      "CatalogStatusResponse": {
+        "type": "object",
+        "properties": {
+          "selectedCatalogId": {
+            "type": "string"
+          },
+          "catalogStatus": {
+            "type": "string",
+            "enum": [
+              "running",
+              "stopping-in-progress",
+              "stopped",
+              "failed",
+              "completed"
+            ]
+          },
+          "jobStatus": {
+            "type": "string"
+          },
+          "indexedDate": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "QuestionsResponseBody": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "$ref": "#/components/schemas/QuestionsResponseBodyResult"
+          }
+        }
+      },
+      "QuestionsResponseBodyResult": {
+        "type": "object",
+        "properties": {
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionDTO"
+            }
+          }
+        }
+      },
+      "BigtableInfo": {
+        "type": "object",
+        "properties": {
+          "healthy": {
+            "type": "boolean"
+          },
+          "tableId": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Memory": {
+        "type": "object",
+        "properties": {
+          "allocated": {
+            "type": "string"
+          },
+          "max": {
+            "type": "string"
+          },
+          "free": {
+            "type": "string"
+          }
+        }
+      },
+      "MongoDbInfo": {
+        "type": "object",
+        "properties": {
+          "healthy": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "SearchHealth": {
+        "type": "object",
+        "properties": {
+          "provider": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "healthy": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "Status": {
+        "type": "object",
+        "properties": {
+          "memory": {
+            "$ref": "#/components/schemas/Memory"
+          },
+          "search": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SearchHealth"
+            }
+          },
+          "bigtable": {
+            "$ref": "#/components/schemas/BigtableInfo"
+          },
+          "mongodb": {
+            "$ref": "#/components/schemas/MongoDbInfo"
+          },
+          "vertexai": {
+            "$ref": "#/components/schemas/VertexAiInfo"
+          }
+        }
+      },
+      "VertexAiInfo": {
+        "type": "object",
+        "properties": {
+          "healthy": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "AdminParentProductDTO": {
+        "type": "object",
+        "properties": {
+          "pointId": {
+            "type": "string"
+          },
+          "product_id": {
+            "type": "string"
+          },
+          "item_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "inactive": {
+            "type": "boolean"
+          },
+          "catalog_category": {
+            "type": "string"
+          },
+          "optimized_category": {
+            "type": "string"
+          },
+          "llm_search_text": {
+            "type": "string"
+          },
+          "review": {
+            "$ref": "#/components/schemas/ReviewDTO"
+          },
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionDTO"
+            }
+          },
+          "variants": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ProductDTO"
+            }
+          }
+        }
+      },
+      "ParentProductScrollResponse": {
+        "type": "object",
+        "properties": {
+          "parent_products": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminParentProductDTO"
+            }
+          },
+          "nextOffset": {
+            "type": "string"
+          }
+        }
+      },
+      "CategoryScrollResponse": {
+        "type": "object",
+        "properties": {
+          "categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryDTO"
+            }
+          },
+          "nextOffset": {
+            "type": "string"
+          }
+        }
+      },
+      "QdrantResponse": {
+        "type": "object",
+        "properties": {
+          "qdrantCount": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "unmapped": {
+            "$ref": "#/components/schemas/ProductDTO"
+          },
+          "mapped": {
+            "$ref": "#/components/schemas/ProductDTO"
+          }
+        }
+      },
+      "ReviewFieldEntry": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Field name",
+            "example": "reviewId"
+          },
+          "type": {
+            "type": "string",
+            "description": "Field data type",
+            "example": "string",
+            "enum": [
+              "string",
+              "integer",
+              "boolean",
+              "timestamp"
+            ]
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Whether this field is required in CSV mapping"
+          },
+          "description": {
+            "type": "string",
+            "description": "Human-readable field description"
+          }
+        },
+        "description": "Review field definition with type and requirement information"
+      },
+      "ReviewFieldSchema": {
+        "type": "object",
+        "properties": {
+          "fields": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReviewFieldEntry"
+            }
+          }
+        },
+        "description": "Schema definition for available review fields"
+      },
+      "QuestionWeights": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "version": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "personaId": {
+            "type": "string"
+          },
+          "entityType": {
+            "type": "string",
+            "enum": [
+              "PRODUCT",
+              "CATEGORY",
+              "QUERY"
+            ]
+          },
+          "creationTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastUpdateTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "PROCESSING",
+              "PROCESSED"
+            ]
+          },
+          "weights": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "number",
+                "format": "double"
+              }
+            }
+          }
+        }
+      },
+      "TopRanked": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "personaId": {
+            "type": "string"
+          },
+          "creationTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "products": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "QueryLog": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "personaId": {
+            "type": "string"
+          },
+          "creationTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "lastUpdateTimestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "PROCESSING",
+              "PROCESSED"
+            ]
+          },
+          "queries": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        }
+      },
+      "KnowledgeBaseDocumentListResponse": {
+        "type": "object",
+        "properties": {
+          "documents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeBaseDocumentDTO"
+            }
+          }
+        }
+      },
+      "CatalogMeta": {
+        "type": "object",
+        "properties": {
+          "catalogSummary": {
+            "type": "string"
+          },
+          "longCatalogSummary": {
+            "type": "string"
+          },
+          "titleField": {
+            "type": "string"
+          },
+          "embeddingFields": {
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "urlField": {
+            "$ref": "#/components/schemas/UrlField"
+          },
+          "imageField": {
+            "$ref": "#/components/schemas/ImageField"
+          }
+        }
+      },
+      "CustomerSettingValue": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "object"
+          }
+        },
+        "oneOf": [
+          {
+            "type": "string"
+          },
+          {
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "type": "boolean"
+          },
+          {
+            "type": "number",
+            "format": "double"
+          },
+          {
+            "$ref": "#/components/schemas/JsonNode"
+          }
+        ]
+      },
+      "ImageField": {
+        "type": "object",
+        "properties": {
+          "fieldName": {
+            "type": "string"
+          },
+          "multiple": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Persona": {
+        "type": "object",
+        "properties": {
+          "personaId": {
+            "type": "string"
+          },
+          "personaName": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          },
+          "selectedCatalogId": {
+            "type": "string"
+          },
+          "lastIndexedCatalogId": {
+            "type": "string"
+          },
+          "lastCatalogIndexedTime": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "lastCatalogEnrichmentTime": {
+            "type": "string",
+            "format": "date-time",
+            "writeOnly": true
+          },
+          "searchBackend": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          },
+          "priceMappingChanged": {
+            "type": "boolean"
+          },
+          "parentProductCollectionMigrationDone": {
+            "type": "boolean"
+          },
+          "catalogSchema": {
+            "$ref": "#/components/schemas/Schema"
+          },
+          "catalogConfig": {
+            "$ref": "#/components/schemas/CatalogConfig"
+          },
+          "catalogMeta": {
+            "$ref": "#/components/schemas/CatalogMeta"
+          },
+          "customerSettings": {
+            "type": "object",
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CustomerSettingValue"
+            }
+          },
+          "customAttributeListForConversationEngine": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "filterAttributeList": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "productReviewsConfig": {
+            "$ref": "#/components/schemas/ProductReviewsConfig"
+          },
+          "queryLogsEnabled": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ProductReviewsConfig": {
+        "type": "object",
+        "properties": {
+          "last_sync_timestamp": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "enable_daily_sync": {
+            "type": "boolean"
+          },
+          "filters": {
+            "$ref": "#/components/schemas/ProductReviewFilters"
+          }
+        }
+      },
+      "UrlField": {
+        "type": "object",
+        "properties": {
+          "fieldName": {
+            "type": "string"
+          }
+        }
+      },
+      "DiscoveryUrlsResponse": {
+        "type": "object",
+        "properties": {
+          "catalogName": {
+            "type": "string"
+          },
+          "accountIdentifier": {
+            "type": "string"
+          },
+          "envName": {
+            "type": "string"
+          },
+          "discoveryInstance": {
+            "type": "string"
+          },
+          "view": {
+            "type": "string"
+          },
+          "maxFilesToProcess": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "urls": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "urlCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "expiresIn": {
+            "type": "string"
+          }
+        }
+      },
+      "CatalogProduct": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string"
+          },
+          "properties": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object"
+            }
+          }
+        }
+      },
+      "PersonaIds": {
+        "type": "object",
+        "properties": {
+          "personaId": {
+            "type": "string"
+          },
+          "projectId": {
+            "type": "string"
+          }
+        }
+      },
+      "ErrorBody": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "error": {
+            "type": "string"
+          },
+          "msg": {
+            "type": "string"
+          }
+        }
+      },
+      "AddMessageUserGenByBtnEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.USER.GEN_BY_BTN"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "text": {
+            "type": "string",
+            "enum": [
+              "SHOW_SIMILAR",
+              "COMPARISON"
+            ]
+          },
+          "label": {
+            "nullable": true,
+            "type": "string"
+          }
+        }
+      },
+      "FeSetContextEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "FE.SET_CONTEXT"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currentItemIds": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "currentItemIdsType": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "product_id",
+              "item_id"
+            ]
+          },
+          "currentItemId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "miniPageProduct": {
+            "nullable": true,
+            "type": "string",
+            "description": "MiniPDP product context value. Source: tFeSetContextEvent.miniPageProduct (T.null_string)."
+          },
+          "cartItemIds": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "userContextFilter": {
+            "nullable": true,
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string",
+            "description": "Frontend/customer-supplied valid ISO 4217 currency code (for example USD, GBP, or EUR). Product data may omit currency; clients should use this configured currency for product-card price formatting and pass it in FE.SET_CONTEXT.currency."
+          },
+          "plpCategoryName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "plpCategoryDescription": {
+            "nullable": true,
+            "type": "string"
+          },
+          "urlQueryParams": {
+            "nullable": true,
+            "type": "string"
+          },
+          "uid": {
+            "nullable": true,
+            "type": "string"
+          },
+          "remove": {
+            "nullable": true,
+            "type": "array",
+            "description": "Context buckets to unset for partial context edits.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "pageList",
+                "pageProduct",
+                "miniPageProduct",
+                "shoppingCartList"
+              ]
+            }
+          }
+        }
+      },
+      "AddMessageUserTextEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.USER.TEXT"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "_metadata": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "engVer": {
+                "nullable": true,
+                "type": "string",
+                "description": "Public metadata: backend engine/version marker when provided."
+              },
+              "queries": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
+              }
+            },
+            "description": "Public metadata fields."
+          }
+        }
+      },
+      "AddMessageUserDirectCallEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.USER.DIRECT_CALL"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "target": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "results_summarizer",
+              "search_in_catalog",
+              "sqr_with_search_or_extraction",
+              "products_expert_question",
+              "find_similar_or_compatible_products",
+              "post_search"
+            ],
+            "description": "Public direct-call target. Do not send undocumented/internal target names."
+          },
+          "text": {
+            "nullable": true,
+            "type": "string"
+          },
+          "invisible": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "source": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "DISCOVERY_SUGGESTION",
+              "DISCOVERY_QR",
+              "DISCOVERY",
+              "DEFAULT",
+              "WEBLAYER"
+            ]
+          },
+          "payload": {
+            "nullable": true,
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Target-specific free-form payload for ADD_MESSAGE.USER.DIRECT_CALL. Public direct-call targets accept these shapes; preserve and forward unknown fields when echoing a server-provided quick-reply payload. search_in_catalog: {query?, filters?, userContextFilter?}. sqr_with_search_or_extraction: {query?, question?, productIds?, itemIds?}. products_expert_question: {question?, productIds?, itemIds?, product?}. find_similar_or_compatible_products: {productId?, itemId?, id?, ids?, mode?}. results_summarizer: {query?, productIds?, itemIds?, products?}. post_search: {query?, productIds?, itemIds?, selectedProductIds?}."
+          },
+          "_metadata": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "engVer": {
+                "nullable": true,
+                "type": "string",
+                "description": "Public metadata: backend engine/version marker when provided."
+              },
+              "queries": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
+              }
+            },
+            "description": "Public metadata fields."
+          }
+        },
+        "description": "User direct-call event for public direct-call targets. Sent for EVERY quick-reply selection (always DIRECT_CALL, never ADD_MESSAGE.USER.TEXT), whether or not the option carries a target/payload; copy any server-provided target/payload back verbatim. Can also be constructed with the documented target-specific payload shapes."
+      },
+      "AddMessageUserFeedbackEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.USER.FEEDBACK"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "score": {
+            "nullable": true,
+            "type": "number"
+          },
+          "text": {
+            "nullable": true,
+            "type": "string"
+          },
+          "messages": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "SyncEventLogEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "SYNC_EVENT_LOG"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "lastProcessedEventId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "welcomeUnnecessary": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        }
+      },
+      "SelectedItemsEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "ids"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "SELECTED_ITEMS"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "generatedFromAI": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "data": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "required": [
+                "id"
+              ],
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "url": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "title": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "image": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "price": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "originalPrice": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "currency": {
+                  "nullable": true,
+                  "type": "string",
+                  "description": "Optional product currency. In chat integrations this is commonly null/omitted; format prices with the frontend/customer-supplied valid ISO 4217 fallback currency."
+                },
+                "description": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "variantAttributeList": {
+                  "nullable": true,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "questions": {
+                  "nullable": true,
+                  "type": "array",
+                  "items": {
+                    "required": [
+                      "question"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "question": {
+                        "type": "string"
+                      },
+                      "answer": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "identifier": {
+                        "nullable": true,
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "extraVariantFields": {
+                  "nullable": true,
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "variants": {
+                  "nullable": true,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "__categories": {
+                  "nullable": true,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "review": {
+                  "nullable": true,
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "averageRating": {
+                      "nullable": true,
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "isSelectedFromLastBotResponse": {
+            "nullable": true,
+            "type": "object",
+            "additionalProperties": {
+              "type": "boolean"
+            }
+          }
+        }
+      },
+      "PersistColdStartEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "PERSIST_COLD_START"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "events": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReplayEvent"
+            },
+            "description": "Welcome/cold-start events to persist for future replay, including the ADD_MESSAGE.ASSISTANT.COLD_START message shown on the blank-slate screen."
+          }
+        },
+        "description": "Persists welcome/cold-start events for future replay. Use this event to save the ADD_MESSAGE.ASSISTANT.COLD_START message; sending the cold-start message itself does not store it in conversation history."
+      },
+      "AddMessageAssistantColdStartEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.ASSISTANT.COLD_START"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "engText": {
+            "nullable": true,
+            "type": "string"
+          },
+          "productIdsToShow": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "areCartProducts": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "quickReply": {
+            "nullable": true,
+            "required": [
+              "data"
+            ],
+            "type": "object",
+            "properties": {
+              "data": {
+                "type": "array",
+                "items": {
+                  "required": [
+                    "label"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "label": {
+                      "type": "string"
+                    },
+                    "payload": {
+                      "nullable": true,
+                      "type": "object",
+                      "additionalProperties": {}
+                    },
+                    "target": {
+                      "nullable": true,
+                      "type": "string",
+                      "enum": [
+                        "results_summarizer",
+                        "search_in_catalog",
+                        "sqr_with_search_or_extraction",
+                        "products_expert_question",
+                        "find_similar_or_compatible_products",
+                        "post_search"
+                      ]
+                    }
+                  }
+                }
+              },
+              "text": {
+                "nullable": true,
+                "type": "string"
+              }
+            }
+          },
+          "initialContext": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "currentItemIds": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "currentItemIdsType": {
+                "nullable": true,
+                "type": "string",
+                "enum": [
+                  "product_id",
+                  "item_id"
+                ]
+              },
+              "currentItemId": {
+                "nullable": true,
+                "type": "string"
+              },
+              "miniPageProduct": {
+                "nullable": true,
+                "type": "string"
+              },
+              "cartItemIds": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "userContextFilter": {
+                "nullable": true,
+                "type": "object",
+                "additionalProperties": {}
+              },
+              "currency": {
+                "nullable": true,
+                "type": "string"
+              },
+              "plpCategoryName": {
+                "nullable": true,
+                "type": "string"
+              },
+              "plpCategoryDescription": {
+                "nullable": true,
+                "type": "string"
+              },
+              "urlQueryParams": {
+                "nullable": true,
+                "type": "string"
+              },
+              "uid": {
+                "nullable": true,
+                "type": "string"
+              },
+              "remove": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "pageList",
+                    "pageProduct",
+                    "miniPageProduct",
+                    "shoppingCartList"
+                  ]
+                }
+              }
+            }
+          }
+        },
+        "description": "Actual welcome/cold-start message rendered by the UI and replayed later. Sending ADD_MESSAGE.ASSISTANT.COLD_START directly does not persist it in conversation history. To save the welcome state for future replay, send PERSIST_COLD_START with this event in its events payload."
+      },
+      "AddMessageAssistantTextEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.ASSISTANT.TEXT"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "marker": {
+            "nullable": true,
+            "type": "string"
+          },
+          "skipToneOfVoice": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "product_id_link_mapping": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "_metadata": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "engVer": {
+                "nullable": true,
+                "type": "string",
+                "description": "Public metadata: backend engine/version marker when provided."
+              },
+              "queries": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
+              }
+            },
+            "description": "Public metadata fields."
+          },
+          "agent": {
+            "nullable": true,
+            "type": "string"
+          }
+        }
+      },
+      "FatalErrorEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "FATAL_ERROR"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "text": {
+            "nullable": true,
+            "type": "string"
+          },
+          "exception": {
+            "nullable": true,
+            "required": [
+              "message",
+              "type",
+              "stack"
+            ],
+            "type": "object",
+            "properties": {
+              "message": {},
+              "type": {
+                "type": "string"
+              },
+              "stack": {
+                "type": "string"
+              }
+            }
+          },
+          "request": {
+            "nullable": true,
+            "required": [
+              "url",
+              "method"
+            ],
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string"
+              },
+              "headers": {},
+              "body": {}
+            }
+          },
+          "error_category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "is_retryable": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "description": "Fatal, user-facing error. Clients should display the fallback message from general-settings (translated.errorMsg) and stop accepting input for the current turn. The event.text contains internal detail and should NOT be shown to end-users."
+      },
+      "ErrorEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ERROR"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "text": {
+            "nullable": true,
+            "type": "string"
+          },
+          "exception": {
+            "nullable": true,
+            "required": [
+              "message",
+              "type",
+              "stack"
+            ],
+            "type": "object",
+            "properties": {
+              "message": {},
+              "type": {
+                "type": "string"
+              },
+              "stack": {
+                "type": "string"
+              }
+            }
+          },
+          "request": {
+            "nullable": true,
+            "required": [
+              "url",
+              "method"
+            ],
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string"
+              },
+              "headers": {},
+              "body": {}
+            }
+          },
+          "error_category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "is_retryable": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "description": "Non-fatal warning emitted by the backend (e.g. internal AGENT.ERROR telemetry). Clients must NOT surface these to end-users — they should be ignored in the UI (logging to a debug panel is fine)."
+      },
+      "AppendLastAssistantMessageEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "APPEND_LAST_ASSISTANT_MESSAGE"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "_metadata": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "engVer": {
+                "nullable": true,
+                "type": "string",
+                "description": "Public metadata: backend engine/version marker when provided."
+              },
+              "queries": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
+              }
+            },
+            "description": "Public metadata fields."
+          }
+        }
+      },
+      "AddMessageUserCompareEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "ids"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.USER.COMPARE"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "MetadataSelectAgentEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "agent",
+          "conversationId",
+          "userMessage"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "METADATA.SELECT_AGENT"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "agent": {
+            "type": "string"
+          },
+          "userMessageSentDate": {
+            "nullable": true,
+            "type": "string"
+          },
+          "userFiles": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "conversationId": {
+            "type": "string"
+          },
+          "messages": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "end": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "status": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "ended",
+              "transfer",
+              "error"
+            ]
+          },
+          "error": {
+            "nullable": true,
+            "type": "string"
+          },
+          "attachments": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "required": [
+                "type",
+                "data"
+              ],
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "custom",
+                    "file"
+                  ]
+                },
+                "data": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              }
+            }
+          },
+          "userMessage": {
+            "type": "string"
+          }
+        }
+      },
+      "HistoryMetadataEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "HISTORY_METADATA"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        }
+      },
+      "AddMessageAssistantCarouselEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.ASSISTANT.CAROUSEL"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "required": [
+                "id"
+              ],
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "url": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "title": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "image": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "price": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "originalPrice": {
+                  "nullable": true,
+                  "oneOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "string"
+                    }
+                  ]
+                },
+                "currency": {
+                  "nullable": true,
+                  "type": "string",
+                  "description": "Optional product currency. In chat integrations this is commonly null/omitted; format prices with the frontend/customer-supplied valid ISO 4217 fallback currency."
+                },
+                "description": {
+                  "nullable": true,
+                  "type": "string"
+                },
+                "variantAttributeList": {
+                  "nullable": true,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "questions": {
+                  "nullable": true,
+                  "type": "array",
+                  "items": {
+                    "required": [
+                      "question"
+                    ],
+                    "type": "object",
+                    "properties": {
+                      "question": {
+                        "type": "string"
+                      },
+                      "answer": {
+                        "nullable": true,
+                        "type": "string"
+                      },
+                      "identifier": {
+                        "nullable": true,
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "extraVariantFields": {
+                  "nullable": true,
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "variants": {
+                  "nullable": true,
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "__categories": {
+                  "nullable": true,
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "review": {
+                  "nullable": true,
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "nullable": true,
+                      "type": "number"
+                    },
+                    "averageRating": {
+                      "nullable": true,
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "categoryName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rephrasedQuery": {
+            "nullable": true,
+            "type": "string"
+          },
+          "_metadata": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "engVer": {
+                "nullable": true,
+                "type": "string",
+                "description": "Public metadata: backend engine/version marker when provided."
+              },
+              "queries": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
+              }
+            },
+            "description": "Public metadata fields."
+          }
+        }
+      },
+      "AddMessageAssistantQuickReplyEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.ASSISTANT.QUICK_REPLY"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "required": [
+                "label"
+              ],
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "payload": {
+                  "nullable": true,
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "target": {
+                  "nullable": true,
+                  "type": "string",
+                  "enum": [
+                    "results_summarizer",
+                    "search_in_catalog",
+                    "sqr_with_search_or_extraction",
+                    "products_expert_question",
+                    "find_similar_or_compatible_products",
+                    "post_search"
+                  ]
+                }
+              }
+            }
+          },
+          "text": {
+            "nullable": true,
+            "type": "string"
+          },
+          "_metadata": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "engVer": {
+                "nullable": true,
+                "type": "string",
+                "description": "Public metadata: backend engine/version marker when provided."
+              },
+              "queries": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
+              }
+            },
+            "description": "Public metadata fields."
+          }
+        }
+      },
+      "AddMessageAssistantNotificationEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "toolName",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.ASSISTANT.NOTIFICATION"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "toolName": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "description": "In-place progress update. Render only the `text` field; `toolName` is internal. Each notification REPLACES the previous one (and replaces the initial \"Thinking…\" placeholder). Do NOT clear the progress indicator when the first content event arrives; keep it visible while messages stream in and clear it only after the request completes and all response events have been received."
+      },
+      "MetadataEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "metadataType",
+          "data"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "METADATA"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "metadataType": {
+            "type": "string",
+            "enum": [
+              "INTENT"
+            ]
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": {}
+          }
+        }
+      },
+      "OutboundEvent": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AddMessageUserGenByBtnEvent"
+          },
+          {
+            "$ref": "#/components/schemas/FeSetContextEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserTextEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserDirectCallEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserFeedbackEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SyncEventLogEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SelectedItemsEvent"
+          },
+          {
+            "$ref": "#/components/schemas/PersistColdStartEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantColdStartEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantTextEvent"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "ADD_MESSAGE.USER.GEN_BY_BTN": "#/components/schemas/AddMessageUserGenByBtnEvent",
+            "FE.SET_CONTEXT": "#/components/schemas/FeSetContextEvent",
+            "ADD_MESSAGE.USER.TEXT": "#/components/schemas/AddMessageUserTextEvent",
+            "ADD_MESSAGE.USER.DIRECT_CALL": "#/components/schemas/AddMessageUserDirectCallEvent",
+            "ADD_MESSAGE.USER.FEEDBACK": "#/components/schemas/AddMessageUserFeedbackEvent",
+            "SYNC_EVENT_LOG": "#/components/schemas/SyncEventLogEvent",
+            "SELECTED_ITEMS": "#/components/schemas/SelectedItemsEvent",
+            "PERSIST_COLD_START": "#/components/schemas/PersistColdStartEvent",
+            "ADD_MESSAGE.ASSISTANT.COLD_START": "#/components/schemas/AddMessageAssistantColdStartEvent",
+            "ADD_MESSAGE.ASSISTANT.TEXT": "#/components/schemas/AddMessageAssistantTextEvent"
+          }
+        }
+      },
+      "InboundEvent": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AppendLastAssistantMessageEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SelectedItemsEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserGenByBtnEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserTextEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserDirectCallEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserCompareEvent"
+          },
+          {
+            "$ref": "#/components/schemas/MetadataSelectAgentEvent"
+          },
+          {
+            "$ref": "#/components/schemas/HistoryMetadataEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantTextEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantCarouselEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantQuickReplyEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantNotificationEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantColdStartEvent"
+          },
+          {
+            "$ref": "#/components/schemas/FeSetContextEvent"
+          },
+          {
+            "$ref": "#/components/schemas/FatalErrorEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ErrorEvent"
+          },
+          {
+            "$ref": "#/components/schemas/MetadataEvent"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "APPEND_LAST_ASSISTANT_MESSAGE": "#/components/schemas/AppendLastAssistantMessageEvent",
+            "SELECTED_ITEMS": "#/components/schemas/SelectedItemsEvent",
+            "ADD_MESSAGE.USER.GEN_BY_BTN": "#/components/schemas/AddMessageUserGenByBtnEvent",
+            "ADD_MESSAGE.USER.TEXT": "#/components/schemas/AddMessageUserTextEvent",
+            "ADD_MESSAGE.USER.DIRECT_CALL": "#/components/schemas/AddMessageUserDirectCallEvent",
+            "ADD_MESSAGE.USER.COMPARE": "#/components/schemas/AddMessageUserCompareEvent",
+            "METADATA.SELECT_AGENT": "#/components/schemas/MetadataSelectAgentEvent",
+            "HISTORY_METADATA": "#/components/schemas/HistoryMetadataEvent",
+            "ADD_MESSAGE.ASSISTANT.TEXT": "#/components/schemas/AddMessageAssistantTextEvent",
+            "ADD_MESSAGE.ASSISTANT.CAROUSEL": "#/components/schemas/AddMessageAssistantCarouselEvent",
+            "ADD_MESSAGE.ASSISTANT.QUICK_REPLY": "#/components/schemas/AddMessageAssistantQuickReplyEvent",
+            "ADD_MESSAGE.ASSISTANT.NOTIFICATION": "#/components/schemas/AddMessageAssistantNotificationEvent",
+            "ADD_MESSAGE.ASSISTANT.COLD_START": "#/components/schemas/AddMessageAssistantColdStartEvent",
+            "FE.SET_CONTEXT": "#/components/schemas/FeSetContextEvent",
+            "FATAL_ERROR": "#/components/schemas/FatalErrorEvent",
+            "ERROR": "#/components/schemas/ErrorEvent",
+            "METADATA": "#/components/schemas/MetadataEvent"
+          }
+        }
+      },
+      "ReplayEvent": {
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AppendLastAssistantMessageEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SelectedItemsEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserGenByBtnEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserTextEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserDirectCallEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserCompareEvent"
+          },
+          {
+            "$ref": "#/components/schemas/MetadataSelectAgentEvent"
+          },
+          {
+            "$ref": "#/components/schemas/HistoryMetadataEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantTextEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantCarouselEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantQuickReplyEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantNotificationEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantColdStartEvent"
+          },
+          {
+            "$ref": "#/components/schemas/FeSetContextEvent"
+          },
+          {
+            "$ref": "#/components/schemas/FatalErrorEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ErrorEvent"
+          },
+          {
+            "$ref": "#/components/schemas/MetadataEvent"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "APPEND_LAST_ASSISTANT_MESSAGE": "#/components/schemas/AppendLastAssistantMessageEvent",
+            "SELECTED_ITEMS": "#/components/schemas/SelectedItemsEvent",
+            "ADD_MESSAGE.USER.GEN_BY_BTN": "#/components/schemas/AddMessageUserGenByBtnEvent",
+            "ADD_MESSAGE.USER.TEXT": "#/components/schemas/AddMessageUserTextEvent",
+            "ADD_MESSAGE.USER.DIRECT_CALL": "#/components/schemas/AddMessageUserDirectCallEvent",
+            "ADD_MESSAGE.USER.COMPARE": "#/components/schemas/AddMessageUserCompareEvent",
+            "METADATA.SELECT_AGENT": "#/components/schemas/MetadataSelectAgentEvent",
+            "HISTORY_METADATA": "#/components/schemas/HistoryMetadataEvent",
+            "ADD_MESSAGE.ASSISTANT.TEXT": "#/components/schemas/AddMessageAssistantTextEvent",
+            "ADD_MESSAGE.ASSISTANT.CAROUSEL": "#/components/schemas/AddMessageAssistantCarouselEvent",
+            "ADD_MESSAGE.ASSISTANT.QUICK_REPLY": "#/components/schemas/AddMessageAssistantQuickReplyEvent",
+            "ADD_MESSAGE.ASSISTANT.NOTIFICATION": "#/components/schemas/AddMessageAssistantNotificationEvent",
+            "ADD_MESSAGE.ASSISTANT.COLD_START": "#/components/schemas/AddMessageAssistantColdStartEvent",
+            "FE.SET_CONTEXT": "#/components/schemas/FeSetContextEvent",
+            "FATAL_ERROR": "#/components/schemas/FatalErrorEvent",
+            "ERROR": "#/components/schemas/ErrorEvent",
+            "METADATA": "#/components/schemas/MetadataEvent"
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Core",
+      "description": "Core chat endpoints for persona settings and send-event streaming."
+    },
+    {
+      "name": "Conversation Starters",
+      "description": "Pre-chat Conversational agent Search endpoints for PDP, PLP, and search/autosuggest conversation-starter questions."
+    }
+  ]
+}
