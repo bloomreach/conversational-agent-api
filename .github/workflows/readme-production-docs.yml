@@ -1,0 +1,22 @@
+# This GitHub Actions workflow syncs the OAS file to the Bloomreach production documentation site.
+name: ReadMe Production GitHub Action 🦉
+
+on:
+  push:
+    branches:
+      # This workflow will run every time you push code to the following branch: `main`
+      - main
+
+jobs:
+  rdme-openapi:
+    runs-on: ubuntu-latest
+    environment: Production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Upload OpenAPI spec to Readme
+        uses: readmeio/rdme@v10
+        with:
+          rdme:
+            openapi upload openapi-spec.json --key=${{ secrets.CONVERSATIONAL_AGENT_API_KEY }} --slug=openapi-spec.json --branch=v1.0

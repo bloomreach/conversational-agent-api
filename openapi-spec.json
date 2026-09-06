@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "version": "v0.1.0-beta.3",
-    "title": "Conversational Agent API"
+    "title": "Conversational agent API"
   },
   "servers": [
     {
@@ -609,7 +609,7 @@
             "description": "Internal Server Error — backend error."
           }
         },
-        "description": "Send one event to the chat and receive a streaming JSON array of events in response.\nOnly one send-event request should be in flight per chat at a time — disable user input until the stream completes. The backend will hold the connection open for up to 60 seconds; clients should match this with an AbortController to avoid stalled connections locking the UI.\nThe response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same _id to avoid showing the shopper's message twice.",
+        "description": "Send one event to the chat and receive a streaming JSON array of events in response.\n\nOnly one send-event request should be in flight per chat at a time — disable user input until the stream completes. The backend will hold the connection open for up to 60 seconds; clients should match this with an AbortController to avoid stalled connections locking the UI.\n\nThe response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same id to avoid showing the shopper's message twice.",
         "tags": [
           "Core"
         ]
@@ -618,7 +618,7 @@
     "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/items": {
       "post": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getProductsById",
         "parameters": [
@@ -699,7 +699,7 @@
     "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/items/{itemId}": {
       "get": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getProductById",
         "parameters": [
@@ -823,7 +823,7 @@
     "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/items/{itemId}/questions": {
       "get": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getProductQuestionsById",
         "parameters": [
@@ -912,7 +912,7 @@
     "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/parent_product/{product_id}": {
       "get": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getParentProduct",
         "parameters": [
@@ -1027,7 +1027,7 @@
     "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/parent_products": {
       "post": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getParentProducts",
         "parameters": [
@@ -1108,7 +1108,7 @@
     "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/plp": {
       "post": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getPlpQuestions",
         "parameters": [
@@ -1179,7 +1179,7 @@
     "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/suggestions": {
       "get": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getSuggestions",
         "parameters": [
@@ -6357,7 +6357,7 @@
       "description": "Core chat endpoints for persona settings and send-event streaming."
     },
     {
-      "name": "Conversation Starters",
+      "name": "Conversation starters",
       "description": "Pre-chat Conversational agent Search endpoints for PDP, PLP, and search/autosuggest conversation-starter questions."
     }
   ]

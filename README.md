@@ -6,7 +6,7 @@ Documentation and reference test clients for the Bloomreach Conversational Agent
 
 | Path | What it is |
 |---|---|
-| [`documentation.html`](./documentation.html) | **Frontend Integration Guide.** The primary reference document: initialization flow, the `send-event` streaming channel, event catalog (user/assistant messages, carousels, quick replies, notifications, errors), PDP/PLP/search endpoints, and status codes. Start here. |
+| [`documentation.html`](./documentation.html) | **Frontend Integration Guide.** The primary reference document (open the file in your browser): initialization flow, the `send-event` streaming channel, event catalog (user/assistant messages, carousels, quick replies, notifications, errors), PDP/PLP/search endpoints, and status codes. Start here. |
 | [`openapi-spec.json`](./openapi-spec.json) | OpenAPI spec (`v0.1.0-beta.3`) for the same API surface: chat (`general-settings`, `send-event`) and Conversational Agent Search (catalog items, parent products, PLP, suggestions). Use it to generate typed clients or import into API tooling (Postman, Swagger UI, etc.). |
 | [`chat-client/`](./chat-client) | Zero-dependency, single-file (`index.html`) vanilla JS chat client. No build step — open it in a browser or serve it statically. Fastest way to manually poke at a backend and watch raw events. |
 | [`chat-client-react/`](./chat-client-react) | TypeScript + React + Vite implementation of the same client. Closer to how a real frontend integration would be structured; also exposes typed helpers for the Conversational Agent Search endpoints (PDP/PLP/suggestions). |
