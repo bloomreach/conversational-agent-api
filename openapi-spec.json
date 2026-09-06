@@ -609,7 +609,7 @@
             "description": "Internal Server Error — backend error."
           }
         },
-        "description": "Send one event to the chat and receive a streaming JSON array of events in response./nOnly one send-event request should be in flight per chat at a time — disable user input until the stream completes. The backend will hold the connection open for up to 60 seconds; clients should match this with an AbortController to avoid stalled connections locking the UI. The response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same _id to avoid showing the shopper's message twice.",
+        "description": "Send one event to the chat and receive a streaming JSON array of events in response.\nOnly one send-event request should be in flight per chat at a time — disable user input until the stream completes. The backend will hold the connection open for up to 60 seconds; clients should match this with an AbortController to avoid stalled connections locking the UI.\nThe response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same _id to avoid showing the shopper's message twice.",
         "tags": [
           "Core"
         ]
