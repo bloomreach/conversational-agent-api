@@ -2,6 +2,8 @@
 
 Documentation and reference test clients for the Bloomreach Conversational Agent API (also referred to as CoCoAaS — Conversational Commerce as a Service). This repo is meant to help frontend integrators understand the API contract and validate their integration against a real backend.
 
+Refer to the [Bloomreach documentation](https://documentation.bloomreach.com/clarity/reference/get-started) for an interactive API reference and getting started guide.
+
 ## Contents
 
 | Path | What it is |
@@ -20,6 +22,6 @@ Both clients implement the same integration contract described in `documentation
 
 ## Suggested workflow
 
-1. Read `documentation.html` for the event model and lifecycle.
+1. Read `documentation.html` file (rendered) for the event model and lifecycle.
 2. Run one of the chat clients against your `apiUrl`/`projectId`/`personaId` and step through its doc-validation checklist.
 3. Reference `openapi-spec.json` for exact request/response shapes when building your own integration.
