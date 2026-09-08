@@ -1,6 +1,6 @@
-# Conversational Agent Chat — Test Client
+# Clarity Chat — Test Client
 
-A self-contained, single-file chat client used to validate the Conversational agent / CoCoAaS public API documentation (`../DOCUMENTATION.md`, `../openapi-spec.json`).
+A self-contained, single-file chat client used to validate the Clarity / CoCoAaS public API documentation (`../documentation.html`, `../openapi-spec.json`).
 
 No frameworks, no build step, no dependencies. Just a browser.
 
@@ -23,28 +23,28 @@ Then visit <http://localhost:8000>. Origin will be `http://localhost:8000`. Some
 ## What it does
 
 1. On first load, prompts for four onboarding values:
-   - `apiUrl`, `projectId`, `personaId` — provided by Bloomreach
+   - `apiUrl`, `agentId`, `apiToken` — provided by Bloomreach. The token is sent as `Authorization: Bearer <apiToken>` on every API request.
    - `currency` — chosen by the FE/customer integration; must be a valid ISO 4217 code (used for price formatting and sent to the backend in `FE.SET_CONTEXT`)
    - Optionally an `endCustomerId`. If blank, the client generates a UUID and treats it as the user's cookie equivalent.
 
 2. Persists the onboarding to `localStorage` so reloads skip the form.
 
-3. Fetches `GET .../general-settings` to apply the persona's name, logo, and input placeholder. Persona branding (`assistantName`, `assistantLogo`, and `description`) should be configured in the CoCoAaS backend persona configuration; the client only uses local defaults when those fields are omitted. The response is cached in `localStorage` for 6 hours, keyed by `projectId` + `personaId`; reloads within the TTL reuse the cache and skip the network call, and a matching cached response can still be used if a later refresh fails so branding does not disappear entirely.
+3. Fetches authenticated `GET .../general-settings` to apply the agent's name, logo, and input placeholder. Persona branding (`assistantName`, `assistantLogo`, and `description`) should be configured in the CoCoAaS backend persona configuration; the client only uses local defaults when those fields are omitted. The response is cached in `localStorage` for 6 hours, keyed by `agentId`; reloads within the TTL reuse the cache and skip the network call, and a matching cached response can still be used if a later refresh fails so branding does not disappear entirely.
 
 4. Sends `SYNC_EVENT_LOG` to hydrate any existing conversation tied to the persisted `chatId`.
 
-5. Shows default starter questions below the input box and Send button on an empty chat. Once the user types at least two characters, the client fetches search-triggered Conversational agent Search suggestions and replaces the defaults with returned conversation-starter questions. Tapping any starter sends it as `ADD_MESSAGE.USER.TEXT`.
+5. Shows default starter questions below the input box and Send button on an empty chat. Once the user types at least two characters, the client fetches search-triggered Clarity Search suggestions and replaces the defaults with returned conversation-starter questions. Tapping any starter sends it as `ADD_MESSAGE.USER.TEXT`.
 
 6. Lets you chat. The client handles all documented event types:
    - User → server: `ADD_MESSAGE.USER.TEXT` (composer input and conversation starters), `ADD_MESSAGE.USER.DIRECT_CALL` (every quick-reply tap — always DIRECT_CALL, never USER.TEXT, copying any `target`/`payload` verbatim)
    - Server → client: `ADD_MESSAGE.ASSISTANT.TEXT` (and `APPEND_LAST_ASSISTANT_MESSAGE` streaming chunks), `ADD_MESSAGE.ASSISTANT.CAROUSEL`, `ADD_MESSAGE.ASSISTANT.QUICK_REPLY`, `ADD_MESSAGE.ASSISTANT.COLD_START`, `ADD_MESSAGE.ASSISTANT.NOTIFICATION`, per-turn echoed/replayed user events, `METADATA.SELECT_AGENT`. Other event types are accepted silently and visible in the debug panel.
    - `ERROR` events are backend telemetry (non-fatal warnings such as `AGENT.ERROR`); the client logs them to the debug panel and does **not** show them to the user.
-   - `FATAL_ERROR` events render the persona's `translated.errorMsg` fallback and disable the composer. The raw `event.text` is never shown to the user.
+   - `FATAL_ERROR` events render the agent's `translated.errorMsg` fallback and disable the composer. The raw `event.text` is never shown to the user.
    - `ADD_MESSAGE.ASSISTANT.NOTIFICATION` events are rendered as a single, in-place progress chip that updates as new notifications arrive. A "Thinking…" placeholder is shown immediately on submit; the chip stays visible while messages stream in and is cleared only when the request completes (all response events received).
 
 7. **Request concurrency.** While a `send-event` request is in flight, the composer, quick-reply buttons, and conversation-starter buttons are disabled. The client matches the backend's 60-second server timeout with an `AbortController`. On timeout, a fallback error is shown and the composer is re-enabled.
 
-8. Streaming responses are parsed using the JSON-array-stream pattern documented in `DOCUMENTATION.md` (buffer + try-parse + try-parse-with-closing-bracket).
+8. Streaming responses are parsed using the JSON-array-stream pattern documented in `documentation.html` (buffer + try-parse + try-parse-with-closing-bracket).
 
 ## UI controls
 
@@ -78,13 +78,13 @@ The client surfaces a CORS hint in the error message when it detects this case.
 
 | Key | Contents |
 |---|---|
-| `clarityTest.onboarding` | `{ apiUrl, projectId, personaId }` |
+| `clarityTest.onboarding` | `{ apiUrl, agentId, apiToken, currency }` |
 | `clarityTest.endCustomerId` | Stable UUID for the simulated user |
 | `clarityTest.chatId` | Current conversation ID |
 | `clarityTest.chatHistory` | Archive of previous chat IDs (one entry per "New chat" click) |
-| `clarityTest.settings` | `general-settings` response cache: `{ cachedAt, projectId, personaId, data }`. TTL: 6 hours. |
+| `clarityTest.settings` | `general-settings` response cache: `{ cachedAt, agentId, data }`. TTL: 6 hours. |
 
-Conversation-starter suggestions are not persisted; they are fetched on demand from `GET /cocoaas/public/api/clarity-search/v1/personas/{personaId}/suggestions` as the user types.
+Conversation-starter suggestions are not persisted; they are fetched on demand from `GET /ca/v1/agents/{agentId}/suggestions` with the Bearer token as the user types.
 
 Clear all of them via your browser's DevTools → Application → Local Storage to start completely fresh.
 

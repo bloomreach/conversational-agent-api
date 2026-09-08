@@ -1,14 +1,14 @@
-# Conversational Agent Chat — React + Vite Test Client
+# Clarity Chat — React + Vite Test Client
 
-A TypeScript React implementation of the Conversational Agent Chat API client described by `../DOCUMENTATION.md` and `../openapi-spec.json`.
+A TypeScript React implementation of the Clarity Chat API client described by `../DOCUMENTATION.md` and `../openapi-spec.json`.
 
 ## Features
 
-- Runtime onboarding form for `apiUrl`, `projectId`, `personaId`, `currency` (frontend-supplied valid ISO 4217 code), and `endCustomerId`
+- Runtime onboarding form for `apiUrl`, `agentId`, `apiToken`, `currency` (frontend-supplied valid ISO 4217 code), and `endCustomerId`
 - Optional Vite env defaults via `.env`
 - `GET /general-settings` with 6-hour `localStorage` cache and stale-cache fallback
 - `POST /chat/{chatId}/send-event` streaming JSON-array parser
-- Public Conversational agent Search API helpers for PDP, PLP, and search-triggered conversation-starter endpoints
+- Public Clarity Search API helpers for PDP, PLP, and search-triggered conversation-starter endpoints
 - Search-sample fallback starter questions on an empty search chat
 - Search-triggered suggestion buttons below the input box and Send button while the user types
 - UUID v7 for chat and event IDs
@@ -40,12 +40,12 @@ Then edit:
 
 ```env
 VITE_API_URL=https://your-api-host
-VITE_PROJECT_ID=your-project-id
-VITE_PERSONA_ID=your-persona-id
+VITE_AGENT_ID=your-agent-id
+VITE_API_TOKEN=your-api-token
 VITE_CURRENCY=GBP
 ```
 
-The UI onboarding form still works and stores values in `localStorage`. `VITE_CURRENCY`/onboarding currency should be a valid ISO 4217 code such as `GBP`, `USD`, or `EUR`.
+The UI onboarding form still works and stores values in `localStorage`. `VITE_CURRENCY`/onboarding currency should be a valid ISO 4217 code such as `GBP`, `USD`, or `EUR`. All API requests, including `general-settings`, send `Authorization: Bearer <apiToken>` through the documented V1 agent route.
 
 ## Scripts
 
@@ -54,19 +54,19 @@ The UI onboarding form still works and stores values in `localStorage`. `VITE_CU
 - `npm run preview` — preview production build
 - `npm run typecheck` — TypeScript only
 
-## Conversational Agent Search endpoints
+## Clarity Search endpoints
 
-The React client exposes typed helpers in `src/api.ts` for all public Conversational agent Search conversation-starter endpoints now included in `../openapi-spec.json`:
+The React client exposes typed helpers in `src/api.ts` for all public Clarity Search conversation-starter endpoints now included in `../openapi-spec.json`:
 
 - `getProductById` — `GET /catalog/items/{itemId}`
 - `getProductsById` — `POST /catalog/items`
 - `getProductQuestionsById` — `GET /catalog/items/{itemId}/questions`
-- `getParentProduct` — `GET /catalog/parent_product/{product_id}`
+- `getParentProduct` — `GET /catalog/parent_product/{productId}`
 - `getParentProducts` — `POST /catalog/parent_products`
 - `getPlpQuestions` — `POST /catalog/plp`
 - `getSuggestions` — `GET /suggestions`
 
-The UI currently uses `getSuggestions` for the search/autosuggest sample flow: an empty search chat shows `SEARCH_FALLBACK_STARTER_QUESTIONS`, and typing at least two characters fetches search-triggered conversation starters from Conversational agent Search. PDP and PLP clients should use the contextual product/listing endpoints instead of these hard-coded fallback values. Suggestions are rendered below the composer row. They are progressive enhancement only — failures are logged and do not block chat.
+The UI currently uses `getSuggestions` for the search/autosuggest sample flow: an empty search chat shows `SEARCH_FALLBACK_STARTER_QUESTIONS`, and typing at least two characters fetches search-triggered conversation starters from Clarity Search. PDP and PLP clients should use the contextual product/listing endpoints instead of these hard-coded fallback values. Suggestions are rendered below the composer row. They are progressive enhancement only — failures are logged and do not block chat.
 
 ## Testing HTTP error handling
 

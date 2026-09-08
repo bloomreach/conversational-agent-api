@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v7 as uuidv7 } from 'uuid'
-import { HttpError, getGeneralSettings, getSuggestions, makeEvent, sendEventStream } from './api'
+import { HttpError, getGeneralSettings, getProductById, getSuggestions, makeEvent, sendEventStream } from './api'
 import { Composer } from './components/Composer'
 import { DebugPanel } from './components/DebugPanel'
 import { Header } from './components/Header'
@@ -134,7 +134,7 @@ export default function App() {
   )
 
   const handleInboundEvent = useCallback(
-    (event: ChatEvent) => {
+    async (event: ChatEvent) => {
       setDebugEvents((current) => [...current, event])
 
       switch (event.type) {
@@ -162,14 +162,26 @@ export default function App() {
           })
           break
 
-        case 'ADD_MESSAGE.ASSISTANT.CAROUSEL':
-          appendMessage({
-            id: event._id,
-            kind: 'carousel',
-            products: (event as AssistantCarouselEvent).data ?? [],
-            raw: event as AssistantCarouselEvent,
-          })
+        case 'ADD_MESSAGE.ASSISTANT.CAROUSEL': {
+          const carousel = event as AssistantCarouselEvent
+          const products = carousel.data ?? []
+          const enrichedProducts = await Promise.all(
+            products.map(async (product) => {
+              if (product.image) return product
+              try {
+                const response = await getProductById(config!, product.id, { skipQuestionSelection: true })
+                const data = response.response.item?.data
+                const image = typeof data?.thumb_image === 'string' ? data.thumb_image : null
+                return image ? { ...product, image } : product
+              } catch (error) {
+                console.warn(`Could not load image for product ${product.id}`, error)
+                return product
+              }
+            }),
+          )
+          appendMessage({ id: event._id, kind: 'carousel', products: enrichedProducts, raw: carousel })
           break
+        }
 
         case 'ADD_MESSAGE.ASSISTANT.QUICK_REPLY':
           appendMessage({
@@ -206,7 +218,7 @@ export default function App() {
           break
       }
     },
-    [appendMessage, t],
+    [appendMessage, config, t],
   )
 
   useEffect(() => {
@@ -243,7 +255,7 @@ export default function App() {
 
   useEffect(() => {
     if (!config) return
-    const key = `${config.apiUrl}|${config.projectId}|${config.personaId}|${chatId}`
+    const key = `${config.apiUrl}|${config.agentId}|${config.apiToken}|${config.currency}|${chatId}`
     if (startupRanFor.current === key) return
     startupRanFor.current = key
 

@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "version": "v0.1.0-beta.3",
-    "title": "Conversational agent API"
+    "version": "v1.0.0",
+    "title": "Bloomreach Conversational Agent API"
   },
   "servers": [
     {
@@ -17,21 +17,12 @@
     }
   ],
   "paths": {
-    "/cocoaas/public/api/projectId/{projectId}/persona/{personaId}/general-settings": {
+    "/ca/v1/agents/{agentId}/general-settings": {
       "get": {
-        "summary": "Get assistant settings",
         "parameters": [
           {
             "in": "path",
-            "name": "projectId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "personaId",
+            "name": "agentId",
             "required": true,
             "schema": {
               "type": "string"
@@ -466,7 +457,7 @@
             "description": "Bad Request — invalid request parameters."
           },
           "404": {
-            "description": "Not Found — unknown projectId or personaId."
+            "description": "Not Found — unknown agentId."
           },
           "429": {
             "description": "Too Many Requests — rate limit exceeded. Back off before retrying."
@@ -477,24 +468,20 @@
         },
         "tags": [
           "Core"
+        ],
+        "security": [
+          {
+            "apiToken": []
+          }
         ]
       }
     },
-    "/cocoaas/public/api/projectId/{projectId}/persona/{personaId}/chat/{chatId}/send-event": {
+    "/ca/v1/agents/{agentId}/chats/{chatId}/send-event": {
       "post": {
-        "summary": "Send an event",
         "parameters": [
           {
             "in": "path",
-            "name": "projectId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "personaId",
+            "name": "agentId",
             "required": true,
             "schema": {
               "type": "string"
@@ -600,7 +587,7 @@
             "description": "Bad Request — invalid event format or missing required field."
           },
           "404": {
-            "description": "Not Found — unknown projectId, personaId, or chatId."
+            "description": "Not Found — unknown agentId or chatId."
           },
           "429": {
             "description": "Too Many Requests — rate limit exceeded. Back off before retrying."
@@ -612,10 +599,15 @@
         "description": "Send one event to the chat and receive a streaming JSON array of events in response.\n\nOnly one send-event request should be in flight per chat at a time — disable user input until the stream completes. The backend will hold the connection open for up to 60 seconds; clients should match this with an AbortController to avoid stalled connections locking the UI.\n\nThe response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same id to avoid showing the shopper's message twice.",
         "tags": [
           "Core"
+        ],
+        "security": [
+          {
+            "apiToken": []
+          }
         ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/items": {
+    "/ca/v1/agents/{agentId}/catalog/items": {
       "post": {
         "tags": [
           "Conversation starters"
@@ -623,7 +615,7 @@
         "operationId": "getProductsById",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -693,10 +685,15 @@
             }
           }
         },
-        "summary": "Get multiple products (items) by id"
+        "summary": "Get multiple products (items) by id",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/items/{itemId}": {
+    "/ca/v1/agents/{agentId}/catalog/items/{itemId}": {
       "get": {
         "tags": [
           "Conversation starters"
@@ -704,7 +701,7 @@
         "operationId": "getProductById",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -817,10 +814,15 @@
             }
           }
         },
-        "summary": "Get product (item) by id"
+        "summary": "Get product (item) by id",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/items/{itemId}/questions": {
+    "/ca/v1/agents/{agentId}/catalog/items/{itemId}/questions": {
       "get": {
         "tags": [
           "Conversation starters"
@@ -828,7 +830,7 @@
         "operationId": "getProductQuestionsById",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -906,10 +908,15 @@
             }
           }
         },
-        "summary": "Get conversation-starter questions for an item"
+        "summary": "Get conversation-starter questions for an item",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/parent_product/{product_id}": {
+    "/ca/v1/agents/{agentId}/catalog/parent_product/{productId}": {
       "get": {
         "tags": [
           "Conversation starters"
@@ -917,7 +924,7 @@
         "operationId": "getParentProduct",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -925,7 +932,7 @@
             }
           },
           {
-            "name": "product_id",
+            "name": "productId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1021,10 +1028,15 @@
             }
           }
         },
-        "summary": "Get parent product by id"
+        "summary": "Get parent product by id",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/parent_products": {
+    "/ca/v1/agents/{agentId}/catalog/parent_products": {
       "post": {
         "tags": [
           "Conversation starters"
@@ -1032,7 +1044,7 @@
         "operationId": "getParentProducts",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1102,10 +1114,15 @@
             }
           }
         },
-        "summary": "Get multiple parent products"
+        "summary": "Get multiple parent products",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/plp": {
+    "/ca/v1/agents/{agentId}/catalog/plp": {
       "post": {
         "tags": [
           "Conversation starters"
@@ -1113,7 +1130,7 @@
         "operationId": "getPlpQuestions",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1173,10 +1190,15 @@
             }
           }
         },
-        "summary": "Get category conversation-starter questions for a product listing page"
+        "summary": "Get category conversation-starter questions for a product listing page",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/suggestions": {
+    "/ca/v1/agents/{agentId}/suggestions": {
       "get": {
         "tags": [
           "Conversation starters"
@@ -1184,7 +1206,7 @@
         "operationId": "getSuggestions",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1319,7 +1341,12 @@
             }
           }
         },
-        "summary": "Get search-triggered suggestions (questions + keywords)"
+        "summary": "Get search-triggered suggestions (questions + keywords)",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     }
   },
@@ -6349,6 +6376,14 @@
           }
         }
       }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "API token",
+        "description": "Project-scoped token sent as `Authorization: Bearer <token>`."
+      }
     }
   },
   "tags": [
@@ -6358,7 +6393,7 @@
     },
     {
       "name": "Conversation starters",
-      "description": "Pre-chat Conversational agent Search endpoints for PDP, PLP, and search/autosuggest conversation-starter questions."
+      "description": "Pre-chat Clarity Search endpoints for PDP, PLP, and search/autosuggest conversation-starter questions."
     }
   ]
 }
