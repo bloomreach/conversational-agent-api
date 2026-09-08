@@ -8,12 +8,12 @@ Refer to the [Bloomreach documentation](https://documentation.bloomreach.com/cla
 
 | Path | What it is |
 |---|---|
-| [`documentation.html`](./documentation.html) | **Frontend Integration Guide.** The primary reference document (open the file in your browser): initialization flow, the `send-event` streaming channel, event catalog (user/assistant messages, carousels, quick replies, notifications, errors), PDP/PLP/search endpoints, and status codes. Start here. |
-| [`openapi-spec.json`](./openapi-spec.json) | OpenAPI spec (`v0.1.0-beta.3`) for the same API surface: chat (`general-settings`, `send-event`) and Conversational Agent Search (catalog items, parent products, PLP, suggestions). Use it to generate typed clients or import into API tooling (Postman, Swagger UI, etc.). |
+| [`documentation/`](./documentation/README.md) | **Frontend Integration Guide.** The primary reference document: initialization flow, the `send-event` streaming channel, event catalog (user/assistant messages, carousels, quick replies, notifications, errors), PDP/PLP/search endpoints, and status codes. Start here. |
+| [`openapi-spec.json`](./openapi-spec.json) | OpenAPI spec (`v1.0.0`) for the same API surface: chat (`general-settings`, `send-event`) and Conversational Agent Search (catalog items, parent products, PLP, suggestions). Use it to generate typed clients or import into API tooling (Postman, Swagger UI, etc.). |
 | [`chat-client/`](./chat-client) | Zero-dependency, single-file (`index.html`) vanilla JS chat client. No build step — open it in a browser or serve it statically. Fastest way to manually poke at a backend and watch raw events. |
 | [`chat-client-react/`](./chat-client-react) | TypeScript + React + Vite implementation of the same client. Closer to how a real frontend integration would be structured; also exposes typed helpers for the Conversational Agent Search endpoints (PDP/PLP/suggestions). |
 
-Both clients implement the same integration contract described in `documentation.html`: onboarding (`apiUrl`/`projectId`/`personaId`/`currency`/`endCustomerId`), cached `general-settings` lookup, `SYNC_EVENT_LOG` history restoration, the streaming `send-event` channel, quick replies, product carousels, notifications, and UI-only HTTP error simulation (400/429/500) for testing error handling without a backend. Each has its own README with run instructions and a doc-validation checklist.
+Both clients implement the same integration contract described in [`documentation/`](./documentation/README.md): onboarding (`apiUrl`/`agentId`/`apiToken`/`currency`/`endCustomerId`), cached `general-settings` lookup, `SYNC_EVENT_LOG` history restoration, the streaming `send-event` channel, quick replies, product carousels, notifications, and UI-only HTTP error simulation (400/429/500) for testing error handling without a backend. Each has its own README with run instructions and a doc-validation checklist.
 
 ## Which client should I use?
 
@@ -22,6 +22,6 @@ Both clients implement the same integration contract described in `documentation
 
 ## Suggested workflow
 
-1. Read `documentation.html` file (rendered) for the event model and lifecycle.
-2. Run one of the chat clients against your `apiUrl`/`projectId`/`personaId` and step through its doc-validation checklist.
+1. Read [`documentation/`](./documentation/README.md) for the event model and lifecycle.
+2. Run one of the chat clients against your `apiUrl`/`agentId`/`apiToken` and step through its doc-validation checklist.
 3. Refer to the [API reference](https://documentation.bloomreach.com/clarity/reference/get-assistant-settings) and `openapi-spec.json` for exact request/response shapes when building your own integration.
