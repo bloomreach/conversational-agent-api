@@ -48,7 +48,7 @@ Then visit <http://localhost:8000>. Origin will be `http://localhost:8000`. Some
 
 ## UI controls
 
-- **New chat** — rotates `chatId` and clears the message list. `endCustomerId` is preserved (same user, new conversation). Previous `chatId`s are archived in `localStorage` under `clarityTest.chatHistory` for inspection.
+- **New chat** — rotates `chatId` and clears the message list. `endCustomerId` is preserved (same user, new conversation). Previous `chatId`s are archived in `localStorage` under `caTest.chatHistory` for inspection.
 - **Debug** — toggles a panel showing the raw inbound event stream. The panel also contains HTTP error simulation buttons for testing UI-only handling of 400, 429, and 500 responses without calling the backend.
 - **Reset** — clears the onboarding values and returns to the form. `endCustomerId` is preserved.
 
@@ -78,11 +78,11 @@ The client surfaces a CORS hint in the error message when it detects this case.
 
 | Key | Contents |
 |---|---|
-| `clarityTest.onboarding` | `{ apiUrl, agentId, apiToken, currency }` |
-| `clarityTest.endCustomerId` | Stable UUID for the simulated user |
-| `clarityTest.chatId` | Current conversation ID |
-| `clarityTest.chatHistory` | Archive of previous chat IDs (one entry per "New chat" click) |
-| `clarityTest.settings` | `general-settings` response cache: `{ cachedAt, agentId, data }`. TTL: 6 hours. |
+| `caTest.onboarding` | `{ apiUrl, agentId, apiToken, currency }` |
+| `caTest.endCustomerId` | Stable UUID for the simulated user |
+| `caTest.chatId` | Current conversation ID |
+| `caTest.chatHistory` | Archive of previous chat IDs (one entry per "New chat" click) |
+| `caTest.settings` | `general-settings` response cache: `{ cachedAt, agentId, data }`. TTL: 6 hours. |
 
 Conversation-starter suggestions are not persisted; they are fetched on demand from `GET /ca/v1/agents/{agentId}/suggestions` with the Bearer token as the user types.
 

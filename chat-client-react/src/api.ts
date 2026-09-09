@@ -1,4 +1,4 @@
-// Clarity Chat API helpers: request construction, settings cache, send-event streaming, and HTTP errors.
+// Bloomreach Conversational Agent API helpers: request construction, settings cache, send-event streaming, and HTTP errors.
 import { v7 as uuidv7 } from 'uuid'
 import { LS, readJSON, writeJSON } from './storage'
 import type {

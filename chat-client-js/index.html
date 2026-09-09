@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Clarity Chat — Test Client</title>
+  <title>Bloomreach Conversational Agent API — Test Client</title>
   <style>
     :root {
       --bg: #f6f7f9;
@@ -408,7 +408,7 @@
   <!-- Onboarding -->
   <div id="screen-onboarding" class="screen onboarding">
     <form id="onboarding-form" class="onboarding-form">
-      <h1>Clarity Chat — Test Client</h1>
+      <h1>Bloomreach Conversational Agent API — Test Client</h1>
       <p class="hint">Enter the onboarding details provided by Bloomreach.</p>
       <div id="onboarding-error" class="error"></div>
       <label>
@@ -490,11 +490,11 @@
     // localStorage keys
     // =====================================================================
     const LS = {
-      onboarding: 'clarityTest.onboarding',
-      endCustomerId: 'clarityTest.endCustomerId',
-      chatId: 'clarityTest.chatId',
-      chatHistory: 'clarityTest.chatHistory',
-      settings: 'clarityTest.settings',
+      onboarding: 'caTest.onboarding',
+      endCustomerId: 'caTest.endCustomerId',
+      chatId: 'caTest.chatId',
+      chatHistory: 'caTest.chatHistory',
+      settings: 'caTest.settings',
     };
 
     // Fetch search-triggered conversation-starter suggestions after the user pauses typing.
@@ -1478,7 +1478,7 @@
     // Helpers
     // =====================================================================
     function uuid() {
-      // crypto.randomUUID emits UUID v4. The Clarity docs recommend v7 for
+      // crypto.randomUUID emits UUID v4. The Bloomreach docs recommend v7 for
       // sortable IDs, but v4 is acceptable for a test client — the server
       // does not validate the UUID version.
       if (crypto && crypto.randomUUID) return crypto.randomUUID();

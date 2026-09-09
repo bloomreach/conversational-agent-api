@@ -4,7 +4,7 @@
 
 ## Storefront and chat client
 
-The web experience is composed of **two layers**. The **outer layer** is the merchant's own storefront page — for example a product-detail page (PDP), a product-listing/category page (PLP), or a search-results/autosuggest surface — which defines the [context](05-advanced-cases.md#set-context-both). The **inner layer** is the Clarity chat client UI that floats on top of it, and is everything documented in this guide.
+The web experience is composed of **two layers**. The **outer layer** is the merchant's own storefront page — for example a product-detail page (PDP), a product-listing/category page (PLP), or a search-results/autosuggest surface — which defines the [context](05-advanced-cases.md#set-context-both). The **inner layer** is the Conversational Agent chat client UI that floats on top of it, and is everything documented in this guide.
 
 The chat client itself has **two main views**. The **Welcome view** is the blank-slate state shown before the shopper says anything — it presents the agent's branding and a few actionable **conversation starters** to invite the first message. The moment a message is exchanged, the chat client switches to the **Active chat view**, a scrollable thread that renders every assistant and user turn: text replies, streaming chunks, product carousels, and quick-reply suggestions.
 
@@ -16,7 +16,7 @@ The two wireframes below show each view as the chat client docked inside the out
 
 ### Welcome view — before the first message
 
-Outer layer: the storefront page (PDP / PLP / search). Inner layer: the Clarity chat client, showing branding + starter questions before any chat turn.
+Outer layer: the storefront page (PDP / PLP / search). Inner layer: the Conversational Agent chat client, showing branding + starter questions before any chat turn.
 
 ![Welcome view wireframe inside a storefront page](images/welcome-view-wireframe.svg)
 
@@ -33,7 +33,7 @@ Outer layer: the storefront page (PDP / PLP / search). Inner layer: the Clarity 
 
 ### Active chat — messages, carousel & suggestions
 
-Outer layer: the same storefront page. Inner layer: the Clarity chat client mid-conversation — every bubble is a projection of one inbound / outbound event.
+Outer layer: the same storefront page. Inner layer: the Conversational Agent chat client mid-conversation — every bubble is a projection of one inbound / outbound event.
 
 ![Active chat wireframe inside a storefront page](images/active-chat-wireframe.svg)
 
