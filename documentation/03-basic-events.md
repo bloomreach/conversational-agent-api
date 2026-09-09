@@ -4,7 +4,7 @@
 
 The everyday building blocks: the shopper's text, the assistant's text and its streaming chunks, the in-place progress indicator, and the welcome message.
 
-## User text message `Outbound` (echoed)
+## User text message <sup>`Outbound`</sup> (echoed)
 
 `ADD_MESSAGE.USER.TEXT`
 
@@ -25,7 +25,7 @@ Quick-reply selections do **not** use this event — they are always sent as `AD
 
 <br clear="right" />
 
-## Assistant text message `Inbound`
+## Assistant text message <sup>`Inbound`</sup>
 
 `ADD_MESSAGE.ASSISTANT.TEXT`
 
@@ -48,7 +48,7 @@ Render as GitHub Flavored Markdown (links, tables, lists). It may be the seed th
 
 <br clear="right" />
 
-## Streaming chunk `Inbound`
+## Streaming chunk <sup>`Inbound`</sup>
 
 `APPEND_LAST_ASSISTANT_MESSAGE`
 
@@ -73,7 +73,7 @@ case 'APPEND_LAST_ASSISTANT_MESSAGE':
 
 <br clear="right" />
 
-## Progress notification `Inbound`
+## Progress notification <sup>`Inbound`</sup>
 
 `ADD_MESSAGE.ASSISTANT.NOTIFICATION`
 

@@ -4,7 +4,7 @@
 
 Pre-chat suggestions from public Clarity Search APIs. Call these **before** the first `send-event`. When the shopper selects one, send its text as a normal `ADD_MESSAGE.USER.TEXT`. These paths use the same public V1 prefix and require the Bearer token: `/ca/v1/agents/{agentId}/catalog/...`
 
-## PDP — product detail page `Inbound`
+## PDP — product detail page <sup>`Inbound`</sup>
 
 ### Questions for the item being viewed
 
@@ -18,7 +18,7 @@ Pre-chat suggestions from public Clarity Search APIs. Call these **before** the 
 
 Common controls: `skipQuestionSelection` (default false), `limitQuestions` (default 5), plus `includeVariants`, `includeImplicitFilter`, `fields`, `limitVariants`.
 
-## PLP — product listing page `Inbound`
+## PLP — product listing page <sup>`Inbound`</sup>
 
 `POST /catalog/plp` · `getPlpQuestions`
 
@@ -32,7 +32,7 @@ POST /catalog/plp
 
 At least one of `item_ids` or `product_ids` is required. Questions at `response.plp.questions`; contributing categories at `response.plp.categories`.
 
-## Search / autosuggest `Inbound`
+## Search / autosuggest <sup>`Inbound`</sup>
 
 `GET /suggestions` · `getSuggestions`
 

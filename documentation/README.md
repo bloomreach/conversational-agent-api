@@ -1,6 +1,4 @@
-<img src="images/bloomreach-logo.svg" width="32" height="32" alt="Bloomreach logo" />
-
-# Conversational Agent API — Frontend Integration Guide
+# <img src="images/bloomreach-logo.svg" width="32" height="32" alt="Bloomreach logo" /> Conversational Agent API — Frontend Integration Guide
 
 This guide explains how to build a chat UI for Conversational Agent. The product is called Conversational Agent, while the public API is called Clarity.
 The [`openapi-spec.json`](../openapi-spec.json) is the source of truth — when this guide and the spec disagree, the spec wins.
@@ -94,7 +92,7 @@ The whole integration is a one-time settings fetch, a single streaming chat chan
 
 The first two are the **core** surface; the three `clarity-search` paths are optional **conversation starters** shown before the first message. See [Chapter 6](06-conversation-starters.md) for their request/response details.
 
-### Step 1 — Fetch branding & translations `Inbound`
+### Step 1 — Fetch branding & translations <sup>`Inbound`</sup>
 
 `GET /ca/v1/agents/{agentId}/general-settings`
 
@@ -124,7 +122,7 @@ applyBrandingAndI18n(await getGeneralSettingsCached())
 
 > **Cache** the response in `localStorage` for up to **6 hours**, keyed by `agentId`. On failure, fall back to a stale entry rather than losing branding.
 
-### Step 2 — Set the current context `Outbound`
+### Step 2 — Set the current context <sup>`Outbound`</sup>
 
 `FE.SET_CONTEXT` via send-event
 
@@ -155,7 +153,7 @@ sendEvent({
 })
 ```
 
-### Step 3 — Restore existing history `Outbound`
+### Step 3 — Restore existing history <sup>`Outbound`</sup>
 
 `SYNC_EVENT_LOG` via send-event
 

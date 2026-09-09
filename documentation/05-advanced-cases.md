@@ -4,7 +4,7 @@
 
 Direct calls triggered by quick replies, context synchronization, history restoration, feedback, and error handling. These power the richer flows and keep the UI in sync with the backend.
 
-## Direct call `Outbound` (echoed)
+## Direct call <sup>`Outbound`</sup> (echoed)
 
 `ADD_MESSAGE.USER.DIRECT_CALL`
 
@@ -33,7 +33,7 @@ Sent for **every** quick-reply selection — always `DIRECT_CALL`, never `USER.T
 
 > **Public integration rule:** treat `target` values as server-owned routing hints. Your client should only return values it received from Clarity in a quick reply; do not hardcode or expose an independent picker of backend targets.
 
-## Built-in button action `Outbound` (echoed)
+## Built-in button action <sup>`Outbound`</sup> (echoed)
 
 `ADD_MESSAGE.USER.GEN_BY_BTN` · `ADD_MESSAGE.USER.COMPARE`
 
@@ -97,7 +97,7 @@ Sent for **every** quick-reply selection — always `DIRECT_CALL`, never `USER.T
 
 Send whenever page / cart / filter state changes so responses stay relevant. Pass the FE-configured `currency` here. Use `remove` to clear previously sent context groups, such as page-list or cart state. The server may also assert context state back with the same object — apply it to local state.
 
-## History restoration `Outbound`
+## History restoration <sup>`Outbound`</sup>
 
 `SYNC_EVENT_LOG` · `PERSIST_COLD_START`
 
@@ -119,7 +119,7 @@ Send on initial mount only when reopening an existing `chatId`. The server repla
 
 <br clear="right" />
 
-## Feedback `Outbound`
+## Feedback <sup>`Outbound`</sup>
 
 `ADD_MESSAGE.USER.FEEDBACK`
 
@@ -140,7 +140,7 @@ Powers both per-message thumbs up/down and the survey overlay. `score` is the ra
 
 <br clear="right" />
 
-## Errors `Inbound`
+## Errors <sup>`Inbound`</sup>
 
 `ERROR` · `FATAL_ERROR`
 

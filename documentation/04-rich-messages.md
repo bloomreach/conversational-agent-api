@@ -4,7 +4,7 @@
 
 Beyond plain text, the assistant emits structured product carousels, selectable quick replies, and selection state that ties into the message input's "compare" flow.
 
-## Product carousel `Inbound`
+## Product carousel <sup>`Inbound`</sup>
 
 `ADD_MESSAGE.ASSISTANT.CAROUSEL`
 
@@ -28,7 +28,7 @@ Render product cards (image, title, price, tags, add-to-cart). There is no defau
 
 <br clear="right" />
 
-## Quick replies `Inbound`
+## Quick replies <sup>`Inbound`</sup>
 
 `ADD_MESSAGE.ASSISTANT.QUICK_REPLY`
 
