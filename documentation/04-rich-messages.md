@@ -52,7 +52,7 @@ Render product cards (image, title, price, tags, add-to-cart). There is no defau
 
 <br clear="right" />
 
-## Selected items `Both`
+## Selected items <sup>`Both`</sup>
 
 `SELECTED_ITEMS`
 

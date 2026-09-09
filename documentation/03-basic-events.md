@@ -96,7 +96,7 @@ case 'APPEND_LAST_ASSISTANT_MESSAGE':
 
 <br clear="right" />
 
-## Welcome / cold start `Both`
+## Welcome / cold start <sup>`Both`</sup>
 
 `ADD_MESSAGE.ASSISTANT.COLD_START`
 

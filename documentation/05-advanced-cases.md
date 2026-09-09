@@ -59,7 +59,7 @@ Sent for **every** quick-reply selection — always `DIRECT_CALL`, never `USER.T
 
 <br clear="right" />
 
-## Set context `Both`
+## Set context <sup>`Both`</sup>
 
 `FE.SET_CONTEXT`
 
