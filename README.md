@@ -1,4 +1,4 @@
-# Bloomreach Conversational Agent API
+# <img src="documentation/images/bloomreach-logo.svg" width="32" height="32" alt="Bloomreach logo" /> Bloomreach Conversational Agent API
 
 Documentation and reference test clients for the Bloomreach Conversational Agent API (also referred to as CoCoAaS — Conversational Commerce as a Service). This repo is meant to help frontend integrators understand the API contract and validate their integration against a real backend.
 
