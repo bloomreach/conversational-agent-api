@@ -1,6 +1,6 @@
-# Clarity Chat — Test Client
+# Bloomreach Conversational Agent API — Test Client
 
-A self-contained, single-file chat client used to validate the Clarity / CoCoAaS public API documentation (`../documentation.html`, `../openapi-spec.json`).
+A self-contained, single-file chat client used to validate the Bloomreach Conversational Agent API documentation (`../documentation/`, `../openapi-spec.json`).
 
 No frameworks, no build step, no dependencies. Just a browser.
 
@@ -44,7 +44,7 @@ Then visit <http://localhost:8000>. Origin will be `http://localhost:8000`. Some
 
 7. **Request concurrency.** While a `send-event` request is in flight, the composer, quick-reply buttons, and conversation-starter buttons are disabled. The client matches the backend's 60-second server timeout with an `AbortController`. On timeout, a fallback error is shown and the composer is re-enabled.
 
-8. Streaming responses are parsed using the JSON-array-stream pattern documented in `documentation.html` (buffer + try-parse + try-parse-with-closing-bracket).
+8. Streaming responses are parsed using the JSON-array-stream pattern documented in `../documentation/` (buffer + try-parse + try-parse-with-closing-bracket).
 
 ## UI controls
 

@@ -1,6 +1,6 @@
-# Clarity Chat — React + Vite Test Client
+# Bloomreach Conversational Agent API — React + Vite Test Client
 
-A TypeScript React implementation of the Clarity Chat API client described by `../DOCUMENTATION.md` and `../openapi-spec.json`.
+A TypeScript React implementation of the Bloomreach Conversational Agent API described by `../documentation/` and `../openapi-spec.json`.
 
 ## Features
 
