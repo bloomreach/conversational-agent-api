@@ -70,6 +70,11 @@ button, input, textarea, select { font: inherit; }
 
 .chat-messages { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; padding: 16px; }
 .message { max-width: min(75%, 720px); padding: 10px 14px; border-radius: var(--radius); line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+/* Markdown emitted by renderMarkdown(): lists are the only block elements it produces. */
+.message ul, .message ol { margin: 6px 0; padding-left: 22px; }
+.message li { margin: 2px 0; }
+.message strong { font-weight: 600; }
+.message a { color: inherit; text-decoration: underline; }
 .message.user { align-self: flex-end; border-bottom-right-radius: 4px; background: var(--user-bubble); color: var(--user-bubble-text); }
 .message.assistant { align-self: flex-start; border: 1px solid var(--border); border-bottom-left-radius: 4px; background: var(--assistant-bubble); }
 .message.system { align-self: center; max-width: 90%; padding: 6px 12px; background: var(--system-bubble); color: var(--text-muted); font-size: 12px; text-align: center; }

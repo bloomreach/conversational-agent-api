@@ -1,4 +1,4 @@
-// Bloomreach Conversational Agent API helpers: request construction, settings cache, send-event streaming, and HTTP errors.
+// Clarity Chat API helpers: request construction, settings cache, send-event streaming, and HTTP errors.
 import { v7 as uuidv7 } from 'uuid'
 import { LS, readJSON, writeJSON } from './storage'
 import type {
@@ -186,7 +186,15 @@ export async function getGeneralSettings(config: OnboardingConfig): Promise<Gene
   const url = `${trimTrailingSlash(config.apiUrl)}/ca/v1/agents/${encodeURIComponent(config.agentId)}/general-settings`
 
   try {
-    const response = await fetch(url, { headers: { Accept: 'application/json', ...authHeaders(config) } })
+    // cache: 'no-store' so the browser never revalidates conditionally. A 304 has an empty
+    // body and response.ok === false (ok is 200-299 only), so it would land in the catch
+    // below and discard every setting - branding and translations included - rather than
+    // reusing what we already had. This client does its own 6-hour localStorage caching, so
+    // HTTP-level caching buys nothing here.
+    const response = await fetch(url, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json', ...authHeaders(config) },
+    })
     if (!response.ok) throw new Error(`general-settings failed with HTTP ${response.status}`)
     const data = (await response.json()) as GeneralSettings
     writeJSON(LS.settings, {

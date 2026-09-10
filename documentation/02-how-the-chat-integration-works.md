@@ -118,6 +118,8 @@ for (;;) {
 
 Try `JSON.parse(buffer)` (closed array), else `JSON.parse(buffer + ']')` (in-flight). When done, the buffer must end with `]` or the stream is malformed.
 
+> ⚠️ **Ignore event types you don't recognise.** The stream also carries internal event types that are deliberately left out of this contract, and new types may be added without that counting as a breaking change. Switch on `event.type` and make the `default` branch a no-op. This matters most for generated clients: a strict `oneOf`/discriminator deserializer (Go `ValueByDiscriminator`, Jackson `@JsonSubTypes` without a `defaultImpl`, and similar) will **throw** on an unmapped `type` unless you give it a fallback.
+
 ## Request lifecycle — one in-flight at a time
 
 ### Disable while streaming

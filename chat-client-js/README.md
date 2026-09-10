@@ -1,6 +1,6 @@
-# Bloomreach Conversational Agent API — Test Client
+# Clarity Chat — Test Client
 
-A self-contained, single-file chat client used to validate the Bloomreach Conversational Agent API documentation (`../documentation/`, `../openapi-spec.json`).
+A self-contained, single-file chat client used to validate the Clarity / CoCoAaS public API documentation (`../documentation/`, `../openapi-spec.json`).
 
 No frameworks, no build step, no dependencies. Just a browser.
 
@@ -37,18 +37,19 @@ Then visit <http://localhost:8000>. Origin will be `http://localhost:8000`. Some
 
 6. Lets you chat. The client handles all documented event types:
    - User → server: `ADD_MESSAGE.USER.TEXT` (composer input and conversation starters), `ADD_MESSAGE.USER.DIRECT_CALL` (every quick-reply tap — always DIRECT_CALL, never USER.TEXT, copying any `target`/`payload` verbatim)
-   - Server → client: `ADD_MESSAGE.ASSISTANT.TEXT` (and `APPEND_LAST_ASSISTANT_MESSAGE` streaming chunks), `ADD_MESSAGE.ASSISTANT.CAROUSEL`, `ADD_MESSAGE.ASSISTANT.QUICK_REPLY`, `ADD_MESSAGE.ASSISTANT.COLD_START`, `ADD_MESSAGE.ASSISTANT.NOTIFICATION`, per-turn echoed/replayed user events, `METADATA.SELECT_AGENT`. Other event types are accepted silently and visible in the debug panel.
+   - Server → client: `ADD_MESSAGE.ASSISTANT.TEXT` (and `APPEND_LAST_ASSISTANT_MESSAGE` streaming chunks), `ADD_MESSAGE.ASSISTANT.CAROUSEL`, `ADD_MESSAGE.ASSISTANT.QUICK_REPLY`, `ADD_MESSAGE.ASSISTANT.COLD_START`, `ADD_MESSAGE.ASSISTANT.NOTIFICATION`, per-turn echoed/replayed user events, `METADATA.SELECT_AGENT`. Other event types are accepted silently and visible in the debug panel — that is required behaviour, not incidental: the stream also carries internal event types excluded from `../openapi-spec.json`, and new ones may be added without that counting as a breaking change, so an unrecognised `type` must never raise.
+   - `ADD_MESSAGE.ASSISTANT.TEXT` is markdown. `mdRender()` supports a deliberately small subset — bold, italic, unordered/ordered lists and links — and builds DOM nodes rather than an HTML string, so assistant text is only ever inserted as a text node. Link URLs are accepted only for `http:`, `https:` and `mailto:`; anything else (`javascript:`, `data:`, …) is left as literal text. If you extend it, keep that shape: switching to `innerHTML` turns a formatting helper into an XSS surface.
    - `ERROR` events are backend telemetry (non-fatal warnings such as `AGENT.ERROR`); the client logs them to the debug panel and does **not** show them to the user.
    - `FATAL_ERROR` events render the agent's `translated.errorMsg` fallback and disable the composer. The raw `event.text` is never shown to the user.
    - `ADD_MESSAGE.ASSISTANT.NOTIFICATION` events are rendered as a single, in-place progress chip that updates as new notifications arrive. A "Thinking…" placeholder is shown immediately on submit; the chip stays visible while messages stream in and is cleared only when the request completes (all response events received).
 
 7. **Request concurrency.** While a `send-event` request is in flight, the composer, quick-reply buttons, and conversation-starter buttons are disabled. The client matches the backend's 60-second server timeout with an `AbortController`. On timeout, a fallback error is shown and the composer is re-enabled.
 
-8. Streaming responses are parsed using the JSON-array-stream pattern documented in `../documentation/` (buffer + try-parse + try-parse-with-closing-bracket).
+8. Streaming responses are parsed using the JSON-array-stream pattern documented in `documentation/02-how-the-chat-integration-works.md` (buffer + try-parse + try-parse-with-closing-bracket).
 
 ## UI controls
 
-- **New chat** — rotates `chatId` and clears the message list. `endCustomerId` is preserved (same user, new conversation). Previous `chatId`s are archived in `localStorage` under `caTest.chatHistory` for inspection.
+- **New chat** — rotates `chatId` and clears the message list. `endCustomerId` is preserved (same user, new conversation). Previous `chatId`s are archived in `localStorage` under `clarityTest.chatHistory` for inspection.
 - **Debug** — toggles a panel showing the raw inbound event stream. The panel also contains HTTP error simulation buttons for testing UI-only handling of 400, 429, and 500 responses without calling the backend.
 - **Reset** — clears the onboarding values and returns to the form. `endCustomerId` is preserved.
 
@@ -78,11 +79,11 @@ The client surfaces a CORS hint in the error message when it detects this case.
 
 | Key | Contents |
 |---|---|
-| `caTest.onboarding` | `{ apiUrl, agentId, apiToken, currency }` |
-| `caTest.endCustomerId` | Stable UUID for the simulated user |
-| `caTest.chatId` | Current conversation ID |
-| `caTest.chatHistory` | Archive of previous chat IDs (one entry per "New chat" click) |
-| `caTest.settings` | `general-settings` response cache: `{ cachedAt, agentId, data }`. TTL: 6 hours. |
+| `clarityTest.onboarding` | `{ apiUrl, agentId, apiToken, currency }` |
+| `clarityTest.endCustomerId` | Stable UUID for the simulated user |
+| `clarityTest.chatId` | Current conversation ID |
+| `clarityTest.chatHistory` | Archive of previous chat IDs (one entry per "New chat" click) |
+| `clarityTest.settings` | `general-settings` response cache: `{ cachedAt, agentId, data }`. TTL: 6 hours. |
 
 Conversation-starter suggestions are not persisted; they are fetched on demand from `GET /ca/v1/agents/{agentId}/suggestions` with the Bearer token as the user types.
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bloomreach Conversational Agent API — Test Client</title>
+  <title>Clarity Chat — Test Client</title>
   <style>
     :root {
       --bg: #f6f7f9;
@@ -158,6 +158,11 @@
       word-wrap: break-word;
       white-space: pre-wrap;
     }
+    /* Markdown emitted by mdRender(): lists are the only block elements it produces. */
+    .message ul, .message ol { margin: 6px 0; padding-left: 22px; }
+    .message li { margin: 2px 0; }
+    .message strong { font-weight: 600; }
+    .message a { color: inherit; text-decoration: underline; }
     .message.user {
       align-self: flex-end;
       background: var(--user-bubble);
@@ -408,7 +413,7 @@
   <!-- Onboarding -->
   <div id="screen-onboarding" class="screen onboarding">
     <form id="onboarding-form" class="onboarding-form">
-      <h1>Bloomreach Conversational Agent API — Test Client</h1>
+      <h1>Clarity Chat — Test Client</h1>
       <p class="hint">Enter the onboarding details provided by Bloomreach.</p>
       <div id="onboarding-error" class="error"></div>
       <label>
@@ -490,11 +495,11 @@
     // localStorage keys
     // =====================================================================
     const LS = {
-      onboarding: 'caTest.onboarding',
-      endCustomerId: 'caTest.endCustomerId',
-      chatId: 'caTest.chatId',
-      chatHistory: 'caTest.chatHistory',
-      settings: 'caTest.settings',
+      onboarding: 'clarityTest.onboarding',
+      endCustomerId: 'clarityTest.endCustomerId',
+      chatId: 'clarityTest.chatId',
+      chatHistory: 'clarityTest.chatHistory',
+      settings: 'clarityTest.settings',
     };
 
     // Fetch search-triggered conversation-starter suggestions after the user pauses typing.
@@ -751,6 +756,12 @@
       const url = `${apiUrl}/ca/v1/agents/${encodeURIComponent(agentId)}/general-settings`;
       try {
         const res = await fetch(url, {
+          // cache: 'no-store' so the browser never revalidates conditionally. A 304 has an
+          // empty body and res.ok === false (ok is 200-299 only), so it was landing in the
+          // catch below and wiping every setting - branding and translations included -
+          // rather than reusing what we already had. This client does its own 6-hour
+          // localStorage caching, so HTTP-level caching buys nothing here.
+          cache: 'no-store',
           headers: {
             'Accept': 'application/json',
             'Authorization': `Bearer ${apiToken}`,
@@ -777,7 +788,10 @@
       const s = state.settings || {};
       const logo = document.getElementById('assistant-logo');
       const fallback = document.getElementById('assistant-fallback');
-      const name = s.assistantName || 'Assistant';
+      // agentPersonaName is the persona's display name from customer settings and is
+      // commonly the only one set: assistantName is null unless branding was configured
+      // explicitly. Skipping it showed "Assistant" for a persona that has a name.
+      const name = s.assistantName || s.agentPersonaName || 'Assistant';
 
       if (s.assistantLogo) {
         logo.src = s.assistantLogo;
@@ -1073,7 +1087,7 @@
     }
 
     // =====================================================================
-    // Streaming reader — JSON-array-stream pattern from documentation.html
+    // Streaming reader — JSON-array-stream pattern from documentation/02-how-the-chat-integration-works.md
     // =====================================================================
     async function jsonArrayStreamFetchReader(response, onItem) {
       const reader = response.body.getReader();
@@ -1123,7 +1137,10 @@
 
         case 'APPEND_LAST_ASSISTANT_MESSAGE':
           if (state.lastAssistantBubble) {
-            state.lastAssistantBubble.textContent += (event.text || '');
+            setAssistantMarkdown(
+              state.lastAssistantBubble,
+              (state.lastAssistantBubble._mdRaw || '') + (event.text || '')
+            );
             scrollToBottom();
           } else {
             state.lastAssistantBubble = renderAssistantBubble(event);
@@ -1189,7 +1206,10 @@
           break;
 
         default:
-          // Unknown — debug panel only
+          // Unrecognised event type — deliberately a no-op (debug panel only).
+          // Required by the contract: the stream also carries internal event types that
+          // are excluded from openapi-spec.json, and new ones may be added without that
+          // being a breaking change. Never throw here.
           break;
       }
 
@@ -1226,11 +1246,112 @@
       return '[user action]';
     }
 
+    // =====================================================================
+    // Minimal markdown for ADD_MESSAGE.ASSISTANT.TEXT
+    //
+    // Supports bold, italic, unordered/ordered lists and links — nothing else.
+    // Builds DOM nodes and never assembles an HTML string, so assistant text is only ever
+    // inserted as a text node and cannot become markup. Do not "simplify" this into
+    // innerHTML with escaping: that turns a formatting helper into an XSS surface.
+    // =====================================================================
+    const MD_ALLOWED_LINK_SCHEMES = ['http:', 'https:', 'mailto:'];
+    // ** first so bold wins over italic; a link's URL must be bracket-free.
+    const MD_INLINE = /\*\*([^*]+)\*\*|\*([^*\n]+)\*|_([^_\n]+)_|\[([^\]]+)\]\(([^)\s]+)\)/g;
+    const MD_UL_ITEM = /^\s*[*-]\s+(.*)$/;
+    const MD_OL_ITEM = /^\s*\d+[.)]\s+(.*)$/;
+
+    function mdSafeHref(url) {
+      try {
+        const parsed = new URL(url, window.location.href);
+        return MD_ALLOWED_LINK_SCHEMES.includes(parsed.protocol) ? parsed.href : null;
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function mdRenderInline(text, parent) {
+      let lastIndex = 0;
+      let match;
+      MD_INLINE.lastIndex = 0;
+      while ((match = MD_INLINE.exec(text)) !== null) {
+        if (match.index > lastIndex) {
+          parent.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+        }
+        if (match[1] !== undefined) {
+          const strong = document.createElement('strong');
+          strong.textContent = match[1];
+          parent.appendChild(strong);
+        } else if (match[2] !== undefined || match[3] !== undefined) {
+          const em = document.createElement('em');
+          em.textContent = match[2] !== undefined ? match[2] : match[3];
+          parent.appendChild(em);
+        } else {
+          const href = mdSafeHref(match[5]);
+          if (href) {
+            const anchor = document.createElement('a');
+            anchor.href = href;
+            anchor.textContent = match[4];
+            anchor.target = '_blank';
+            anchor.rel = 'noopener noreferrer';
+            parent.appendChild(anchor);
+          } else {
+            // Rejected scheme (javascript:, data:, ...) stays literal text.
+            parent.appendChild(document.createTextNode(match[0]));
+          }
+        }
+        lastIndex = MD_INLINE.lastIndex;
+      }
+      if (lastIndex < text.length) {
+        parent.appendChild(document.createTextNode(text.slice(lastIndex)));
+      }
+    }
+
+    function mdRender(source) {
+      const fragment = document.createDocumentFragment();
+      const lines = String(source == null ? '' : source).split('\n');
+      let i = 0;
+      while (i < lines.length) {
+        const isUl = MD_UL_ITEM.test(lines[i]);
+        const isOl = !isUl && MD_OL_ITEM.test(lines[i]);
+        if (isUl || isOl) {
+          const list = document.createElement(isUl ? 'ul' : 'ol');
+          const pattern = isUl ? MD_UL_ITEM : MD_OL_ITEM;
+          while (i < lines.length) {
+            const item = pattern.exec(lines[i]);
+            if (!item) break;
+            const li = document.createElement('li');
+            mdRenderInline(item[1], li);
+            list.appendChild(li);
+            i += 1;
+          }
+          fragment.appendChild(list);
+          continue;
+        }
+        // Everything else is a text run. Newlines stay literal because .message already
+        // sets white-space: pre-wrap; emitting <p> here would double the spacing.
+        const run = [];
+        while (i < lines.length && !MD_UL_ITEM.test(lines[i]) && !MD_OL_ITEM.test(lines[i])) {
+          run.push(lines[i]);
+          i += 1;
+        }
+        mdRenderInline(run.join('\n'), fragment);
+      }
+      return fragment;
+    }
+
+    // Streamed chunks can split a markdown span (`**bo` then `ld**`), so the raw text is
+    // kept on the bubble and the whole thing is re-rendered on every append.
+    function setAssistantMarkdown(el, text) {
+      el._mdRaw = text == null ? '' : text;
+      el.textContent = '';
+      el.appendChild(mdRender(el._mdRaw));
+    }
+
     function renderAssistantBubble(event) {
       const el = document.createElement('div');
       el.className = 'message assistant';
       el.dataset.eventId = event._id;
-      el.textContent = event.text || '';
+      setAssistantMarkdown(el, event.text || '');
       messagesEl().appendChild(el);
       scrollToBottom();
       return el;
@@ -1478,7 +1599,7 @@
     // Helpers
     // =====================================================================
     function uuid() {
-      // crypto.randomUUID emits UUID v4. The Bloomreach docs recommend v7 for
+      // crypto.randomUUID emits UUID v4. The Clarity docs recommend v7 for
       // sortable IDs, but v4 is acceptable for a test client — the server
       // does not validate the UUID version.
       if (crypto && crypto.randomUUID) return crypto.randomUUID();

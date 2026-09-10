@@ -37,7 +37,7 @@ export function Onboarding({ initialConfig, initialEndCustomerId, error, onSubmi
   return (
     <main className="screen onboarding active">
       <form className="onboarding-form" onSubmit={submit}>
-        <h1>Bloomreach Conversational Agent API — React + Vite Test Client</h1>
+        <h1>Clarity Chat — React Test Client</h1>
         <p className="hint">Enter the onboarding details provided by Bloomreach.</p>
         {(localError || error) && <div className="error shown">{localError || error}</div>}
 

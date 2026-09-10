@@ -37,6 +37,8 @@ Network drops are normal during streaming — handle `TypeError: network error` 
 | `ERROR` | In | Non-fatal telemetry — do not surface. |
 | `FATAL_ERROR` | In | User-facing error → show `errorMsg`. |
 
+> ⚠️ **This table is the supported set, not everything the stream can contain.** The backend also emits internal event types that are intentionally excluded here, and may add more without that being a breaking change. Handle the types above and ignore anything else — see [Streaming responses](02-how-the-chat-integration-works.md#streaming-responses).
+
 ---
 
 Documentation companion to [`openapi-spec.json`](../openapi-spec.json) (Bloomreach Conversational Agent API v1.0.0). The OpenAPI spec is the source of truth — when this guide and the spec disagree, the spec wins.

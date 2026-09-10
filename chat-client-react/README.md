@@ -1,6 +1,6 @@
-# Bloomreach Conversational Agent API — React + Vite Test Client
+# Clarity Chat — React + Vite Test Client
 
-A TypeScript React implementation of the Bloomreach Conversational Agent API described by `../documentation/` and `../openapi-spec.json`.
+A TypeScript React implementation of the Clarity Chat API client described by `../DOCUMENTATION.md` and `../openapi-spec.json`.
 
 ## Features
 
@@ -81,3 +81,7 @@ These buttons simulate UI behavior only; they do not call the backend. Real `5xx
 ## Notes
 
 If requests fail in the browser with a `TypeError: fetch failed`/network-style error, verify the API host, project/persona IDs, and CORS configuration for the Vite dev origin.
+
+`ADD_MESSAGE.ASSISTANT.TEXT` is markdown. `src/markdown.tsx` renders a deliberately small subset — bold, italic, unordered/ordered lists and links — and returns React nodes rather than an HTML string, so assistant text is only ever rendered as text. Link URLs are accepted only for `http:`, `https:` and `mailto:`; anything else (`javascript:`, `data:`, …) is left as literal text. If you extend it, keep that shape: switching to `dangerouslySetInnerHTML` turns a formatting helper into an XSS surface.
+
+The event switch in `src/App.tsx` ends in a `default` branch that ignores anything it does not recognise. That is required by the contract, not an oversight: the response stream also carries internal event types excluded from `../openapi-spec.json`, and new ones may be added without that counting as a breaking change. If you generate a client from the spec rather than hand-writing one, give its `oneOf`/discriminator deserializer a fallback — a strict one throws on an unmapped `type`.

@@ -1,9 +1,9 @@
 export const LS = {
-  onboarding: 'caReact.onboarding',
-  endCustomerId: 'caReact.endCustomerId',
-  chatId: 'caReact.chatId',
-  chatHistory: 'caReact.chatHistory',
-  settings: 'caReact.settings',
+  onboarding: 'clarityReact.onboarding',
+  endCustomerId: 'clarityReact.endCustomerId',
+  chatId: 'clarityReact.chatId',
+  chatHistory: 'clarityReact.chatHistory',
+  settings: 'clarityReact.settings',
 } as const
 
 export function readJSON<T>(key: string): T | null {

@@ -212,6 +212,10 @@ export default function App() {
           break
 
         default:
+          // Anything not handled above falls through here and is ignored unless it is a
+          // user event worth echoing. Required by the contract: the stream also carries
+          // internal event types excluded from openapi-spec.json, and new ones may be
+          // added without that being a breaking change. Never throw here.
           if (isUserVisibleUserEvent(event.type)) {
             appendMessage({ id: event._id, kind: 'user', text: userEventText(event), raw: event })
           }
