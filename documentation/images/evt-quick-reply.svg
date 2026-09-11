@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 120" role="img" aria-label="Mock chat showing selectable quick-reply chips">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  </style>
+  <rect x="0" y="0" width="320" height="120" rx="16" fill="#f1f4f9" stroke="#d8dee9"/>
+  <rect x="8" y="8" width="304" height="104" rx="14" fill="#ffffff" stroke="#d8dee9"/>
+  <rect x="22" y="22" width="220" height="32" rx="14" fill="#eef2f7"/>
+  <text x="34" y="42" fill="#172033" font-size="12">Want me to narrow it down?</text>
+
+  <rect x="22" y="68" width="120" height="26" rx="13" fill="#ffffff" stroke="#405cf5" stroke-width="1.2"/>
+  <text x="82" y="85" text-anchor="middle" fill="#172033" font-size="11">Compare selected</text>
+  <rect x="150" y="68" width="76" height="26" rx="13" fill="#ffffff" stroke="#d8dee9"/>
+  <text x="188" y="85" text-anchor="middle" fill="#172033" font-size="11">Under $100</text>
+  <rect x="234" y="68" width="72" height="26" rx="13" fill="#ffffff" stroke="#d8dee9"/>
+  <text x="270" y="85" text-anchor="middle" fill="#172033" font-size="11">Show more</text>
+</svg>

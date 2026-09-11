@@ -1,0 +1,128 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 476" role="img" aria-label="Welcome view wireframe inside a storefront page">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    .wf-page { fill: #ffffff; stroke: #d8dee9; }
+    .wf-bar  { fill: #eef2f7; stroke: #d8dee9; }
+    .wf-dot  { fill: #c3ccdb; }
+    .wf-collabel { fill: #5f6b7a; font-size: 9.5px; font-weight: 700; letter-spacing: 0.5px; }
+    .wf-frame { fill: #ffffff; stroke: #d8dee9; }
+    .wf-frame.wf-layer-in { fill: #ffffff; stroke: #405cf5; stroke-width: 1.4; stroke-dasharray: 5 4; }
+    .wf-region { fill: #f1f4f9; stroke: #d8dee9; }
+    .wf-line { stroke: #d8dee9; }
+    .wf-ph-2 { fill: #d7deea; }
+    .wf-accent { fill: #405cf5; }
+    .wf-accent2 { fill: #0f9f8f; }
+    .wf-t   { fill: #5f6b7a; font-size: 9px; }
+    .wf-th  { fill: #172033; font-size: 10px; font-weight: 600; }
+    .wf-tu  { fill: #ffffff; font-size: 9.5px; }
+    .wf-tp  { fill: #047d73; font-size: 9px; font-weight: 600; }
+    .wf-bubble-u { fill: #405cf5; }
+    .wf-bubble-a { fill: #eef2f7; stroke: #d8dee9; }
+    .wf-chip { fill: #ffffff; stroke: #d8dee9; }
+    .hit { fill: transparent; stroke: transparent; }
+  </style>
+  <!-- ===== OUTER LAYER: storefront page ===== -->
+  <rect class="wf-page" x="8" y="8" width="604" height="460" rx="12"/>
+  <!-- browser / nav bar -->
+  <rect class="wf-bar" x="8" y="8" width="604" height="34" rx="12"/>
+  <rect class="wf-bar" x="8" y="26" width="604" height="16"/>
+  <circle class="wf-dot" cx="26" cy="25" r="4"/>
+  <circle class="wf-dot" cx="40" cy="25" r="4"/>
+  <circle class="wf-dot" cx="54" cy="25" r="4"/>
+  <rect class="wf-region" x="72" y="18" width="420" height="14" rx="7"/>
+  <text class="wf-collabel" x="22" y="60">OUTER LAYER · STOREFRONT PAGE</text>
+  <!-- page content placeholders -->
+  <rect class="wf-ph-2" x="22" y="74" width="180" height="12" rx="6"/>
+  <rect class="wf-region" x="22" y="98" width="150" height="120" rx="8"/>
+  <text class="wf-t" x="97" y="162" text-anchor="middle">Product / hero</text>
+  <rect class="wf-region" x="186" y="98" width="120" height="120" rx="8"/>
+  <rect class="wf-ph-2" x="22" y="232" width="284" height="9" rx="4"/>
+  <rect class="wf-ph-2" x="22" y="248" width="240" height="9" rx="4"/>
+  <rect class="wf-ph-2" x="22" y="264" width="264" height="9" rx="4"/>
+  <text class="wf-collabel" x="483" y="64" text-anchor="middle" fill="#405cf5">INNER LAYER · CLARITY CHAT CLIENT</text>
+
+  <!-- ===== INNER LAYER: chat client ===== -->
+  <g transform="translate(360, 72) scale(0.82)">
+  <!-- frame -->
+  <rect class="wf-frame wf-layer-in" x="8" y="8" width="284" height="436" rx="16"/>
+  <!-- header divider -->
+  <line class="wf-line" x1="8" y1="58" x2="292" y2="58"/>
+
+  <!-- Agent Logo (header) -->
+  <g data-title="Agent Logo" data-evt="GET general-settings" data-dir="in">
+    <circle class="wf-region" cx="34" cy="33" r="14"/>
+    <text class="wf-t" x="34" y="31" text-anchor="middle">Agent</text>
+    <text class="wf-t" x="34" y="41" text-anchor="middle">Logo</text>
+    <rect class="hit" x="16" y="15" width="36" height="36" rx="8"/>
+  </g>
+
+  <!-- Agent name + description -->
+  <g data-title="Agent name &amp; description" data-evt="GET general-settings" data-dir="in">
+    <text class="wf-th" x="58" y="32">Agent name</text>
+    <text class="wf-t" x="58" y="43">Agent description</text>
+    <rect class="hit" x="56" y="20" width="140" height="30" rx="6"/>
+  </g>
+
+  <!-- New chat action -->
+  <g data-title="New chat" data-evt="SYNC_EVENT_LOG (new chatId)" data-dir="out">
+    <rect class="wf-region" x="246" y="25" width="16" height="16" rx="4"/>
+    <path class="wf-line" stroke-width="1.4" d="M254 29 v8 M250 33 h8"/>
+    <rect class="hit" x="244" y="23" width="20" height="20" rx="5"/>
+  </g>
+  <!-- Close chat action -->
+  <g data-title="Close chat" data-evt="UI only — no event" data-dir="out">
+    <rect class="wf-region" x="268" y="25" width="16" height="16" rx="4"/>
+    <path class="wf-line" stroke-width="1.4" d="M272 29 l8 8 M280 29 l-8 8"/>
+    <rect class="hit" x="266" y="23" width="20" height="20" rx="5"/>
+  </g>
+
+  <!-- Large agent logo (welcome) -->
+  <g data-title="Agent Logo (large)" data-evt="GET general-settings" data-dir="in">
+    <circle class="wf-region" cx="150" cy="104" r="24"/>
+    <text class="wf-t" x="150" y="101" text-anchor="middle">Agent</text>
+    <text class="wf-t" x="150" y="112" text-anchor="middle">Logo</text>
+    <rect class="hit" x="122" y="76" width="56" height="56" rx="12"/>
+  </g>
+
+  <!-- Welcome message -->
+  <g data-title="Welcome message" data-evt="ADD_MESSAGE.ASSISTANT.COLD_START" data-dir="both">
+    <text class="wf-th" x="150" y="152" text-anchor="middle">Welcome message</text>
+    <text class="wf-t" x="150" y="166" text-anchor="middle">Greeting text shown before</text>
+    <text class="wf-t" x="150" y="177" text-anchor="middle">the first message</text>
+    <rect class="hit" x="58" y="138" width="184" height="48" rx="8"/>
+  </g>
+
+  <!-- Starter question 1 -->
+  <g data-title="Starter question 1" data-evt="Conversation Starters → ADD_MESSAGE.USER.TEXT" data-dir="in">
+    <rect class="wf-chip" x="46" y="204" width="208" height="30" rx="15"/>
+    <text class="wf-t" x="150" y="222" text-anchor="middle">Starter question 1</text>
+    <rect class="hit" x="46" y="204" width="208" height="30" rx="15"/>
+  </g>
+
+  <!-- Starter question 2 -->
+  <g data-title="Starter question 2" data-evt="Conversation Starters → ADD_MESSAGE.USER.TEXT" data-dir="in">
+    <rect class="wf-chip" x="46" y="242" width="208" height="30" rx="15"/>
+    <text class="wf-t" x="150" y="260" text-anchor="middle">Starter question 2</text>
+    <rect class="hit" x="46" y="242" width="208" height="30" rx="15"/>
+  </g>
+
+  <!-- Starter question 3 -->
+  <g data-title="Starter question 3" data-evt="Conversation Starters → ADD_MESSAGE.USER.TEXT" data-dir="in">
+    <rect class="wf-chip" x="46" y="280" width="208" height="30" rx="15"/>
+    <text class="wf-t" x="150" y="298" text-anchor="middle">Starter question 3</text>
+    <rect class="hit" x="46" y="280" width="208" height="30" rx="15"/>
+  </g>
+
+  <!-- footer divider -->
+  <line class="wf-line" x1="8" y1="394" x2="292" y2="394"/>
+
+  <!-- Chat input box -->
+  <g data-title="Chat input box" data-evt="ADD_MESSAGE.USER.TEXT" data-dir="out">
+    <rect class="wf-region" x="24" y="408" width="224" height="24" rx="12"/>
+    <text class="wf-t" x="36" y="423">Chat input box</text>
+    <circle class="wf-accent" cx="264" cy="420" r="12"/>
+    <path fill="#ffffff" d="M259 415 l8 5 -8 5 2 -5 z"/>
+    <rect class="hit" x="24" y="406" width="252" height="30" rx="14"/>
+  </g>
+  </g>
+</svg>

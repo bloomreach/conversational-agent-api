@@ -2,8 +2,8 @@ export type Currency = 'GBP' | 'USD' | 'EUR' | 'JPY' | 'AUD' | 'CAD' | 'CHF' | '
 
 export interface OnboardingConfig {
   apiUrl: string
-  projectId: string
-  personaId: string
+  agentId: string
+  apiToken: string
   currency: Currency
 }
 

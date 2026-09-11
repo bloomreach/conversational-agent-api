@@ -11,8 +11,8 @@ interface Props {
 
 export function Onboarding({ initialConfig, initialEndCustomerId, error, onSubmit }: Props) {
   const [apiUrl, setApiUrl] = useState(initialConfig?.apiUrl ?? '')
-  const [projectId, setProjectId] = useState(initialConfig?.projectId ?? '')
-  const [personaId, setPersonaId] = useState(initialConfig?.personaId ?? '')
+  const [agentId, setAgentId] = useState(initialConfig?.agentId ?? '')
+  const [apiToken, setApiToken] = useState(initialConfig?.apiToken ?? '')
   const [currency, setCurrency] = useState(initialConfig?.currency ?? 'GBP')
   const [endCustomerId, setEndCustomerId] = useState(initialEndCustomerId)
   const [localError, setLocalError] = useState<string | null>(null)
@@ -21,8 +21,8 @@ export function Onboarding({ initialConfig, initialEndCustomerId, error, onSubmi
     event.preventDefault()
     const config = {
       apiUrl: apiUrl.trim().replace(/\/+$/, ''),
-      projectId: projectId.trim(),
-      personaId: personaId.trim(),
+      agentId: agentId.trim(),
+      apiToken: apiToken.trim(),
       currency: currency.trim(),
     }
     const validationError = validateOnboarding(config)
@@ -37,7 +37,7 @@ export function Onboarding({ initialConfig, initialEndCustomerId, error, onSubmi
   return (
     <main className="screen onboarding active">
       <form className="onboarding-form" onSubmit={submit}>
-        <h1>Conversational Agent Chat — React Test Client</h1>
+        <h1>Conversational Agent — React Test Client</h1>
         <p className="hint">Enter the onboarding details provided by Bloomreach.</p>
         {(localError || error) && <div className="error shown">{localError || error}</div>}
 
@@ -54,13 +54,13 @@ export function Onboarding({ initialConfig, initialEndCustomerId, error, onSubmi
         </label>
 
         <label>
-          projectId
-          <input required value={projectId} autoComplete="off" onChange={(event) => setProjectId(event.target.value)} />
+          agentId
+          <input required value={agentId} autoComplete="off" onChange={(event) => setAgentId(event.target.value)} />
         </label>
 
         <label>
-          personaId
-          <input required value={personaId} autoComplete="off" onChange={(event) => setPersonaId(event.target.value)} />
+          API token
+          <input type="password" required value={apiToken} autoComplete="off" onChange={(event) => setApiToken(event.target.value)} />
         </label>
 
         <label>

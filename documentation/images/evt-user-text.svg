@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" role="img" aria-label="Mock chat showing a right-aligned user text bubble">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  </style>
+  <rect x="0" y="0" width="320" height="80" rx="16" fill="#f1f4f9" stroke="#d8dee9"/>
+  <rect x="8" y="8" width="304" height="64" rx="14" fill="#ffffff" stroke="#d8dee9"/>
+  <rect x="104" y="23" width="196" height="42" rx="14" fill="#405cf5"/>
+  <text x="202" y="41" text-anchor="middle" fill="#ffffff" font-size="12">Show me waterproof trail</text>
+  <text x="202" y="55" text-anchor="middle" fill="#ffffff" font-size="12">shoes under $100</text>
+</svg>

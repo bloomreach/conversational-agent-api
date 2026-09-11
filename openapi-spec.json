@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "version": "v0.1.0-beta.3",
-    "title": "Conversational agent API"
+    "version": "v1.0.0",
+    "title": "Clarity API"
   },
   "servers": [
     {
@@ -17,21 +17,12 @@
     }
   ],
   "paths": {
-    "/cocoaas/public/api/projectId/{projectId}/persona/{personaId}/general-settings": {
+    "/ca/v1/agents/{agentId}/general-settings": {
       "get": {
-        "summary": "Get assistant settings",
         "parameters": [
           {
             "in": "path",
-            "name": "projectId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "personaId",
+            "name": "agentId",
             "required": true,
             "schema": {
               "type": "string"
@@ -110,7 +101,6 @@
                         "inputFollowUp",
                         "detail",
                         "selectedProduct",
-                        "selectedProoducts",
                         "deselectAll",
                         "noProductsFound",
                         "optionAvailable",
@@ -136,6 +126,7 @@
                         "surveyFeedback_thankYou",
                         "surveyFeedback_thankYouSubtext",
                         "view",
+                        "viewDetails",
                         "fileNumberError",
                         "fileSizeError",
                         "connectingToLiveAgent",
@@ -143,7 +134,10 @@
                         "backWithAssistant",
                         "uploadFile",
                         "endConversation",
-                        "seeAllResults"
+                        "seeAllResults",
+                        "goodResponse",
+                        "badResponse",
+                        "pageContextUpdated"
                       ],
                       "type": "object",
                       "properties": {
@@ -261,9 +255,6 @@
                         "selectedProduct": {
                           "type": "string"
                         },
-                        "selectedProoducts": {
-                          "type": "string"
-                        },
                         "deselectAll": {
                           "type": "string"
                         },
@@ -339,6 +330,9 @@
                         "view": {
                           "type": "string"
                         },
+                        "viewDetails": {
+                          "type": "string"
+                        },
                         "fileNumberError": {
                           "type": "string"
                         },
@@ -361,6 +355,15 @@
                           "type": "string"
                         },
                         "seeAllResults": {
+                          "type": "string"
+                        },
+                        "goodResponse": {
+                          "type": "string"
+                        },
+                        "badResponse": {
+                          "type": "string"
+                        },
+                        "pageContextUpdated": {
                           "type": "string"
                         }
                       }
@@ -466,7 +469,7 @@
             "description": "Bad Request — invalid request parameters."
           },
           "404": {
-            "description": "Not Found — unknown projectId or personaId."
+            "description": "Not Found — unknown agentId."
           },
           "429": {
             "description": "Too Many Requests — rate limit exceeded. Back off before retrying."
@@ -477,24 +480,20 @@
         },
         "tags": [
           "Core"
+        ],
+        "security": [
+          {
+            "apiToken": []
+          }
         ]
       }
     },
-    "/cocoaas/public/api/projectId/{projectId}/persona/{personaId}/chat/{chatId}/send-event": {
+    "/ca/v1/agents/{agentId}/chats/{chatId}/send-event": {
       "post": {
-        "summary": "Send an event",
         "parameters": [
           {
             "in": "path",
-            "name": "projectId",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          },
-          {
-            "in": "path",
-            "name": "personaId",
+            "name": "agentId",
             "required": true,
             "schema": {
               "type": "string"
@@ -600,7 +599,7 @@
             "description": "Bad Request — invalid event format or missing required field."
           },
           "404": {
-            "description": "Not Found — unknown projectId, personaId, or chatId."
+            "description": "Not Found — unknown agentId or chatId."
           },
           "429": {
             "description": "Too Many Requests — rate limit exceeded. Back off before retrying."
@@ -609,21 +608,26 @@
             "description": "Internal Server Error — backend error."
           }
         },
-        "description": "Send one event to the chat and receive a streaming JSON array of events in response.\n\nOnly one send-event request should be in flight per chat at a time — disable user input until the stream completes. The backend will hold the connection open for up to 60 seconds; clients should match this with an AbortController to avoid stalled connections locking the UI.\n\nThe response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same id to avoid showing the shopper's message twice.",
+        "description": "Send one event to the chat and receive a streaming JSON array of events in response. Only one send-event request should be in flight per chat at a time — disable user input until the stream completes. The backend will hold the connection open for up to 60 seconds; clients should match this with an AbortController to avoid stalled connections locking the UI. The response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same _id to avoid showing the shopper's message twice.",
         "tags": [
           "Core"
+        ],
+        "security": [
+          {
+            "apiToken": []
+          }
         ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/items": {
+    "/ca/v1/agents/{agentId}/catalog/items": {
       "post": {
         "tags": [
-          "Conversation starters"
+          "Conversation Starters"
         ],
         "operationId": "getProductsById",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -693,18 +697,23 @@
             }
           }
         },
-        "summary": "Get multiple products (items) by id"
+        "summary": "Get multiple products (items) by id",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/items/{itemId}": {
+    "/ca/v1/agents/{agentId}/catalog/items/{itemId}": {
       "get": {
         "tags": [
-          "Conversation starters"
+          "Conversation Starters"
         ],
         "operationId": "getProductById",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -817,18 +826,23 @@
             }
           }
         },
-        "summary": "Get product (item) by id"
+        "summary": "Get product (item) by id",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/items/{itemId}/questions": {
+    "/ca/v1/agents/{agentId}/catalog/items/{itemId}/questions": {
       "get": {
         "tags": [
-          "Conversation starters"
+          "Conversation Starters"
         ],
         "operationId": "getProductQuestionsById",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -906,18 +920,23 @@
             }
           }
         },
-        "summary": "Get conversation-starter questions for an item"
+        "summary": "Get conversation-starter questions for an item",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/parent_product/{product_id}": {
+    "/ca/v1/agents/{agentId}/catalog/parent_product/{productId}": {
       "get": {
         "tags": [
-          "Conversation starters"
+          "Conversation Starters"
         ],
         "operationId": "getParentProduct",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -925,7 +944,7 @@
             }
           },
           {
-            "name": "product_id",
+            "name": "productId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1021,18 +1040,23 @@
             }
           }
         },
-        "summary": "Get parent product by id"
+        "summary": "Get parent product by id",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/parent_products": {
+    "/ca/v1/agents/{agentId}/catalog/parent_products": {
       "post": {
         "tags": [
-          "Conversation starters"
+          "Conversation Starters"
         ],
         "operationId": "getParentProducts",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1102,18 +1126,23 @@
             }
           }
         },
-        "summary": "Get multiple parent products"
+        "summary": "Get multiple parent products",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/catalog/plp": {
+    "/ca/v1/agents/{agentId}/catalog/plp": {
       "post": {
         "tags": [
-          "Conversation starters"
+          "Conversation Starters"
         ],
         "operationId": "getPlpQuestions",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1173,18 +1202,23 @@
             }
           }
         },
-        "summary": "Get category conversation-starter questions for a product listing page"
+        "summary": "Get category conversation-starter questions for a product listing page",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     },
-    "/cocoaas/public/api/clarity-search/v1/personas/{personaId}/suggestions": {
+    "/ca/v1/agents/{agentId}/suggestions": {
       "get": {
         "tags": [
-          "Conversation starters"
+          "Conversation Starters"
         ],
         "operationId": "getSuggestions",
         "parameters": [
           {
-            "name": "personaId",
+            "name": "agentId",
             "in": "path",
             "required": true,
             "schema": {
@@ -1319,237 +1353,17 @@
             }
           }
         },
-        "summary": "Get search-triggered suggestions (questions + keywords)"
+        "summary": "Get search-triggered suggestions (questions + keywords)",
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
       }
     }
   },
   "components": {
     "schemas": {
-      "ProductReviewFilters": {
-        "type": "object",
-        "properties": {
-          "rating_base": {
-            "maximum": 5,
-            "minimum": 1,
-            "type": "integer",
-            "format": "int32",
-            "default": 1
-          },
-          "verified_purchaser": {
-            "type": "boolean"
-          },
-          "helpful_votes": {
-            "type": "boolean"
-          },
-          "inappropriate_votes": {
-            "type": "boolean"
-          },
-          "is_featured": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ProductReviewsConfigUpdateRequest": {
-        "type": "object",
-        "properties": {
-          "enable_daily_sync": {
-            "type": "boolean"
-          },
-          "filters": {
-            "$ref": "#/components/schemas/ProductReviewFilters"
-          }
-        }
-      },
-      "ProductReviewsConfigResponse": {
-        "type": "object",
-        "properties": {
-          "last_sync_timestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "enable_daily_sync": {
-            "type": "boolean"
-          },
-          "filters": {
-            "$ref": "#/components/schemas/ProductReviewFilters"
-          }
-        }
-      },
-      "KnowledgeBaseDocumentUpdateRequest": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "labels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "KnowledgeBaseDocumentDTO": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "labels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "state": {
-            "type": "string"
-          },
-          "creationTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lastUpdateTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "KnowledgeBaseSearchRequest": {
-        "type": "object",
-        "properties": {
-          "search_query": {
-            "type": "string"
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "KnowledgeBaseSearchChunkDTO": {
-        "type": "object",
-        "properties": {
-          "content": {
-            "type": "string"
-          },
-          "document_id": {
-            "type": "string"
-          },
-          "labels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "chunk_index": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "KnowledgeBaseSearchResponse": {
-        "type": "object",
-        "properties": {
-          "status": {
-            "type": "string"
-          },
-          "chunks": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/KnowledgeBaseSearchChunkDTO"
-            }
-          }
-        }
-      },
-      "DocumentsByLabelsRequest": {
-        "type": "object",
-        "properties": {
-          "limit": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "labels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "labelsBlacklist": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "DocumentsCountData": {
-        "type": "object",
-        "properties": {
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "DocumentsCountResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "$ref": "#/components/schemas/DocumentsCountData"
-          }
-        }
-      },
-      "DocumentContentDTO": {
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "projectId": {
-            "type": "string"
-          },
-          "personaId": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "labels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "content": {
-            "type": "string"
-          }
-        }
-      },
-      "DocumentsResponse": {
-        "type": "object",
-        "properties": {
-          "data": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/DocumentContentDTO"
-            }
-          }
-        }
-      },
-      "DocumentsByIdsRequest": {
-        "type": "object",
-        "properties": {
-          "ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
       "BoostAddition": {
         "type": "object",
         "properties": {
@@ -1663,17 +1477,6 @@
           }
         }
       },
-      "OrderBy": {
-        "type": "object",
-        "properties": {
-          "field": {
-            "type": "string"
-          },
-          "direction": {
-            "type": "string"
-          }
-        }
-      },
       "Range": {
         "type": "object",
         "properties": {
@@ -1684,64 +1487,6 @@
           "max": {
             "type": "number",
             "format": "double"
-          }
-        }
-      },
-      "SearchBody": {
-        "type": "object",
-        "properties": {
-          "filter": {
-            "$ref": "#/components/schemas/JsonNode"
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "offset": {
-            "type": "string"
-          },
-          "threshold": {
-            "type": "number",
-            "format": "float"
-          },
-          "trace": {
-            "type": "boolean"
-          },
-          "embedding": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "float"
-            }
-          },
-          "query": {
-            "type": "string"
-          },
-          "subSchema": {
-            "type": "boolean"
-          },
-          "subSchemaSampleSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "orderBy": {
-            "$ref": "#/components/schemas/OrderBy"
-          },
-          "user_context_filter": {
-            "$ref": "#/components/schemas/JsonNode"
-          },
-          "fields": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "boost_config": {
-            "$ref": "#/components/schemas/BoostConfiguration"
-          },
-          "limit_questions": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       },
@@ -2015,400 +1760,6 @@
           }
         }
       },
-      "GroupSearchBody": {
-        "type": "object",
-        "properties": {
-          "filter": {
-            "$ref": "#/components/schemas/JsonNode"
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "offset": {
-            "type": "string"
-          },
-          "threshold": {
-            "type": "number",
-            "format": "float"
-          },
-          "trace": {
-            "type": "boolean"
-          },
-          "embedding": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "float"
-            }
-          },
-          "query": {
-            "type": "string"
-          },
-          "subSchema": {
-            "type": "boolean"
-          },
-          "subSchemaSampleSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "orderBy": {
-            "$ref": "#/components/schemas/OrderBy"
-          },
-          "user_context_filter": {
-            "$ref": "#/components/schemas/JsonNode"
-          },
-          "fields": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "boost_config": {
-            "$ref": "#/components/schemas/BoostConfiguration"
-          },
-          "limit_questions": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "group_by": {
-            "type": "string"
-          },
-          "group_size": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "Group": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "items": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProductDTO"
-            }
-          }
-        }
-      },
-      "ResponseGroupBody": {
-        "type": "object",
-        "properties": {
-          "response": {
-            "$ref": "#/components/schemas/SearchGroupResult"
-          }
-        }
-      },
-      "SearchGroupResult": {
-        "type": "object",
-        "properties": {
-          "groups": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Group"
-            }
-          }
-        }
-      },
-      "TopCategories": {
-        "type": "object",
-        "properties": {
-          "categories": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TopCategory"
-            }
-          }
-        }
-      },
-      "TopCategory": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "get_score": {
-            "type": "number",
-            "format": "double"
-          }
-        }
-      },
-      "TopAttributesRequestBody": {
-        "type": "object",
-        "properties": {
-          "filter": {
-            "$ref": "#/components/schemas/JsonNode"
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "offset": {
-            "type": "string"
-          },
-          "threshold": {
-            "type": "number",
-            "format": "float"
-          },
-          "trace": {
-            "type": "boolean"
-          },
-          "embedding": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "float"
-            }
-          },
-          "query": {
-            "type": "string"
-          },
-          "subSchema": {
-            "type": "boolean"
-          },
-          "subSchemaSampleSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "orderBy": {
-            "$ref": "#/components/schemas/OrderBy"
-          },
-          "user_context_filter": {
-            "$ref": "#/components/schemas/JsonNode"
-          },
-          "fields": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "boost_config": {
-            "$ref": "#/components/schemas/BoostConfiguration"
-          },
-          "limit_questions": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "TopAttribute": {
-        "type": "object",
-        "properties": {
-          "field": {
-            "type": "string"
-          },
-          "values": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/TopAttributeValue"
-            }
-          }
-        }
-      },
-      "TopAttributeValue": {
-        "type": "object",
-        "properties": {
-          "term": {
-            "type": "string"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "get_score": {
-            "type": "number",
-            "format": "double"
-          }
-        }
-      },
-      "FacetRequestBody": {
-        "type": "object",
-        "properties": {
-          "filter": {
-            "$ref": "#/components/schemas/JsonNode"
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "offset": {
-            "type": "string"
-          },
-          "threshold": {
-            "type": "number",
-            "format": "float"
-          },
-          "trace": {
-            "type": "boolean"
-          },
-          "embedding": {
-            "type": "array",
-            "items": {
-              "type": "number",
-              "format": "float"
-            }
-          },
-          "query": {
-            "type": "string"
-          },
-          "subSchema": {
-            "type": "boolean"
-          },
-          "subSchemaSampleSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "orderBy": {
-            "$ref": "#/components/schemas/OrderBy"
-          },
-          "exact": {
-            "type": "boolean"
-          },
-          "skipImplicitFilter": {
-            "type": "boolean"
-          },
-          "user_context_filter": {
-            "$ref": "#/components/schemas/JsonNode"
-          },
-          "fields": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "boost_config": {
-            "$ref": "#/components/schemas/BoostConfiguration"
-          },
-          "limit_questions": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "field_limits": {
-            "type": "array",
-            "items": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        }
-      },
-      "RecommendRequestBody": {
-        "type": "object",
-        "properties": {
-          "filter": {
-            "$ref": "#/components/schemas/JsonNode"
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "offset": {
-            "type": "string"
-          },
-          "threshold": {
-            "type": "number",
-            "format": "float"
-          },
-          "trace": {
-            "type": "boolean"
-          },
-          "positives": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "negatives": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "positiveItemIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "negativeItemIds": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "strict": {
-            "type": "boolean"
-          },
-          "strategy": {
-            "type": "string"
-          },
-          "user_context_filter": {
-            "$ref": "#/components/schemas/JsonNode"
-          },
-          "fields": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "boost_config": {
-            "$ref": "#/components/schemas/BoostConfiguration"
-          },
-          "limit_questions": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "RecommendResponseBody": {
-        "type": "object",
-        "properties": {
-          "strategy": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "response": {
-            "$ref": "#/components/schemas/RecommendResult"
-          }
-        }
-      },
-      "RecommendResult": {
-        "type": "object",
-        "properties": {
-          "recommendations": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/RecommendationDTO"
-            }
-          }
-        }
-      },
-      "RecommendationDTO": {
-        "type": "object",
-        "properties": {
-          "itemId": {
-            "type": "string"
-          },
-          "recommended": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProductDTO"
-            }
-          },
-          "error": {
-            "type": "string"
-          }
-        }
-      },
       "PlpRequestBody": {
         "type": "object",
         "properties": {
@@ -2649,1317 +2000,6 @@
           "itemIds"
         ]
       },
-      "FacetField": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "values": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FacetValue"
-            }
-          }
-        }
-      },
-      "FacetResponseBody": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          },
-          "response": {
-            "$ref": "#/components/schemas/FacetResult"
-          }
-        }
-      },
-      "FacetResult": {
-        "type": "object",
-        "properties": {
-          "fields": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/FacetField"
-            }
-          }
-        }
-      },
-      "FacetValue": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "Job": {
-        "type": "object",
-        "properties": {
-          "jobId": {
-            "type": "string"
-          },
-          "projectId": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "RUNNING",
-              "DIED",
-              "RETRY",
-              "RESUME",
-              "FAILED",
-              "INTERRUPTING",
-              "INTERRUPTED",
-              "COMPLETED",
-              "ABORTED"
-            ]
-          },
-          "jobType": {
-            "type": "string",
-            "enum": [
-              "BOOTSTRAP_JOB",
-              "STANDARD_JOB",
-              "SYNC_JOB",
-              "EMBEDDING_JOB",
-              "ENRICHMENT_JOB",
-              "PRODUCT_QUESTIONS_JOB",
-              "QUERIES_JOB",
-              "QUESTION_WEIGHTS_JOB",
-              "PRODUCT_REVIEWS_SUMMARIZATION_JOB",
-              "BAZAAR_VOICE_FULL_SYNC_JOB",
-              "BAZAAR_VOICE_DELTA_SYNC_JOB",
-              "KB_DOCUMENT_SYNC_JOB",
-              "KNOWLEDGE_BASE_MANIFEST_JOB"
-            ]
-          },
-          "personaId": {
-            "type": "string"
-          },
-          "creator": {
-            "type": "string"
-          },
-          "owner": {
-            "type": "string"
-          },
-          "workerVersion": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "description": {
-            "type": "string"
-          },
-          "lastUpdateTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "creationTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "startTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "finishTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "jobTasks": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/JobTask"
-            }
-          },
-          "jobLogs": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/JobLog"
-            }
-          },
-          "exceptionDetails": {
-            "type": "string"
-          },
-          "attempt": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "JobLog": {
-        "type": "object",
-        "properties": {
-          "message": {
-            "type": "string"
-          },
-          "stackTrace": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "LOG",
-              "ERROR"
-            ]
-          },
-          "timeStamp": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "JobTask": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "BOOTSTRAP_QDRANT",
-              "COMPUTE_SCHEMA_AND_SYNC_TO_MONGO",
-              "SYNC_SCHEMA_TO_QDRANT",
-              "ENRICH_PRODUCTS",
-              "SYNC_PRODUCTS_TO_QDRANT",
-              "SYNC_PARENT_PRODUCTS",
-              "SYNC_ATTRIBUTES",
-              "SYNC_TAXONOMIES",
-              "SET_OPTIMIZED_CATEGORY_PRODUCTS",
-              "SET_MULTI_CATEGORIES_PRODUCTS",
-              "INDEX_CATEGORIES",
-              "COLLAPSE_CATEGORIES",
-              "RECOMPUTE_CATEGORY_COUNTS",
-              "GENERATE_CATEGORY_QUESTIONS",
-              "ENRICH_LLM_SEARCH_TEXT",
-              "GENERATE_QUESTIONS",
-              "INDEX_QUERIES",
-              "GENERATE_QUERY_QUESTIONS",
-              "APPLY_QUESTION_WEIGHTS",
-              "PRODUCT_REVIEWS_SUMMARIZATION",
-              "FETCH_BAZAAR_VOICE_FULL",
-              "FETCH_BAZAAR_VOICE_DELTA",
-              "DOCUMENT_ADD_SYNC",
-              "DOCUMENT_DELETE_SYNC",
-              "DOCUMENT_QDRANT_SYNC",
-              "KNOWLEDGE_BASE_MANIFEST_SYNC"
-            ]
-          },
-          "force": {
-            "type": "boolean"
-          },
-          "reset": {
-            "type": "boolean"
-          },
-          "startTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "finishTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "totalTimeSeconds": {
-            "type": "number",
-            "format": "double"
-          },
-          "cursor": {
-            "type": "string"
-          }
-        }
-      },
-      "ReviewSyncResponse": {
-        "type": "object",
-        "properties": {
-          "created": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "skipped": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "failed": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "SyncFeature": {
-        "type": "object",
-        "properties": {
-          "reset": {
-            "type": "boolean"
-          },
-          "force": {
-            "type": "boolean"
-          },
-          "description": {
-            "type": "string"
-          },
-          "jobType": {
-            "type": "string",
-            "enum": [
-              "SYNC",
-              "SYNC_PRODUCTS",
-              "SYNC_PARENT_PRODUCTS",
-              "SYNC_ATTRIBUTES_AND_TAXONOMIES",
-              "ENRICHMENT",
-              "PRODUCT_QUESTIONS",
-              "QUERY_QUESTIONS",
-              "QUESTION_WEIGHTS",
-              "PRODUCT_REVIEWS_SUMMARIZATION",
-              "BAZAAR_VOICE_FULL_SYNC",
-              "BAZAAR_VOICE_DELTA_SYNC"
-            ]
-          }
-        }
-      },
-      "AttributeValues": {
-        "type": "object",
-        "properties": {
-          "vectorSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "distance": {
-            "type": "string"
-          },
-          "collectionName": {
-            "type": "string"
-          },
-          "vectorsCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pointsCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "m": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "payloadSchema": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PayloadSchemaField"
-            }
-          },
-          "ef_construct": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "Catalog": {
-        "type": "object",
-        "properties": {
-          "vectorSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "distance": {
-            "type": "string"
-          },
-          "collectionName": {
-            "type": "string"
-          },
-          "vectorsCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pointsCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "m": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "payloadSchema": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PayloadSchemaField"
-            }
-          },
-          "ef_construct": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "Categories": {
-        "type": "object",
-        "properties": {
-          "vectorSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "distance": {
-            "type": "string"
-          },
-          "collectionName": {
-            "type": "string"
-          },
-          "vectorsCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pointsCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "m": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "payloadSchema": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PayloadSchemaField"
-            }
-          },
-          "ef_construct": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "Documents": {
-        "type": "object",
-        "properties": {
-          "vectorSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "distance": {
-            "type": "string"
-          },
-          "collectionName": {
-            "type": "string"
-          },
-          "vectorsCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pointsCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "m": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "payloadSchema": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PayloadSchemaField"
-            }
-          },
-          "ef_construct": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "ParentProductCollection": {
-        "type": "object",
-        "properties": {
-          "vectorSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "distance": {
-            "type": "string"
-          },
-          "collectionName": {
-            "type": "string"
-          },
-          "vectorsCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pointsCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "m": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "payloadSchema": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PayloadSchemaField"
-            }
-          },
-          "ef_construct": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "PayloadSchemaField": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "onDisk": {
-            "type": "boolean"
-          },
-          "points": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "QdrantPersona": {
-        "required": [
-          "personaId"
-        ],
-        "type": "object",
-        "properties": {
-          "personaId": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "projectId": {
-            "type": "string"
-          },
-          "catalogId": {
-            "type": "string"
-          },
-          "catalog": {
-            "$ref": "#/components/schemas/Catalog"
-          },
-          "parentProductCollection": {
-            "$ref": "#/components/schemas/ParentProductCollection"
-          },
-          "categories": {
-            "$ref": "#/components/schemas/Categories"
-          },
-          "attributeValues": {
-            "$ref": "#/components/schemas/AttributeValues"
-          },
-          "queries": {
-            "$ref": "#/components/schemas/Queries"
-          },
-          "documents": {
-            "$ref": "#/components/schemas/Documents"
-          },
-          "searchBackend": {
-            "type": "string"
-          },
-          "unavailableInMongoDb": {
-            "type": "boolean"
-          }
-        }
-      },
-      "Queries": {
-        "type": "object",
-        "properties": {
-          "vectorSize": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "distance": {
-            "type": "string"
-          },
-          "collectionName": {
-            "type": "string"
-          },
-          "vectorsCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "pointsCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "m": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "payloadSchema": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/PayloadSchemaField"
-            }
-          },
-          "ef_construct": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "HnswConfig": {
-        "type": "object",
-        "properties": {
-          "onDisk": {
-            "type": "boolean"
-          },
-          "m": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "ef_construct": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "OptimizersConfig": {
-        "type": "object",
-        "properties": {
-          "maxOptimizationThreads": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "indexing_threshold": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "flush_interval_sec": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "QdrantCollectionConfigDTO": {
-        "type": "object",
-        "properties": {
-          "targetPersonaId": {
-            "type": "string"
-          },
-          "inMemoryPayloadIndex": {
-            "type": "boolean"
-          },
-          "hnsw_config": {
-            "$ref": "#/components/schemas/HnswConfig"
-          },
-          "optimizer_config": {
-            "$ref": "#/components/schemas/OptimizersConfig"
-          },
-          "quantization_config": {
-            "$ref": "#/components/schemas/QuantizationConfig"
-          }
-        }
-      },
-      "QuantizationConfig": {
-        "type": "object",
-        "properties": {
-          "enabled": {
-            "type": "boolean"
-          },
-          "always_ram": {
-            "type": "boolean"
-          }
-        }
-      },
-      "CategorySearchRequest": {
-        "required": [
-          "query"
-        ],
-        "type": "object",
-        "properties": {
-          "query": {
-            "type": "string"
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "CategoryDTO": {
-        "type": "object",
-        "properties": {
-          "pointId": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "representant": {
-            "type": "string"
-          },
-          "multi_categories": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "questions": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "string"
-              }
-            }
-          },
-          "score": {
-            "type": "number",
-            "format": "float"
-          }
-        }
-      },
-      "CategorySearchResponse": {
-        "type": "object",
-        "properties": {
-          "categories": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CategoryDTO"
-            }
-          }
-        }
-      },
-      "ReviewUploadRequest": {
-        "required": [
-          "file",
-          "headerMapping"
-        ],
-        "type": "object",
-        "properties": {
-          "file": {
-            "type": "string",
-            "format": "binary"
-          },
-          "headerMapping": {
-            "type": "string",
-            "description": "JSON string mapping review fields to CSV column names. Must include all required fields: reviewId, productId, title, content, rating, submissionTimestamp, verifiedPurchaser. See ReviewHeaderMapping for complete structure.",
-            "format": "json",
-            "example": "{\"reviewId\":\"Review ID\",\"productId\":\"Product ID\",\"title\":\"Review title\",\"content\":\"Review text\",\"rating\":\"Rating\",\"submissionTimestamp\":\"Submission date\",\"verifiedPurchaser\":\"VerifiedPurchaser\"}"
-          }
-        },
-        "description": "Product reviews CSV upload request with header mapping"
-      },
-      "ParseError": {
-        "type": "object",
-        "properties": {
-          "lineNumber": {
-            "type": "integer",
-            "description": "CSV line number where error occurred",
-            "format": "int32",
-            "example": 5
-          },
-          "message": {
-            "type": "string",
-            "description": "Error description",
-            "example": "Invalid rating: 'abc'"
-          },
-          "truncatedLine": {
-            "type": "string",
-            "description": "First 100 characters of problematic CSV line"
-          }
-        },
-        "description": "CSV parse error information"
-      },
-      "ReviewUploadResponse": {
-        "type": "object",
-        "properties": {
-          "jobId": {
-            "type": "string",
-            "description": "Job ID for async processing (only present if new job created)",
-            "nullable": true,
-            "example": "job-12345-abc"
-          },
-          "totalRows": {
-            "type": "integer",
-            "description": "Total CSV rows processed (excluding header)",
-            "format": "int64",
-            "example": 2950
-          },
-          "insertedReviews": {
-            "type": "integer",
-            "description": "New reviews inserted into database",
-            "format": "int64",
-            "example": 2100
-          },
-          "updatedReviews": {
-            "type": "integer",
-            "description": "Existing reviews updated",
-            "format": "int64",
-            "example": 650
-          },
-          "duplicateReviews": {
-            "type": "integer",
-            "description": "Duplicate reviews skipped (same content hash - no changes needed)",
-            "format": "int64",
-            "example": 100
-          },
-          "parseErrors": {
-            "type": "integer",
-            "description": "Rows with parse errors (not stored)",
-            "format": "int64",
-            "example": 100
-          },
-          "errorRate": {
-            "type": "number",
-            "description": "Error rate as percentage (parseErrors / totalRows * 100)",
-            "format": "double",
-            "example": 3.39
-          },
-          "errors": {
-            "type": "array",
-            "description": "Detailed parse error information (limited to avoid bloat)",
-            "items": {
-              "$ref": "#/components/schemas/ParseError"
-            }
-          },
-          "message": {
-            "type": "string",
-            "description": "Human-readable upload result message"
-          }
-        },
-        "description": "Product reviews upload response with processing statistics"
-      },
-      "SearchReviewsRequest": {
-        "type": "object",
-        "properties": {
-          "product_id": {
-            "type": "string"
-          },
-          "review_id": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "PROCESSING",
-              "PROCESSED"
-            ]
-          },
-          "moderation_status": {
-            "type": "string",
-            "enum": [
-              "APPROVED",
-              "PENDING",
-              "REJECTED"
-            ]
-          },
-          "source": {
-            "type": "string",
-            "enum": [
-              "csv",
-              "bazaar_voice"
-            ]
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "offset": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "AdminReviewDTO": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "persona_id": {
-            "type": "string"
-          },
-          "review_id": {
-            "type": "string"
-          },
-          "product_id": {
-            "type": "string"
-          },
-          "title": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "raw_content": {
-            "type": "string"
-          },
-          "rating": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "submission_timestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "verified_purchaser": {
-            "type": "boolean"
-          },
-          "photo_count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "badges": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "moderation_status": {
-            "type": "string",
-            "enum": [
-              "APPROVED",
-              "PENDING",
-              "REJECTED"
-            ]
-          },
-          "would_recommend": {
-            "type": "boolean"
-          },
-          "locale": {
-            "type": "string"
-          },
-          "helpful_votes": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "not_helpful_votes": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "inappropriate_votes": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "comment_count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "is_featured": {
-            "type": "boolean"
-          },
-          "is_incentivized": {
-            "type": "boolean"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "PROCESSING",
-              "PROCESSED"
-            ]
-          },
-          "upload_timestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "processing_timestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "processed_timestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "content_hash": {
-            "type": "string"
-          },
-          "source": {
-            "type": "string"
-          },
-          "last_modification_time": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
-      "ReviewSearchResponse": {
-        "type": "object",
-        "properties": {
-          "total": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AdminReviewDTO"
-            }
-          }
-        }
-      },
-      "BulkDeleteReviewsRequest": {
-        "type": "object",
-        "properties": {
-          "review_ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "product_id": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "PROCESSING",
-              "PROCESSED"
-            ]
-          },
-          "moderation_status": {
-            "type": "string",
-            "enum": [
-              "APPROVED",
-              "PENDING",
-              "REJECTED"
-            ]
-          }
-        }
-      },
-      "BulkDeleteReviewsResponse": {
-        "type": "object",
-        "properties": {
-          "deleted_count": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "deleted_review_ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "CreateQuestionRequest": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string",
-            "enum": [
-              "product",
-              "category",
-              "query"
-            ]
-          },
-          "entity_id": {
-            "type": "string"
-          },
-          "question": {
-            "type": "string"
-          },
-          "answer": {
-            "type": "string"
-          },
-          "weight": {
-            "type": "number",
-            "format": "double"
-          }
-        }
-      },
-      "QuestionResponse": {
-        "type": "object",
-        "properties": {
-          "identifier": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "product",
-              "category",
-              "query"
-            ]
-          },
-          "entity_id": {
-            "type": "string"
-          },
-          "question": {
-            "type": "string"
-          },
-          "answer": {
-            "type": "string"
-          },
-          "weight": {
-            "type": "number",
-            "format": "double"
-          }
-        }
-      },
-      "SearchQuestionsRequest": {
-        "type": "object",
-        "properties": {
-          "question": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "product",
-              "category",
-              "query"
-            ]
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32"
-          }
-        }
-      },
-      "QuestionDetail": {
-        "type": "object",
-        "properties": {
-          "identifier": {
-            "type": "string"
-          },
-          "question": {
-            "type": "string"
-          },
-          "answer": {
-            "type": "string"
-          },
-          "weight": {
-            "type": "number",
-            "format": "double"
-          }
-        }
-      },
-      "QuestionMatch": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "entity_id": {
-            "type": "string"
-          },
-          "entity_name": {
-            "type": "string"
-          },
-          "question": {
-            "$ref": "#/components/schemas/QuestionDetail"
-          }
-        }
-      },
-      "QuestionSearchResponse": {
-        "type": "object",
-        "properties": {
-          "total": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "results": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QuestionMatch"
-            }
-          }
-        }
-      },
-      "JobMessageResponse": {
-        "type": "object",
-        "properties": {
-          "msg": {
-            "type": "string"
-          },
-          "jobId": {
-            "type": "string"
-          }
-        }
-      },
-      "CatalogConfig": {
-        "type": "object",
-        "properties": {
-          "filterItemCondition": {
-            "$ref": "#/components/schemas/FilterItemCondition"
-          },
-          "keyNameMapper": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "categoriesToProcess": {
-            "uniqueItems": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "FieldOptions": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "required": {
-            "type": "boolean"
-          },
-          "options": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "oneOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "integer",
-                  "format": "int32"
-                },
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "number",
-                  "format": "double"
-                }
-              ]
-            }
-          }
-        }
-      },
-      "FilterItemCondition": {
-        "type": "object",
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "required": {
-            "type": "boolean"
-          },
-          "properties": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/FieldOptions"
-            }
-          }
-        }
-      },
-      "KnowledgeBaseManifestResponse": {
-        "type": "object",
-        "properties": {
-          "manifest": {
-            "type": "string"
-          },
-          "documentsChecksum": {
-            "type": "string"
-          },
-          "manifestGenerationStrategy": {
-            "type": "string"
-          },
-          "lastGeneratedTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "state": {
-            "type": "string",
-            "enum": [
-              "CURRENT",
-              "STALE"
-            ]
-          }
-        }
-      },
-      "EnrichmentMetadataDTO": {
-        "type": "object",
-        "properties": {
-          "summary": {
-            "type": "string"
-          }
-        }
-      },
-      "KnowledgeBaseDocumentDetailDTO": {
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "contentChecksum": {
-            "type": "string"
-          },
-          "labels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "projectId": {
-            "type": "string"
-          },
-          "personaId": {
-            "type": "string"
-          },
-          "state": {
-            "type": "string"
-          },
-          "enrichmentMetadata": {
-            "$ref": "#/components/schemas/EnrichmentMetadataDTO"
-          },
-          "qdrantChunks": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QdrantChunkDTO"
-            }
-          }
-        }
-      },
-      "KnowledgeBaseDocumentDetailResponse": {
-        "type": "object",
-        "properties": {
-          "document": {
-            "$ref": "#/components/schemas/KnowledgeBaseDocumentDetailDTO"
-          }
-        }
-      },
-      "QdrantChunkDTO": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "chunkIndex": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "chunkType": {
-            "type": "string"
-          },
-          "content": {
-            "type": "string"
-          },
-          "labels": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
       "Keyword": {
         "type": "object",
         "properties": {
@@ -4008,31 +2048,6 @@
           }
         }
       },
-      "CatalogStatusResponse": {
-        "type": "object",
-        "properties": {
-          "selectedCatalogId": {
-            "type": "string"
-          },
-          "catalogStatus": {
-            "type": "string",
-            "enum": [
-              "running",
-              "stopping-in-progress",
-              "stopped",
-              "failed",
-              "completed"
-            ]
-          },
-          "jobStatus": {
-            "type": "string"
-          },
-          "indexedDate": {
-            "type": "string",
-            "format": "date-time"
-          }
-        }
-      },
       "QuestionsResponseBody": {
         "type": "object",
         "properties": {
@@ -4049,574 +2064,6 @@
             "items": {
               "$ref": "#/components/schemas/QuestionDTO"
             }
-          }
-        }
-      },
-      "BigtableInfo": {
-        "type": "object",
-        "properties": {
-          "healthy": {
-            "type": "boolean"
-          },
-          "tableId": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
-      "Memory": {
-        "type": "object",
-        "properties": {
-          "allocated": {
-            "type": "string"
-          },
-          "max": {
-            "type": "string"
-          },
-          "free": {
-            "type": "string"
-          }
-        }
-      },
-      "MongoDbInfo": {
-        "type": "object",
-        "properties": {
-          "healthy": {
-            "type": "boolean"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
-      "SearchHealth": {
-        "type": "object",
-        "properties": {
-          "provider": {
-            "type": "string"
-          },
-          "version": {
-            "type": "string"
-          },
-          "healthy": {
-            "type": "boolean"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
-      "Status": {
-        "type": "object",
-        "properties": {
-          "memory": {
-            "$ref": "#/components/schemas/Memory"
-          },
-          "search": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/SearchHealth"
-            }
-          },
-          "bigtable": {
-            "$ref": "#/components/schemas/BigtableInfo"
-          },
-          "mongodb": {
-            "$ref": "#/components/schemas/MongoDbInfo"
-          },
-          "vertexai": {
-            "$ref": "#/components/schemas/VertexAiInfo"
-          }
-        }
-      },
-      "VertexAiInfo": {
-        "type": "object",
-        "properties": {
-          "healthy": {
-            "type": "boolean"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      },
-      "AdminParentProductDTO": {
-        "type": "object",
-        "properties": {
-          "pointId": {
-            "type": "string"
-          },
-          "product_id": {
-            "type": "string"
-          },
-          "item_ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "inactive": {
-            "type": "boolean"
-          },
-          "catalog_category": {
-            "type": "string"
-          },
-          "optimized_category": {
-            "type": "string"
-          },
-          "llm_search_text": {
-            "type": "string"
-          },
-          "review": {
-            "$ref": "#/components/schemas/ReviewDTO"
-          },
-          "questions": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/QuestionDTO"
-            }
-          },
-          "variants": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ProductDTO"
-            }
-          }
-        }
-      },
-      "ParentProductScrollResponse": {
-        "type": "object",
-        "properties": {
-          "parent_products": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/AdminParentProductDTO"
-            }
-          },
-          "nextOffset": {
-            "type": "string"
-          }
-        }
-      },
-      "CategoryScrollResponse": {
-        "type": "object",
-        "properties": {
-          "categories": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/CategoryDTO"
-            }
-          },
-          "nextOffset": {
-            "type": "string"
-          }
-        }
-      },
-      "QdrantResponse": {
-        "type": "object",
-        "properties": {
-          "qdrantCount": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "unmapped": {
-            "$ref": "#/components/schemas/ProductDTO"
-          },
-          "mapped": {
-            "$ref": "#/components/schemas/ProductDTO"
-          }
-        }
-      },
-      "ReviewFieldEntry": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Field name",
-            "example": "reviewId"
-          },
-          "type": {
-            "type": "string",
-            "description": "Field data type",
-            "example": "string",
-            "enum": [
-              "string",
-              "integer",
-              "boolean",
-              "timestamp"
-            ]
-          },
-          "required": {
-            "type": "boolean",
-            "description": "Whether this field is required in CSV mapping"
-          },
-          "description": {
-            "type": "string",
-            "description": "Human-readable field description"
-          }
-        },
-        "description": "Review field definition with type and requirement information"
-      },
-      "ReviewFieldSchema": {
-        "type": "object",
-        "properties": {
-          "fields": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReviewFieldEntry"
-            }
-          }
-        },
-        "description": "Schema definition for available review fields"
-      },
-      "QuestionWeights": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "version": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "projectId": {
-            "type": "string"
-          },
-          "personaId": {
-            "type": "string"
-          },
-          "entityType": {
-            "type": "string",
-            "enum": [
-              "PRODUCT",
-              "CATEGORY",
-              "QUERY"
-            ]
-          },
-          "creationTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lastUpdateTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "PROCESSING",
-              "PROCESSED"
-            ]
-          },
-          "weights": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object",
-              "additionalProperties": {
-                "type": "number",
-                "format": "double"
-              }
-            }
-          }
-        }
-      },
-      "TopRanked": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "projectId": {
-            "type": "string"
-          },
-          "personaId": {
-            "type": "string"
-          },
-          "creationTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "products": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        }
-      },
-      "QueryLog": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "projectId": {
-            "type": "string"
-          },
-          "personaId": {
-            "type": "string"
-          },
-          "creationTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "lastUpdateTimestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "status": {
-            "type": "string",
-            "enum": [
-              "CREATED",
-              "PROCESSING",
-              "PROCESSED"
-            ]
-          },
-          "queries": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        }
-      },
-      "KnowledgeBaseDocumentListResponse": {
-        "type": "object",
-        "properties": {
-          "documents": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/KnowledgeBaseDocumentDTO"
-            }
-          }
-        }
-      },
-      "CatalogMeta": {
-        "type": "object",
-        "properties": {
-          "catalogSummary": {
-            "type": "string"
-          },
-          "longCatalogSummary": {
-            "type": "string"
-          },
-          "titleField": {
-            "type": "string"
-          },
-          "embeddingFields": {
-            "uniqueItems": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "urlField": {
-            "$ref": "#/components/schemas/UrlField"
-          },
-          "imageField": {
-            "$ref": "#/components/schemas/ImageField"
-          }
-        }
-      },
-      "CustomerSettingValue": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "object"
-          }
-        },
-        "oneOf": [
-          {
-            "type": "string"
-          },
-          {
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "type": "boolean"
-          },
-          {
-            "type": "number",
-            "format": "double"
-          },
-          {
-            "$ref": "#/components/schemas/JsonNode"
-          }
-        ]
-      },
-      "ImageField": {
-        "type": "object",
-        "properties": {
-          "fieldName": {
-            "type": "string"
-          },
-          "multiple": {
-            "type": "boolean"
-          }
-        }
-      },
-      "Persona": {
-        "type": "object",
-        "properties": {
-          "personaId": {
-            "type": "string"
-          },
-          "personaName": {
-            "type": "string"
-          },
-          "projectId": {
-            "type": "string"
-          },
-          "selectedCatalogId": {
-            "type": "string"
-          },
-          "lastIndexedCatalogId": {
-            "type": "string"
-          },
-          "lastCatalogIndexedTime": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "lastCatalogEnrichmentTime": {
-            "type": "string",
-            "format": "date-time",
-            "writeOnly": true
-          },
-          "searchBackend": {
-            "type": "string"
-          },
-          "language": {
-            "type": "string"
-          },
-          "priceMappingChanged": {
-            "type": "boolean"
-          },
-          "parentProductCollectionMigrationDone": {
-            "type": "boolean"
-          },
-          "catalogSchema": {
-            "$ref": "#/components/schemas/Schema"
-          },
-          "catalogConfig": {
-            "$ref": "#/components/schemas/CatalogConfig"
-          },
-          "catalogMeta": {
-            "$ref": "#/components/schemas/CatalogMeta"
-          },
-          "customerSettings": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/components/schemas/CustomerSettingValue"
-            }
-          },
-          "customAttributeListForConversationEngine": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "filterAttributeList": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "productReviewsConfig": {
-            "$ref": "#/components/schemas/ProductReviewsConfig"
-          },
-          "queryLogsEnabled": {
-            "type": "boolean"
-          }
-        }
-      },
-      "ProductReviewsConfig": {
-        "type": "object",
-        "properties": {
-          "last_sync_timestamp": {
-            "type": "integer",
-            "format": "int64"
-          },
-          "enable_daily_sync": {
-            "type": "boolean"
-          },
-          "filters": {
-            "$ref": "#/components/schemas/ProductReviewFilters"
-          }
-        }
-      },
-      "UrlField": {
-        "type": "object",
-        "properties": {
-          "fieldName": {
-            "type": "string"
-          }
-        }
-      },
-      "DiscoveryUrlsResponse": {
-        "type": "object",
-        "properties": {
-          "catalogName": {
-            "type": "string"
-          },
-          "accountIdentifier": {
-            "type": "string"
-          },
-          "envName": {
-            "type": "string"
-          },
-          "discoveryInstance": {
-            "type": "string"
-          },
-          "view": {
-            "type": "string"
-          },
-          "maxFilesToProcess": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "urls": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "urlCount": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "expiresIn": {
-            "type": "string"
-          }
-        }
-      },
-      "CatalogProduct": {
-        "type": "object",
-        "properties": {
-          "item_id": {
-            "type": "string"
-          },
-          "properties": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "object"
-            }
-          }
-        }
-      },
-      "PersonaIds": {
-        "type": "object",
-        "properties": {
-          "personaId": {
-            "type": "string"
-          },
-          "projectId": {
-            "type": "string"
           }
         }
       },
@@ -5431,6 +2878,11 @@
           "agent": {
             "nullable": true,
             "type": "string"
+          },
+          "batchId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Groups the events that make up ONE assistant reply. A single reply can arrive as several events - text, then a carousel, then quick replies - and those share a batchId, so a client can render the first part while the rest still streams in. Two different batchIds are two separate replies. Optional: it is absent on events recorded before it existed, and on every user event, so treat a missing value as \"no grouping information\" and fall back to grouping consecutive events from the same role that arrive close together."
           }
         }
       },
@@ -5982,6 +3434,11 @@
               }
             },
             "description": "Public metadata fields."
+          },
+          "batchId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Groups the events that make up ONE assistant reply. A single reply can arrive as several events - text, then a carousel, then quick replies - and those share a batchId, so a client can render the first part while the rest still streams in. Two different batchIds are two separate replies. Optional: it is absent on events recorded before it existed, and on every user event, so treat a missing value as \"no grouping information\" and fall back to grouping consecutive events from the same role that arrive close together."
           }
         }
       },
@@ -6066,6 +3523,11 @@
               }
             },
             "description": "Public metadata fields."
+          },
+          "batchId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Groups the events that make up ONE assistant reply. A single reply can arrive as several events - text, then a carousel, then quick replies - and those share a batchId, so a client can render the first part while the rest still streams in. Two different batchIds are two separate replies. Optional: it is absent on events recorded before it existed, and on every user event, so treat a missing value as \"no grouping information\" and fall back to grouping consecutive events from the same role that arrive close together."
           }
         }
       },
@@ -6105,46 +3567,6 @@
           }
         },
         "description": "In-place progress update. Render only the `text` field; `toolName` is internal. Each notification REPLACES the previous one (and replaces the initial \"Thinking…\" placeholder). Do NOT clear the progress indicator when the first content event arrives; keep it visible while messages stream in and clear it only after the request completes and all response events have been received."
-      },
-      "MetadataEvent": {
-        "required": [
-          "_id",
-          "type",
-          "sentDate",
-          "metadataType",
-          "data"
-        ],
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "METADATA"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "metadataType": {
-            "type": "string",
-            "enum": [
-              "INTENT"
-            ]
-          },
-          "data": {
-            "type": "object",
-            "additionalProperties": {}
-          }
-        }
       },
       "OutboundEvent": {
         "oneOf": [
@@ -6196,6 +3618,7 @@
         }
       },
       "InboundEvent": {
+        "description": "One event from the send-event response stream. **Ignore any event whose `type` is not listed here.** The server also emits internal event types that are deliberately excluded from this contract, and further types may be added without that counting as a breaking change. Dispatch on `type` and treat an unrecognised value as a no-op rather than an error; if you generate a client that deserializes strictly on the discriminator, give it a fallback branch instead of letting it throw.",
         "oneOf": [
           {
             "$ref": "#/components/schemas/AppendLastAssistantMessageEvent"
@@ -6244,9 +3667,6 @@
           },
           {
             "$ref": "#/components/schemas/ErrorEvent"
-          },
-          {
-            "$ref": "#/components/schemas/MetadataEvent"
           }
         ],
         "discriminator": {
@@ -6267,8 +3687,7 @@
             "ADD_MESSAGE.ASSISTANT.COLD_START": "#/components/schemas/AddMessageAssistantColdStartEvent",
             "FE.SET_CONTEXT": "#/components/schemas/FeSetContextEvent",
             "FATAL_ERROR": "#/components/schemas/FatalErrorEvent",
-            "ERROR": "#/components/schemas/ErrorEvent",
-            "METADATA": "#/components/schemas/MetadataEvent"
+            "ERROR": "#/components/schemas/ErrorEvent"
           }
         }
       },
@@ -6321,9 +3740,6 @@
           },
           {
             "$ref": "#/components/schemas/ErrorEvent"
-          },
-          {
-            "$ref": "#/components/schemas/MetadataEvent"
           }
         ],
         "discriminator": {
@@ -6344,10 +3760,17 @@
             "ADD_MESSAGE.ASSISTANT.COLD_START": "#/components/schemas/AddMessageAssistantColdStartEvent",
             "FE.SET_CONTEXT": "#/components/schemas/FeSetContextEvent",
             "FATAL_ERROR": "#/components/schemas/FatalErrorEvent",
-            "ERROR": "#/components/schemas/ErrorEvent",
-            "METADATA": "#/components/schemas/MetadataEvent"
+            "ERROR": "#/components/schemas/ErrorEvent"
           }
         }
+      }
+    },
+    "securitySchemes": {
+      "apiToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "API token",
+        "description": "Project-scoped token sent as `Authorization: Bearer <token>`."
       }
     }
   },
@@ -6357,8 +3780,8 @@
       "description": "Core chat endpoints for persona settings and send-event streaming."
     },
     {
-      "name": "Conversation starters",
-      "description": "Pre-chat Conversational agent Search endpoints for PDP, PLP, and search/autosuggest conversation-starter questions."
+      "name": "Conversation Starters",
+      "description": "Pre-chat Clarity Search endpoints for PDP, PLP, and search/autosuggest conversation-starter questions."
     }
   ]
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v7 as uuidv7 } from 'uuid'
-import { HttpError, getGeneralSettings, getSuggestions, makeEvent, sendEventStream } from './api'
+import { HttpError, getGeneralSettings, getProductById, getSuggestions, makeEvent, sendEventStream } from './api'
 import { Composer } from './components/Composer'
 import { DebugPanel } from './components/DebugPanel'
 import { Header } from './components/Header'
@@ -134,9 +134,7 @@ export default function App() {
   )
 
   const handleInboundEvent = useCallback(
-    (event: ChatEvent) => {
-      setDebugEvents((current) => [...current, event])
-
+    async (event: ChatEvent) => {
       switch (event.type) {
         case 'ADD_MESSAGE.ASSISTANT.NOTIFICATION':
           setProgressText(typeof event.text === 'string' ? event.text : '')
@@ -162,14 +160,26 @@ export default function App() {
           })
           break
 
-        case 'ADD_MESSAGE.ASSISTANT.CAROUSEL':
-          appendMessage({
-            id: event._id,
-            kind: 'carousel',
-            products: (event as AssistantCarouselEvent).data ?? [],
-            raw: event as AssistantCarouselEvent,
-          })
+        case 'ADD_MESSAGE.ASSISTANT.CAROUSEL': {
+          const carousel = event as AssistantCarouselEvent
+          const products = carousel.data ?? []
+          const enrichedProducts = await Promise.all(
+            products.map(async (product) => {
+              if (product.image) return product
+              try {
+                const response = await getProductById(config!, product.id, { skipQuestionSelection: true })
+                const data = response.response.item?.data
+                const image = typeof data?.thumb_image === 'string' ? data.thumb_image : null
+                return image ? { ...product, image } : product
+              } catch (error) {
+                console.warn(`Could not load image for product ${product.id}`, error)
+                return product
+              }
+            }),
+          )
+          appendMessage({ id: event._id, kind: 'carousel', products: enrichedProducts, raw: carousel })
           break
+        }
 
         case 'ADD_MESSAGE.ASSISTANT.QUICK_REPLY':
           appendMessage({
@@ -186,8 +196,6 @@ export default function App() {
           break
 
         case 'ERROR':
-        case 'DEBUG':
-        case 'METADATA':
         case 'HISTORY_METADATA':
         case 'FE.SET_CONTEXT':
         case 'SELECTED_ITEMS':
@@ -200,13 +208,21 @@ export default function App() {
           break
 
         default:
+          // Anything not handled above falls through here and is ignored unless it is a
+          // user event worth echoing. Required by the contract: the stream also carries
+          // internal event types excluded from openapi-spec.json, and new ones may be
+          // added without that being a breaking change. Never throw here.
           if (isUserVisibleUserEvent(event.type)) {
             appendMessage({ id: event._id, kind: 'user', text: userEventText(event), raw: event })
+            break
           }
-          break
+          // Unrecognised: dropped entirely, debug panel included.
+          return
       }
+
+      setDebugEvents((current) => [...current, event])
     },
-    [appendMessage, t],
+    [appendMessage, config, t],
   )
 
   useEffect(() => {
@@ -243,7 +259,7 @@ export default function App() {
 
   useEffect(() => {
     if (!config) return
-    const key = `${config.apiUrl}|${config.projectId}|${config.personaId}|${chatId}`
+    const key = `${config.apiUrl}|${config.agentId}|${config.apiToken}|${config.currency}|${chatId}`
     if (startupRanFor.current === key) return
     startupRanFor.current = key
 
