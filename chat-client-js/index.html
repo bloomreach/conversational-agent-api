@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Conversational Agent Chat — Test Client</title>
+  <title>Conversational Agent — Test Client</title>
   <style>
     :root {
       --bg: #f6f7f9;
@@ -158,6 +158,11 @@
       word-wrap: break-word;
       white-space: pre-wrap;
     }
+    /* Markdown emitted by mdRender(): lists are the only block elements it produces. */
+    .message ul, .message ol { margin: 6px 0; padding-left: 22px; }
+    .message li { margin: 2px 0; }
+    .message strong { font-weight: 600; }
+    .message a { color: inherit; text-decoration: underline; }
     .message.user {
       align-self: flex-end;
       background: var(--user-bubble);
@@ -408,7 +413,7 @@
   <!-- Onboarding -->
   <div id="screen-onboarding" class="screen onboarding">
     <form id="onboarding-form" class="onboarding-form">
-      <h1>Conversational Agent Chat — Test Client</h1>
+      <h1>Conversational Agent — Test Client</h1>
       <p class="hint">Enter the onboarding details provided by Bloomreach.</p>
       <div id="onboarding-error" class="error"></div>
       <label>
@@ -416,12 +421,13 @@
         <input id="f-apiUrl" type="url" required placeholder="https://api.example.com" autocomplete="off" />
       </label>
       <label>
-        projectId
-        <input id="f-projectId" required autocomplete="off" />
+        agentId
+        <input id="f-agentId" required autocomplete="off" />
       </label>
       <label>
-        personaId
-        <input id="f-personaId" required autocomplete="off" />
+        API token
+        <input id="f-apiToken" type="password" required autocomplete="off" />
+        <span class="field-note">sent as <code>Authorization: Bearer &lt;token&gt;</code> on every API request</span>
       </label>
       <label>
         currency
@@ -523,7 +529,7 @@
     // App state
     // =====================================================================
     const state = {
-      onboarding: null,           // { apiUrl, projectId, personaId, currency }
+      onboarding: null,           // { apiUrl, agentId, apiToken, currency }
       endCustomerId: null,
       chatId: null,
       settings: null,
@@ -549,8 +555,8 @@
       // Re-prompt so the user picks one rather than silently defaulting.
       const isComplete = state.onboarding
         && state.onboarding.apiUrl
-        && state.onboarding.projectId
-        && state.onboarding.personaId
+        && state.onboarding.agentId
+        && state.onboarding.apiToken
         && state.onboarding.currency;
 
       if (isComplete) {
@@ -570,8 +576,8 @@
 
       if (state.onboarding) {
         document.getElementById('f-apiUrl').value = state.onboarding.apiUrl || '';
-        document.getElementById('f-projectId').value = state.onboarding.projectId || '';
-        document.getElementById('f-personaId').value = state.onboarding.personaId || '';
+        document.getElementById('f-agentId').value = state.onboarding.agentId || '';
+        document.getElementById('f-apiToken').value = state.onboarding.apiToken || '';
         if (state.onboarding.currency) {
           document.getElementById('f-currency').value = state.onboarding.currency;
         }
@@ -582,13 +588,13 @@
         e.preventDefault();
         errorEl.classList.remove('shown');
         const apiUrl = document.getElementById('f-apiUrl').value.trim().replace(/\/$/, '');
-        const projectId = document.getElementById('f-projectId').value.trim();
-        const personaId = document.getElementById('f-personaId').value.trim();
+        const agentId = document.getElementById('f-agentId').value.trim();
+        const apiToken = document.getElementById('f-apiToken').value.trim();
         const currency = document.getElementById('f-currency').value.trim();
         const ecid = document.getElementById('f-endCustomerId').value.trim();
 
-        if (!apiUrl || !projectId || !personaId || !currency) {
-          showOnboardingError('All four onboarding fields are required.');
+        if (!apiUrl || !agentId || !apiToken || !currency) {
+          showOnboardingError('All onboarding fields are required.');
           return;
         }
         try { new URL(apiUrl); } catch {
@@ -600,7 +606,7 @@
           return;
         }
 
-        state.onboarding = { apiUrl, projectId, personaId, currency };
+        state.onboarding = { apiUrl, agentId, apiToken, currency };
         writeJSON(LS.onboarding, state.onboarding);
 
         if (ecid && ecid !== state.endCustomerId) {
@@ -634,7 +640,7 @@
         wipeOnboarding({ keepEndCustomerId: true });
         startOnboarding();
         const errorEl = document.getElementById('onboarding-error');
-        errorEl.textContent = `Could not load persona settings: ${err.message}. Verify apiUrl/projectId/personaId.`;
+        errorEl.textContent = `Could not load persona settings: ${err.message}. Verify apiUrl/agentId/token.`;
         errorEl.classList.add('shown');
         return;
       }
@@ -711,7 +717,7 @@
     }
 
     function onResetClicked() {
-      if (!confirm('Reset onboarding? This clears apiUrl, projectId, and personaId, and starts a fresh chat. Your endCustomerId is preserved.')) return;
+      if (!confirm('Reset onboarding? This clears apiUrl, agentId, and the API token, and starts a fresh chat. Your endCustomerId is preserved.')) return;
       wipeOnboarding({ keepEndCustomerId: true });
       startOnboarding();
     }
@@ -734,11 +740,10 @@
     // general-settings
     // =====================================================================
     async function fetchGeneralSettings() {
-      const { apiUrl, projectId, personaId } = state.onboarding;
+      const { apiUrl, agentId, apiToken } = state.onboarding;
       const cached = readJSON(LS.settings);
       const cacheMatches = cached
-        && cached.projectId === projectId
-        && cached.personaId === personaId
+        && cached.agentId === agentId
         && typeof cached.cachedAt === 'number';
 
       // Fresh-enough cache → skip the network call entirely.
@@ -748,15 +753,25 @@
       }
 
       // Otherwise fetch fresh. On failure, fall back to a stale cache.
-      const url = `${apiUrl}/cocoaas/public/api/projectId/${encodeURIComponent(projectId)}/persona/${encodeURIComponent(personaId)}/general-settings`;
+      const url = `${apiUrl}/ca/v1/agents/${encodeURIComponent(agentId)}/general-settings`;
       try {
-        const res = await fetch(url);
+        const res = await fetch(url, {
+          // cache: 'no-store' so the browser never revalidates conditionally. A 304 has an
+          // empty body and res.ok === false (ok is 200-299 only), so it was landing in the
+          // catch below and wiping every setting - branding and translations included -
+          // rather than reusing what we already had. This client does its own 6-hour
+          // localStorage caching, so HTTP-level caching buys nothing here.
+          cache: 'no-store',
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${apiToken}`,
+          },
+        });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         state.settings = await res.json();
         writeJSON(LS.settings, {
           cachedAt: Date.now(),
-          projectId,
-          personaId,
+          agentId,
           data: state.settings,
         });
       } catch (err) {
@@ -773,7 +788,10 @@
       const s = state.settings || {};
       const logo = document.getElementById('assistant-logo');
       const fallback = document.getElementById('assistant-fallback');
-      const name = s.assistantName || 'Assistant';
+      // agentPersonaName is the persona's display name from customer settings and is
+      // commonly the only one set: assistantName is null unless branding was configured
+      // explicitly. Skipping it showed "Assistant" for a persona that has a name.
+      const name = s.assistantName || s.agentPersonaName || 'Assistant';
 
       if (s.assistantLogo) {
         logo.src = s.assistantLogo;
@@ -797,7 +815,7 @@
     // =====================================================================
     async function sendEvent(eventBody, opts = {}) {
       const { showOptimistic = true, userInitiated = undefined } = opts;
-      const { apiUrl, projectId, personaId } = state.onboarding;
+      const { apiUrl, agentId } = state.onboarding;
 
       // Default heuristic: any ADD_MESSAGE.USER.* event is user-initiated.
       // Callers (startChat) can override for housekeeping events that
@@ -834,17 +852,21 @@
       const timer = setTimeout(() => abort.abort('timeout'), REQUEST_TIMEOUT_MS);
 
       try {
-        const endpoint = `${apiUrl}/cocoaas/public/api/projectId/${encodeURIComponent(projectId)}/persona/${encodeURIComponent(personaId)}/chat/${encodeURIComponent(state.chatId)}/send-event`;
+        const endpoint = `${apiUrl}/ca/v1/agents/${encodeURIComponent(agentId)}/chats/${encodeURIComponent(state.chatId)}/send-event`;
         let lastHttpError = null;
 
         for (let attempt = 0; attempt <= SEND_EVENT_RETRY_ATTEMPTS; attempt += 1) {
           const res = await fetch(endpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${state.onboarding.apiToken}`,
+            },
             body: JSON.stringify({
               event,
               url: window.location.href,
-              localeTime: new Date().toLocaleString(),
+              localeTime: new Date().toISOString(),
               endCustomerId: state.endCustomerId,
             }),
             signal: abort.signal,
@@ -852,7 +874,6 @@
 
           if (res.ok) {
             await jsonArrayStreamFetchReader(res, (item) => {
-              logDebug(item);
               handleInboundEvent(item);
             });
             lastHttpError = null;
@@ -958,12 +979,12 @@
     }
 
     async function fetchConversationStarters(query) {
-      const { apiUrl, personaId } = state.onboarding;
+      const { apiUrl, agentId, apiToken } = state.onboarding;
       const seq = ++state.suggestionsSeq;
       const abort = new AbortController();
       state.suggestionsAbort = abort;
 
-      const endpoint = `${apiUrl}/cocoaas/public/api/clarity-search/v1/personas/${encodeURIComponent(personaId)}/suggestions`;
+      const endpoint = `${apiUrl}/ca/v1/agents/${encodeURIComponent(agentId)}/suggestions`;
       const params = new URLSearchParams({
         q: query,
         limit_questions: String(SUGGESTIONS_LIMIT),
@@ -971,7 +992,10 @@
       });
 
       const res = await fetch(`${endpoint}?${params}`, {
-        headers: { 'Accept': 'application/json' },
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': `Bearer ${apiToken}`,
+        },
         signal: abort.signal,
       });
       if (!res.ok) throw await makeHttpError(res);
@@ -1062,7 +1086,7 @@
     }
 
     // =====================================================================
-    // Streaming reader — JSON-array-stream pattern from DOCUMENTATION.md
+    // Streaming reader — JSON-array-stream pattern from documentation/02-how-the-chat-integration-works.md
     // =====================================================================
     async function jsonArrayStreamFetchReader(response, onItem) {
       const reader = response.body.getReader();
@@ -1099,6 +1123,8 @@
     // Inbound event handler
     // =====================================================================
     function handleInboundEvent(event) {
+      let recognised = true;
+
       switch (event.type) {
         case 'ADD_MESSAGE.ASSISTANT.NOTIFICATION':
           // In-place progress update — replaces the previous indicator.
@@ -1112,7 +1138,10 @@
 
         case 'APPEND_LAST_ASSISTANT_MESSAGE':
           if (state.lastAssistantBubble) {
-            state.lastAssistantBubble.textContent += (event.text || '');
+            setAssistantMarkdown(
+              state.lastAssistantBubble,
+              (state.lastAssistantBubble._mdRaw || '') + (event.text || '')
+            );
             scrollToBottom();
           } else {
             state.lastAssistantBubble = renderAssistantBubble(event);
@@ -1153,8 +1182,6 @@
           break;
 
         // Accepted silently; available in debug panel
-        case 'METADATA':
-        case 'HISTORY_METADATA':
         case 'FE.SET_CONTEXT':
         case 'SELECTED_ITEMS':
           break;
@@ -1174,13 +1201,16 @@
           break;
         }
 
-        case 'DEBUG':
-          break;
-
         default:
-          // Unknown — debug panel only
+          // Unrecognised event type — dropped entirely, debug panel included.
+          // Required by the contract: the stream also carries internal event types that
+          // are excluded from openapi-spec.json, and new ones may be added without that
+          // being a breaking change. Never throw here.
+          recognised = false;
           break;
       }
+
+      if (recognised) logDebug(event);
 
       // The progress indicator is NOT cleared when content arrives. Keep it
       // visible (trailing the freshly rendered content) for the whole turn;
@@ -1215,11 +1245,112 @@
       return '[user action]';
     }
 
+    // =====================================================================
+    // Minimal markdown for ADD_MESSAGE.ASSISTANT.TEXT
+    //
+    // Supports bold, italic, unordered/ordered lists and links — nothing else.
+    // Builds DOM nodes and never assembles an HTML string, so assistant text is only ever
+    // inserted as a text node and cannot become markup. Do not "simplify" this into
+    // innerHTML with escaping: that turns a formatting helper into an XSS surface.
+    // =====================================================================
+    const MD_ALLOWED_LINK_SCHEMES = ['http:', 'https:', 'mailto:'];
+    // ** first so bold wins over italic; a link's URL must be bracket-free.
+    const MD_INLINE = /\*\*([^*]+)\*\*|\*([^*\n]+)\*|_([^_\n]+)_|\[([^\]]+)\]\(([^)\s]+)\)/g;
+    const MD_UL_ITEM = /^\s*[*-]\s+(.*)$/;
+    const MD_OL_ITEM = /^\s*\d+[.)]\s+(.*)$/;
+
+    function mdSafeHref(url) {
+      try {
+        const parsed = new URL(url, window.location.href);
+        return MD_ALLOWED_LINK_SCHEMES.includes(parsed.protocol) ? parsed.href : null;
+      } catch (err) {
+        return null;
+      }
+    }
+
+    function mdRenderInline(text, parent) {
+      let lastIndex = 0;
+      let match;
+      MD_INLINE.lastIndex = 0;
+      while ((match = MD_INLINE.exec(text)) !== null) {
+        if (match.index > lastIndex) {
+          parent.appendChild(document.createTextNode(text.slice(lastIndex, match.index)));
+        }
+        if (match[1] !== undefined) {
+          const strong = document.createElement('strong');
+          strong.textContent = match[1];
+          parent.appendChild(strong);
+        } else if (match[2] !== undefined || match[3] !== undefined) {
+          const em = document.createElement('em');
+          em.textContent = match[2] !== undefined ? match[2] : match[3];
+          parent.appendChild(em);
+        } else {
+          const href = mdSafeHref(match[5]);
+          if (href) {
+            const anchor = document.createElement('a');
+            anchor.href = href;
+            anchor.textContent = match[4];
+            anchor.target = '_blank';
+            anchor.rel = 'noopener noreferrer';
+            parent.appendChild(anchor);
+          } else {
+            // Rejected scheme (javascript:, data:, ...) stays literal text.
+            parent.appendChild(document.createTextNode(match[0]));
+          }
+        }
+        lastIndex = MD_INLINE.lastIndex;
+      }
+      if (lastIndex < text.length) {
+        parent.appendChild(document.createTextNode(text.slice(lastIndex)));
+      }
+    }
+
+    function mdRender(source) {
+      const fragment = document.createDocumentFragment();
+      const lines = String(source == null ? '' : source).split('\n');
+      let i = 0;
+      while (i < lines.length) {
+        const isUl = MD_UL_ITEM.test(lines[i]);
+        const isOl = !isUl && MD_OL_ITEM.test(lines[i]);
+        if (isUl || isOl) {
+          const list = document.createElement(isUl ? 'ul' : 'ol');
+          const pattern = isUl ? MD_UL_ITEM : MD_OL_ITEM;
+          while (i < lines.length) {
+            const item = pattern.exec(lines[i]);
+            if (!item) break;
+            const li = document.createElement('li');
+            mdRenderInline(item[1], li);
+            list.appendChild(li);
+            i += 1;
+          }
+          fragment.appendChild(list);
+          continue;
+        }
+        // Everything else is a text run. Newlines stay literal because .message already
+        // sets white-space: pre-wrap; emitting <p> here would double the spacing.
+        const run = [];
+        while (i < lines.length && !MD_UL_ITEM.test(lines[i]) && !MD_OL_ITEM.test(lines[i])) {
+          run.push(lines[i]);
+          i += 1;
+        }
+        mdRenderInline(run.join('\n'), fragment);
+      }
+      return fragment;
+    }
+
+    // Streamed chunks can split a markdown span (`**bo` then `ld**`), so the raw text is
+    // kept on the bubble and the whole thing is re-rendered on every append.
+    function setAssistantMarkdown(el, text) {
+      el._mdRaw = text == null ? '' : text;
+      el.textContent = '';
+      el.appendChild(mdRender(el._mdRaw));
+    }
+
     function renderAssistantBubble(event) {
       const el = document.createElement('div');
       el.className = 'message assistant';
       el.dataset.eventId = event._id;
-      el.textContent = event.text || '';
+      setAssistantMarkdown(el, event.text || '');
       messagesEl().appendChild(el);
       scrollToBottom();
       return el;
@@ -1467,7 +1598,7 @@
     // Helpers
     // =====================================================================
     function uuid() {
-      // crypto.randomUUID emits UUID v4. The Conversational agent docs recommend v7 for
+      // crypto.randomUUID emits UUID v4. The Clarity docs recommend v7 for
       // sortable IDs, but v4 is acceptable for a test client — the server
       // does not validate the UUID version.
       if (crypto && crypto.randomUUID) return crypto.randomUUID();

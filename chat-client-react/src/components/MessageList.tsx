@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { renderMarkdown } from '../markdown'
 import type { Currency, GeneralSettings, ProductItem, RenderMessage } from '../types'
 import { formatPrice, pickFirstColor, translate } from '../utils'
 
@@ -39,7 +40,9 @@ export function MessageList({ messages, progressText, settings, currency, disabl
             return (
               <div key={message.id} className={`message ${message.kind}${message.fatal ? ' fatal' : ''}`}>
                 {message.kind === 'error' && (message.fatal ? '⛔ ' : '⚠ ')}
-                {message.text}
+                {/* Only assistant text is markdown per the spec; user input and error copy
+                    stay literal so nothing a shopper types is ever reinterpreted. */}
+                {message.kind === 'assistant' ? renderMarkdown(message.text) : message.text}
               </div>
             )
         }

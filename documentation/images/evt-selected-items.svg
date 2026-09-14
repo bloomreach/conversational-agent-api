@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 110" role="img" aria-label="Mock chat showing selected product chips above the message input">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  </style>
+  <rect x="0" y="0" width="320" height="110" rx="16" fill="#f1f4f9" stroke="#d8dee9"/>
+  <rect x="8" y="8" width="304" height="94" rx="14" fill="#ffffff" stroke="#d8dee9"/>
+
+  <rect x="22" y="22" width="118" height="24" rx="12" fill="#e9edf5" stroke="#d8dee9"/>
+  <text x="34" y="38" fill="#172033" font-size="11">Trail Runner X <tspan fill="#5f6b7a">✕</tspan></text>
+  <rect x="150" y="22" width="100" height="24" rx="12" fill="#e9edf5" stroke="#d8dee9"/>
+  <text x="162" y="38" fill="#172033" font-size="11">Peak Hiker <tspan fill="#5f6b7a">✕</tspan></text>
+
+  <rect x="22" y="58" width="248" height="28" rx="14" fill="#f6f8fc" stroke="#d8dee9"/>
+  <text x="34" y="76" fill="#5f6b7a" font-size="11">Ask about these products…</text>
+  <circle cx="286" cy="72" r="13" fill="#405cf5"/>
+  <path fill="#ffffff" d="M281 67 l9 5 -9 5 2 -5 z"/>
+</svg>
