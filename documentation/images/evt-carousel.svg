@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 150" role="img" aria-label="Mock chat showing a scrollable product carousel">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  </style>
+  <rect x="0" y="0" width="320" height="150" rx="16" fill="#f1f4f9" stroke="#d8dee9"/>
+  <rect x="8" y="8" width="304" height="134" rx="14" fill="#ffffff" stroke="#d8dee9"/>
+
+  <!-- card 1 -->
+  <rect x="22" y="22" width="104" height="110" rx="10" fill="#f1f4f9" stroke="#d8dee9"/>
+  <rect x="22" y="22" width="104" height="58" rx="10" fill="#d7deea"/>
+  <text x="74" y="54" text-anchor="middle" fill="#5f6b7a" font-size="9">image</text>
+  <rect x="30" y="28" width="30" height="14" rx="7" fill="#405cf5"/>
+  <text x="45" y="38" text-anchor="middle" fill="#ffffff" font-size="9" font-weight="700">New</text>
+  <text x="30" y="96" fill="#172033" font-size="11" font-weight="600">Trail Runner X</text>
+  <text x="30" y="110" fill="#047d73" font-size="11" font-weight="600">$89.00</text>
+  <rect x="30" y="116" width="88" height="14" rx="7" fill="#ffffff" stroke="#d8dee9"/>
+  <text x="74" y="126" text-anchor="middle" fill="#5f6b7a" font-size="9">Add to cart</text>
+
+  <!-- card 2 -->
+  <rect x="134" y="22" width="104" height="110" rx="10" fill="#f1f4f9" stroke="#d8dee9"/>
+  <rect x="134" y="22" width="104" height="58" rx="10" fill="#d7deea"/>
+  <text x="186" y="54" text-anchor="middle" fill="#5f6b7a" font-size="9">image</text>
+  <text x="142" y="96" fill="#172033" font-size="11" font-weight="600">Peak Hiker</text>
+  <text x="142" y="110" fill="#047d73" font-size="11" font-weight="600">$119.00</text>
+  <rect x="142" y="116" width="88" height="14" rx="7" fill="#ffffff" stroke="#d8dee9"/>
+  <text x="186" y="126" text-anchor="middle" fill="#5f6b7a" font-size="9">Add to cart</text>
+
+  <!-- card 3 edge -->
+  <rect x="246" y="22" width="20" height="110" rx="10" fill="#f1f4f9" stroke="#d8dee9"/>
+</svg>

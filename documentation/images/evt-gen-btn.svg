@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 110" role="img" aria-label="Mock chat showing a built-in button action being selected">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  </style>
+  <rect x="0" y="0" width="320" height="110" rx="16" fill="#f1f4f9" stroke="#d8dee9"/>
+  <rect x="8" y="8" width="304" height="94" rx="14" fill="#ffffff" stroke="#d8dee9"/>
+
+  <rect x="22" y="22" width="100" height="26" rx="13" fill="#ffffff" stroke="#405cf5" stroke-width="1.2"/>
+  <text x="72" y="39" text-anchor="middle" fill="#172033" font-size="11">Show similar</text>
+  <rect x="130" y="22" width="76" height="26" rx="13" fill="#ffffff" stroke="#d8dee9"/>
+  <text x="168" y="39" text-anchor="middle" fill="#172033" font-size="11">Compare</text>
+
+  <rect x="60" y="58" width="232" height="32" rx="14" fill="#405cf5" opacity="0.85"/>
+  <text x="176" y="78" text-anchor="middle" fill="#ffffff" font-size="10">Compare Trail Runner X &amp; Peak Hiker</text>
+</svg>

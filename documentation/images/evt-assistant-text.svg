@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 100" role="img" aria-label="Mock chat showing a left-aligned assistant markdown reply">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  </style>
+  <rect x="0" y="0" width="320" height="100" rx="16" fill="#f1f4f9" stroke="#d8dee9"/>
+  <rect x="8" y="8" width="304" height="84" rx="14" fill="#ffffff" stroke="#d8dee9"/>
+  <rect x="22" y="22" width="270" height="68" rx="14" fill="#eef2f7"/>
+  <text x="34" y="40" fill="#172033" font-size="12">Here are some great options. The</text>
+  <text x="34" y="56" fill="#172033" font-size="12"><tspan fill="#0f9f8f" font-weight="600">Trail Runner X</tspan> is waterproof and</text>
+  <text x="34" y="72" fill="#172033" font-size="12">well under budget.</text>
+</svg>

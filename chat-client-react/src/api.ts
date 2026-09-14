@@ -1,4 +1,4 @@
-// Conversational Agent Chat API helpers: request construction, settings cache, send-event streaming, and HTTP errors.
+// Conversational Agent API helpers: request construction, settings cache, send-event streaming, and HTTP errors.
 import { v7 as uuidv7 } from 'uuid'
 import { LS, readJSON, writeJSON } from './storage'
 import type {
@@ -16,7 +16,7 @@ import type {
   SuggestionsResponseBody,
 } from './types'
 
-// DOCUMENTATION.md now aligns the reference frontend cache with a 6-hour TTL.
+// The integration guide under public/documentation/ now aligns the reference frontend cache with a 6-hour TTL.
 export const SETTINGS_TTL_MS = 6 * 60 * 60 * 1000
 // Stay a few seconds below the backend's 60-second connection timeout.
 export const REQUEST_TIMEOUT_MS = 55 * 1000
@@ -35,15 +35,18 @@ export class HttpError extends Error {
 
 interface CachedSettings {
   cachedAt: number
-  projectId: string
-  personaId: string
+  agentId: string
   data: GeneralSettings
 }
 
 const trimTrailingSlash = (url: string) => url.replace(/\/+$/, '')
 
+const authHeaders = (config: OnboardingConfig): Record<string, string> => ({
+  Authorization: `Bearer ${config.apiToken}`,
+})
+
 const claritySearchBase = (config: OnboardingConfig) =>
-  `${trimTrailingSlash(config.apiUrl)}/cocoaas/public/api/clarity-search/v1/personas/${encodeURIComponent(config.personaId)}`
+  `${trimTrailingSlash(config.apiUrl)}/ca/v1/agents/${encodeURIComponent(config.agentId)}`
 
 function withQuery(url: string, params: Record<string, string | number | boolean | undefined>): string {
   const qs = new URLSearchParams()
@@ -79,7 +82,7 @@ export async function getSuggestions(
       limit_questions: options.limitQuestions ?? 5,
       limit_keywords: options.limitKeywords ?? 0,
     }),
-    { signal: options.signal },
+    { headers: authHeaders(config), signal: options.signal },
   )
 }
 
@@ -94,7 +97,7 @@ export async function getProductById(
       includeVariants: options.includeVariants,
       skipQuestionSelection: options.skipQuestionSelection,
     }),
-    { signal: options.signal },
+    { headers: authHeaders(config), signal: options.signal },
   )
 }
 
@@ -107,7 +110,7 @@ export async function getProductsById(
     withQuery(`${claritySearchBase(config)}/catalog/items`, { skipQuestionSelection: options.skipQuestionSelection }),
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders(config) },
       body: JSON.stringify(body),
       signal: options.signal,
     },
@@ -124,7 +127,7 @@ export async function getProductQuestionsById(
       limitQuestions: options.limitQuestions,
       skipQuestionSelection: options.skipQuestionSelection,
     }),
-    { signal: options.signal },
+    { headers: authHeaders(config), signal: options.signal },
   )
 }
 
@@ -139,7 +142,7 @@ export async function getParentProduct(
       includeVariants: options.includeVariants,
       skipQuestionSelection: options.skipQuestionSelection,
     }),
-    { signal: options.signal },
+    { headers: authHeaders(config), signal: options.signal },
   )
 }
 
@@ -152,7 +155,7 @@ export async function getParentProducts(
     withQuery(`${claritySearchBase(config)}/catalog/parent_products`, { skipQuestionSelection: options.skipQuestionSelection }),
     {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...authHeaders(config) },
       body: JSON.stringify(body),
       signal: options.signal,
     },
@@ -166,7 +169,7 @@ export async function getPlpQuestions(
 ): Promise<ClaritySearchResponse<{ plp?: { categories?: string[]; questions?: QuestionDTO[] } }>> {
   return fetchJson(`${claritySearchBase(config)}/catalog/plp`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...authHeaders(config) },
     body: JSON.stringify(body),
     signal: options.signal,
   })
@@ -174,27 +177,29 @@ export async function getPlpQuestions(
 
 export async function getGeneralSettings(config: OnboardingConfig): Promise<GeneralSettings> {
   const cached = readJSON<CachedSettings>(LS.settings)
-  const cacheMatches =
-    cached?.projectId === config.projectId &&
-    cached?.personaId === config.personaId &&
-    typeof cached.cachedAt === 'number'
+  const cacheMatches = cached?.agentId === config.agentId && typeof cached.cachedAt === 'number'
 
   if (cacheMatches && Date.now() - cached.cachedAt < SETTINGS_TTL_MS) {
     return cached.data
   }
 
-  const url = `${trimTrailingSlash(config.apiUrl)}/cocoaas/public/api/projectId/${encodeURIComponent(
-    config.projectId,
-  )}/persona/${encodeURIComponent(config.personaId)}/general-settings`
+  const url = `${trimTrailingSlash(config.apiUrl)}/ca/v1/agents/${encodeURIComponent(config.agentId)}/general-settings`
 
   try {
-    const response = await fetch(url, { headers: { Accept: 'application/json' } })
+    // cache: 'no-store' so the browser never revalidates conditionally. A 304 has an empty
+    // body and response.ok === false (ok is 200-299 only), so it would land in the catch
+    // below and discard every setting - branding and translations included - rather than
+    // reusing what we already had. This client does its own 6-hour localStorage caching, so
+    // HTTP-level caching buys nothing here.
+    const response = await fetch(url, {
+      cache: 'no-store',
+      headers: { Accept: 'application/json', ...authHeaders(config) },
+    })
     if (!response.ok) throw new Error(`general-settings failed with HTTP ${response.status}`)
     const data = (await response.json()) as GeneralSettings
     writeJSON(LS.settings, {
       cachedAt: Date.now(),
-      projectId: config.projectId,
-      personaId: config.personaId,
+      agentId: config.agentId,
       data,
     } satisfies CachedSettings)
     return data
@@ -222,9 +227,7 @@ export async function sendEventStream({
 }): Promise<void> {
   const abort = new AbortController()
   const timer = window.setTimeout(() => abort.abort('timeout'), REQUEST_TIMEOUT_MS)
-  const endpoint = `${trimTrailingSlash(config.apiUrl)}/cocoaas/public/api/projectId/${encodeURIComponent(
-    config.projectId,
-  )}/persona/${encodeURIComponent(config.personaId)}/chat/${encodeURIComponent(chatId)}/send-event`
+  const endpoint = `${trimTrailingSlash(config.apiUrl)}/ca/v1/agents/${encodeURIComponent(config.agentId)}/chats/${encodeURIComponent(chatId)}/send-event`
 
   try {
     let lastHttpError: HttpError | null = null
@@ -232,11 +235,11 @@ export async function sendEventStream({
     for (let attempt = 0; attempt <= SEND_EVENT_RETRY_ATTEMPTS; attempt += 1) {
       const response = await fetch(endpoint, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json', ...authHeaders(config) },
         body: JSON.stringify({
           event,
           url: window.location.href,
-          localeTime: new Date().toLocaleString(),
+          localeTime: new Date().toISOString(),
           endCustomerId,
         }),
         signal: abort.signal,

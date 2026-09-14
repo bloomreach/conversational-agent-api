@@ -13,17 +13,17 @@ export function uuid(): string {
 
 export function getEnvOnboarding(): OnboardingConfig | null {
   const apiUrl = import.meta.env.VITE_API_URL as string | undefined
-  const projectId = import.meta.env.VITE_PROJECT_ID as string | undefined
-  const personaId = import.meta.env.VITE_PERSONA_ID as string | undefined
+  const agentId = import.meta.env.VITE_AGENT_ID as string | undefined
+  const apiToken = import.meta.env.VITE_API_TOKEN as string | undefined
   const currency = (import.meta.env.VITE_CURRENCY as Currency | undefined) ?? 'GBP'
 
-  if (!apiUrl || !projectId || !personaId || apiUrl === 'https://example.com') return null
-  return { apiUrl: apiUrl.replace(/\/+$/, ''), projectId, personaId, currency }
+  if (!apiUrl || !agentId || !apiToken || apiUrl === 'https://example.com') return null
+  return { apiUrl: apiUrl.replace(/\/+$/, ''), agentId, apiToken, currency }
 }
 
 export function validateOnboarding(config: OnboardingConfig): string | null {
-  if (!config.apiUrl || !config.projectId || !config.personaId || !config.currency) {
-    return 'apiUrl, projectId, personaId, and currency are required.'
+  if (!config.apiUrl || !config.agentId || !config.apiToken || !config.currency) {
+    return 'apiUrl, agentId, API token, and currency are required.'
   }
   try {
     new URL(config.apiUrl)
