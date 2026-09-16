@@ -1,6 +1,6 @@
 # <img src="images/bloomreach-logo.svg" width="32" height="32" alt="Bloomreach logo" /> Conversational Agent API — Frontend Integration Guide
 
-This guide explains how to build a chat UI for Conversational Agent. The product is called Conversational Agent, while the public API is called Clarity.
+This guide explains how to build a chat UI for Conversational Agent. The product is called Conversational Agent, while the public API is called Conversational Agent API.
 The [`openapi-spec.json`](../openapi-spec.json) is the source of truth — when this guide and the spec disagree, the spec wins.
 
 ## Contents
@@ -21,10 +21,10 @@ The [`openapi-spec.json`](../openapi-spec.json) is the source of truth — when 
 
 Before integrating the API, obtain the **agent ID** and an **API token**. Bloomreach should provide the **API URL** for your environment.
 
-1. In the left menu, select **Clarity** → **API**.
+1. In the left menu, select **Conversational Agent** → **API**.
 2. Click **+ New token** and fill in the form.
 3. Copy the generated token to the clipboard and store it securely for use by your integration.
-4. In the left menu, select **Clarity** → **Agents**. In the table, find the agent you want to integrate and hover over its row. Click the dropdown menu next to its **Edit** button, then select **View Agent ID**.
+4. In the left menu, select **Conversational Agent** → **Agents**. In the table, find the agent you want to integrate and hover over its row. Click the dropdown menu next to its **Edit** button, then select **View Agent ID**.
 5. Use the API URL provided by Bloomreach for your environment.
 
 Your integration configuration should look like this:

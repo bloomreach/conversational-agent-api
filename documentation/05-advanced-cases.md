@@ -12,7 +12,7 @@ Direct calls triggered by quick replies, context synchronization, history restor
 target ─ <server-provided string>
 
 // copied verbatim from the quick-reply
-// option Clarity sent — never invented
+// option Conversational Agent sent — never invented
 // or hardcoded by the client
 ```
 
@@ -31,7 +31,7 @@ target ─ <server-provided string>
 
 Sent for **every** quick-reply selection — always `DIRECT_CALL`, never `USER.TEXT` — whether or not the option carries a `target`/`payload`. The client should not invent targets; copy any server-provided `target`/`payload` back **verbatim**, preserving unknown fields. `invisible: true` hides it from history.
 
-> **Public integration rule:** treat `target` values as server-owned routing hints. Your client should only return values it received from Clarity in a quick reply; do not hardcode or expose an independent picker of backend targets.
+> **Public integration rule:** treat `target` values as server-owned routing hints. Your client should only return values it received from Conversational Agent in a quick reply; do not hardcode or expose an independent picker of backend targets.
 
 ## Built-in button action <sup>`Outbound`</sup> (echoed)
 

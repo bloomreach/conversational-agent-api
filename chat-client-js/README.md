@@ -1,6 +1,6 @@
 # Conversational Agent — Test Client
 
-A self-contained, single-file chat client used to validate the Clarity / CoCoAaS public API documentation (`../documentation/`, `../openapi-spec.json`).
+A self-contained, single-file chat client used to validate the Conversational Agent / CoCoAaS public API documentation (`../documentation/`, `../openapi-spec.json`).
 
 No frameworks, no build step, no dependencies. Just a browser.
 
