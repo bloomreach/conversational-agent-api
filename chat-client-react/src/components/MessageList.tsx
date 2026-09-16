@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useLayoutEffect, useRef } from 'react'
 import { renderMarkdown } from '../markdown'
 import type { Currency, GeneralSettings, ProductItem, RenderMessage } from '../types'
-import { formatPrice, pickFirstColor, translate } from '../utils'
+import { formatPrice, pickFirstColor, safeProductUrl, translate } from '../utils'
 
 interface Props {
   messages: RenderMessage[]
@@ -10,18 +10,77 @@ interface Props {
   currency: Currency
   disabled: boolean
   onQuickReply: (reply: { label: string; target?: string | null; payload?: Record<string, unknown> | null }) => void
+  /** Older history exists beyond the top of the thread — from SYNC_EVENT_LOG.META `hasMore`. */
+  canLoadOlder: boolean
+  loadingOlder: boolean
+  onLoadOlder: () => void
+  /**
+   * Bumped once per prepended history page. This is a SIGNAL, not a count: it is what tells the
+   * scroll effect below that the thread grew upwards. Inferring that from the message list is
+   * not reliable — closing an `appendOrphan` seam removes the message that was previously at
+   * the top, so any check based on "is the old first message still present" reads a legitimate
+   * prepend as an ordinary append and yanks the shopper to the newest message.
+   */
+  prependToken: number
+  /** Retryable paging failure, shown next to the control that caused it rather than in the thread. */
+  historyError: string | null
 }
 
-export function MessageList({ messages, progressText, settings, currency, disabled, onQuickReply }: Props) {
+export function MessageList({
+  messages,
+  progressText,
+  settings,
+  currency,
+  disabled,
+  onQuickReply,
+  canLoadOlder,
+  loadingOlder,
+  onLoadOlder,
+  prependToken,
+  historyError,
+}: Props) {
   const ref = useRef<HTMLDivElement>(null)
+  // Scroll position as it was before the latest render, so a prepended page can be corrected
+  // for. scrollTop is captured on scroll rather than after each render because the shopper
+  // moves it in between - reaching the top is how they ask for the previous page.
+  const previous = useRef({ prependToken, scrollHeight: 0, scrollTop: 0 })
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const node = ref.current
-    if (node) node.scrollTop = node.scrollHeight
-  }, [messages, progressText])
+    if (!node) return
+
+    // A page of older history was inserted above the thread: hold the viewport on the message
+    // the shopper was reading instead of yanking it to either end. Every other update - a new
+    // reply, a streamed chunk - follows the thread to the newest message as before.
+    const prepended = prependToken !== previous.current.prependToken
+
+    node.scrollTop = prepended
+      ? previous.current.scrollTop + (node.scrollHeight - previous.current.scrollHeight)
+      : node.scrollHeight
+
+    previous.current = { prependToken, scrollHeight: node.scrollHeight, scrollTop: node.scrollTop }
+  }, [messages, progressText, prependToken])
+
+  const onScroll = () => {
+    const node = ref.current
+    if (node) previous.current.scrollTop = node.scrollTop
+  }
 
   return (
-    <main ref={ref} className="chat-messages">
+    <main ref={ref} className="chat-messages" onScroll={onScroll}>
+      {(canLoadOlder || historyError) && (
+        <div className="history-loader">
+          {canLoadOlder && (
+            <button type="button" onClick={onLoadOlder} disabled={loadingOlder}>
+              {loadingOlder ? 'Loading…' : 'Load earlier messages'}
+            </button>
+          )}
+          {/* Kept beside the control that failed. Appending it to the thread would scroll the
+              shopper to the newest message, losing the position they were reading from - and
+              no history was loaded, so there is nothing down there to see. */}
+          {historyError && <div className="history-error">⚠ {historyError}</div>}
+        </div>
+      )}
       {messages.map((message) => {
         switch (message.kind) {
           case 'carousel':
@@ -71,6 +130,7 @@ function Carousel({ products, settings, currency }: { products: ProductItem[]; s
 function ProductCard({ product, settings, currency }: { product: ProductItem; settings: GeneralSettings | null; currency: Currency }) {
   const color = pickFirstColor(product)
   const customizedAttrs = settings?.customerSettings?.customized_ui_attributes?.productCardAttrs ?? []
+  const productUrl = safeProductUrl(product.url)
 
   return (
     <article className="carousel-card">
@@ -94,8 +154,8 @@ function ProductCard({ product, settings, currency }: { product: ProductItem; se
           })}
         </dl>
       )}
-      {product.url && (
-        <a className="card-link" href={product.url} target="_blank" rel="noopener noreferrer">
+      {productUrl && (
+        <a className="card-link" href={productUrl} target="_blank" rel="noopener noreferrer">
           {translate(settings, 'view', 'View')}
         </a>
       )}

@@ -64,6 +64,22 @@ export function pickFirstColor(product: ProductItem): string | null {
   return null
 }
 
+// Product URLs come from the catalog and are replayed out of stored history, so they are
+// server data, not constants: a persisted `javascript:` or `data:` URL would otherwise become
+// a clickable XSS payload the moment a shopper opens the card. Only http(s) is a product
+// link; mailto: is allowed for markdown prose (see markdown.tsx) but never here.
+const PRODUCT_ALLOWED_LINK_SCHEMES = ['http:', 'https:']
+
+export function safeProductUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  try {
+    const parsed = new URL(url, window.location.href)
+    return PRODUCT_ALLOWED_LINK_SCHEMES.includes(parsed.protocol) ? parsed.href : null
+  } catch {
+    return null
+  }
+}
+
 export function userEventText(event: ChatEvent): string {
   const anyEvent = event as Record<string, unknown>
   if (typeof anyEvent.text === 'string' && anyEvent.text) return anyEvent.text

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 234" role="img" aria-label="Mock chat showing a load-earlier-messages button above the newest page">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  </style>
+  <rect x="0" y="0" width="320" height="234" rx="16" fill="#f1f4f9" stroke="#d8dee9"/>
+  <rect x="8" y="8" width="304" height="218" rx="14" fill="#ffffff" stroke="#d8dee9"/>
+
+  <!-- older events, beyond the newest page -->
+  <rect x="168" y="22" width="130" height="20" rx="10" fill="#f7f9fc" stroke="#c7d0dd" stroke-dasharray="4 3"/>
+  <rect x="180" y="30" width="86" height="5" rx="2.5" fill="#e3e9f2"/>
+  <rect x="22" y="48" width="160" height="20" rx="10" fill="#f7f9fc" stroke="#c7d0dd" stroke-dasharray="4 3"/>
+  <rect x="34" y="56" width="110" height="5" rx="2.5" fill="#e3e9f2"/>
+  <text x="160" y="86" text-anchor="middle" fill="#8b95a5" font-size="11">hasMore: true · older events exist</text>
+
+  <!-- the button that requests the next page -->
+  <rect x="76" y="96" width="168" height="28" rx="14" fill="#ffffff" stroke="#405cf5" stroke-width="1.2"/>
+  <text x="160" y="114" text-anchor="middle" fill="#405cf5" font-size="11.5">↑ Load earlier messages</text>
+
+  <!-- the page the sync replayed -->
+  <rect x="144" y="138" width="154" height="30" rx="15" fill="#405cf5"/>
+  <text x="221" y="157" text-anchor="middle" fill="#ffffff" font-size="11">What did I pick earlier?</text>
+  <rect x="22" y="176" width="210" height="30" rx="15" fill="#eef2f7"/>
+  <text x="34" y="195" fill="#172033" font-size="11">Your shortlist has 3 items 🛍️</text>
+  <text x="160" y="217" text-anchor="middle" fill="#5f6b7a" font-size="11">↑ newest page, replayed on sync</text>
+</svg>

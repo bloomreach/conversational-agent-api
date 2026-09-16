@@ -2,6 +2,7 @@
 import { v7 as uuidv7 } from 'uuid'
 import { LS, readJSON, writeJSON } from './storage'
 import type {
+  ChatHistoryPage,
   ClaritySearchResponse,
   GeneralSettings,
   OnboardingConfig,
@@ -212,6 +213,30 @@ export async function getGeneralSettings(config: OnboardingConfig): Promise<Gene
   }
 }
 
+/**
+ * One page of chat history, walking BACKWARDS from a cursor the client already holds.
+ *
+ * There is no first-page call: `after` is required, and the first cursor always comes from the
+ * SYNC_EVENT_LOG.META event that opens a SYNC_EVENT_LOG response. A cursor this API did not
+ * issue is a 400 rather than a silent restart at the newest page, so a client that lost its
+ * cursor must re-sync instead of guessing one.
+ *
+ * Not retried and not streamed: it is a plain JSON GET, and a failed page is re-requested by
+ * the shopper pressing load-more again.
+ */
+export async function getChatHistory(
+  config: OnboardingConfig,
+  chatId: string,
+  after: string,
+  options: { limit?: number; signal?: AbortSignal } = {},
+): Promise<ChatHistoryPage> {
+  const base = `${trimTrailingSlash(config.apiUrl)}/ca/v1/agents/${encodeURIComponent(config.agentId)}`
+  return fetchJson(
+    withQuery(`${base}/chats/${encodeURIComponent(chatId)}/history`, { after, limit: options.limit }),
+    { headers: authHeaders(config), signal: options.signal },
+  )
+}
+
 export async function sendEventStream({
   config,
   chatId,
@@ -247,7 +272,18 @@ export async function sendEventStream({
 
       if (response.ok) {
         if (!response.body) throw new Error('send-event response does not contain a stream body')
-        await jsonArrayStreamFetchReader(response, onEvent)
+        let sawSyncMeta = false
+        const stream = await jsonArrayStreamFetchReader(response, (item) => {
+          if ((item as { type?: string } | null)?.type === 'SYNC_EVENT_LOG.META') sawSyncMeta = true
+          return onEvent(item)
+        })
+        // A truncated turn that rendered something is left alone. One that rendered nothing has no
+        // reply to keep, and a sync cut before SYNC_EVENT_LOG.META leaves paging state unset — which
+        // hides Load earlier messages and passes a partial transcript off as a complete one. Both
+        // need to reach the shopper so the turn can be retried.
+        if (stream.truncated && (stream.dispatched === 0 || (event.type === 'SYNC_EVENT_LOG' && !sawSyncMeta))) {
+          throw new Error('Stream truncated before the turn produced a usable result')
+        }
         return
       }
 
@@ -288,10 +324,18 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => window.setTimeout(resolve, ms))
 }
 
+export interface StreamResult {
+  events: unknown[]
+  /** How many events reached onItem. Zero means the turn rendered nothing. */
+  dispatched: number
+  /** The body ended without its closing bracket. */
+  truncated: boolean
+}
+
 export async function jsonArrayStreamFetchReader(
   response: Response,
   onItem: (item: unknown) => Promise<void> | void,
-): Promise<unknown[]> {
+): Promise<StreamResult> {
   const reader = response.body?.getReader()
   if (!reader) throw new Error('Response body is not readable')
 
@@ -299,6 +343,7 @@ export async function jsonArrayStreamFetchReader(
   let buffer = ''
   let lastIndex = -1
   let parsed: unknown[] = []
+  let dispatched = 0
 
   for (;;) {
     const { done, value } = await reader.read()
@@ -316,24 +361,35 @@ export async function jsonArrayStreamFetchReader(
     }
 
     while (lastIndex + 1 < parsed.length) {
+      dispatched += 1
       await onItem(parsed[++lastIndex])
     }
   }
 
   buffer += decoder.decode()
+  // A complete turn is one whose final buffer parses as a whole JSON array. The last character
+  // alone does not show that: a cut after `[{"data":[]` also ends in `]`.
+  let complete = false
   try {
-    parsed = JSON.parse(buffer) as unknown[]
+    const finalParse: unknown = JSON.parse(buffer)
+    if (Array.isArray(finalParse)) {
+      parsed = finalParse
+      complete = true
+    }
   } catch {
-    // The closing bracket check below reports malformed streams.
+    // Keep the events the in-flight parse already produced.
   }
 
   while (lastIndex + 1 < parsed.length) {
+    dispatched += 1
     await onItem(parsed[++lastIndex])
   }
 
-  if (!buffer.trim().endsWith(']')) {
-    throw new Error('Stream did not terminate with closing bracket')
-  }
+  // Truncated turn. Every event parsed before the cut has already been handed to onItem and
+  // rendered, so the caller keeps them; it decides whether what arrived is usable. See
+  // documentation/02-how-the-chat-integration-works.md#parse-a-single-growing-array-incrementally.
+  const truncated = !complete
+  if (truncated) console.warn('Stream ended before the JSON array closed')
 
-  return parsed
+  return { events: parsed, dispatched, truncated }
 }

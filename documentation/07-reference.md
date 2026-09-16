@@ -2,12 +2,23 @@
 
 # 7. Reference
 
+## Endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/ca/v1/agents/{agentId}/general-settings` | Branding and translations. |
+| `POST` | `/ca/v1/agents/{agentId}/chats/{chatId}/send-event` | The chat channel: one event in, a stream of events back. |
+| `GET` | `/ca/v1/agents/{agentId}/chats/{chatId}/history` | [Older events](05-advanced-cases.md#history-paging-inbound). `after` (cursor) required; `limit` defaults to 100, max 500. |
+| `GET` / `POST` | `/ca/v1/agents/{agentId}/catalog/…`, `/suggestions` | [Conversation starters](06-conversation-starters.md). |
+
+All require `Authorization: Bearer <api-token>`.
+
 ## Status codes
 
 | Code | Meaning | Action |
 |---|---|---|
 | `200` | Stream of events. Read until `]`. | Parse the streaming JSON array; render events as they arrive. |
-| `400` | Invalid event format / missing field. | Send valid event objects and required request fields. |
+| `400` | Invalid event format / missing field; on `history`, a missing or unrecognised `after` cursor. | Send valid event objects and required request fields. Re-sync to obtain a fresh cursor rather than retrying the same one. |
 | `404` | Unknown `agentId` or `chatId`. | Verify the identifiers. |
 | `409` | Conflict with current resource state. | Re-check context; retry only after the state changes. |
 | `429` | Rate-limited. | Back off; don't retry in a tight loop. |
@@ -25,6 +36,7 @@ Network drops are normal during streaming — handle `TypeError: network error` 
 | `ADD_MESSAGE.USER.COMPARE` | Replay | Replay-only compare selection. |
 | `ADD_MESSAGE.USER.FEEDBACK` | Out | Rate a response / conversation. |
 | `SYNC_EVENT_LOG` | Out | Request conversation history replay. |
+| `SYNC_EVENT_LOG.META` | In | Opens a sync response: `hasMore`, the history cursor, and folded chat state. Not a message — do not render. |
 | `PERSIST_COLD_START` | Out | Persist welcome state for replay. |
 | `FE.SET_CONTEXT` | Both | Current page / cart / filter / currency state. |
 | `SELECTED_ITEMS` | Both | Selected products (compare). |

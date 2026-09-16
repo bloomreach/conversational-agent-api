@@ -306,6 +306,30 @@
       padding: 4px 0;
     }
 
+    .history-loader { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 2px 0 6px; }
+    .history-loader[hidden] { display: none; }
+    .history-error {
+      background: var(--error-bg);
+      color: var(--error-text);
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 12px;
+      text-align: center;
+    }
+    .history-error[hidden] { display: none; }
+    .history-loader button {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 5px 14px;
+      border-radius: 999px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .history-loader button:hover:not(:disabled) { background: var(--assistant-bubble); }
+    .history-loader button:disabled { opacity: 0.5; cursor: default; }
+
     .quick-replies { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 0; }
     .quick-reply-btn {
       background: var(--surface);
@@ -469,7 +493,13 @@
       </div>
     </header>
 
-    <main id="messages" class="chat-messages"></main>
+    <main id="messages" class="chat-messages">
+      <!-- Stays the first child of #messages; older pages are inserted directly after it. -->
+      <div id="history-loader" class="history-loader" hidden>
+        <button id="load-older-btn" type="button">Load earlier messages</button>
+        <div id="history-error" class="history-error" hidden></div>
+      </div>
+    </main>
 
     <div class="composer-area">
       <footer class="composer">
@@ -525,6 +555,15 @@
 
     const CURRENCY_OPTIONS = ['GBP', 'USD', 'EUR', 'JPY', 'AUD', 'CAD', 'CHF', 'SEK', 'NOK', 'DKK'];
 
+    // How many of the most recent events SYNC_EVENT_LOG replays when a saved chat is reopened.
+    // Set well below the server default of 500 so this sample exercises paging on a
+    // normal-length chat; a production client can omit `limit` entirely. Older events are not
+    // lost either way — they are fetched from the chat `history` endpoint.
+    // See documentation/05-advanced-cases.md#history-paging-inbound.
+    const SYNC_EVENT_LOG_LIMIT = 20;
+    // Events per `history` page. Server default is 100, clamped to 500.
+    const HISTORY_PAGE_LIMIT = 20;
+
     // =====================================================================
     // App state
     // =====================================================================
@@ -540,6 +579,13 @@
       suggestionsTimer: null,
       suggestionsAbort: null,
       suggestionsSeq: 0,
+      // Paging state, all of it seeded by the SYNC_EVENT_LOG.META event that opens a sync
+      // response. Without that event there is no cursor, and older history is unreachable.
+      historyCursor: null,        // `nextCursor`: pass as `after` to load the page before
+      historyHasMore: false,      // `hasMore`: older events exist beyond what we hold
+      historyLoading: false,      // a /history request is in flight
+      historyAbort: null,         // AbortController for that request, so a chat switch cancels it
+      historyError: null,         // retryable paging failure, shown by the loader, not in the thread
     };
 
     // =====================================================================
@@ -631,6 +677,7 @@
       state.chatId = readOrCreate(LS.chatId, () => uuid());
       state.lastAssistantBubble = null;
       bindChatControls();
+      resetHistoryPaging();
 
       try {
         await fetchGeneralSettings();
@@ -660,8 +707,13 @@
 
       // Hydrate any existing conversation. For a brand-new chatId the
       // server typically replies with a cold start; for an existing one
-      // it replays the history.
-      await sendEvent({ type: 'SYNC_EVENT_LOG' }, { showOptimistic: false, userInitiated: false });
+      // it replays the newest SYNC_EVENT_LOG_LIMIT events. The response opens
+      // with SYNC_EVENT_LOG.META, which is where the cursor to anything older
+      // comes from — see loadOlderHistory().
+      await sendEvent(
+        { type: 'SYNC_EVENT_LOG', limit: SYNC_EVENT_LOG_LIMIT },
+        { showOptimistic: false, userInitiated: false }
+      );
       renderDefaultConversationStartersIfEmpty();
 
       document.getElementById('composer-input').focus();
@@ -669,6 +721,7 @@
 
     function bindChatControls() {
       document.getElementById('new-chat-btn').onclick = newChat;
+      document.getElementById('load-older-btn').onclick = loadOlderHistory;
       document.getElementById('debug-btn').onclick = toggleDebug;
       document.getElementById('reset-btn').onclick = onResetClicked;
       document.getElementById('simulate-400-btn').onclick = () => simulateHttpError(400);
@@ -704,15 +757,18 @@
       history.push({ chatId: prev, archivedAt: new Date().toISOString() });
       writeJSON(LS.chatHistory, history);
 
-      document.getElementById('messages').innerHTML = '';
+      clearMessages();
       state.lastAssistantBubble = null;
       state.progressEl = null;
       clearConversationStarters();
       setAgentBadge('');
       resetComposerState();
+      resetHistoryPaging();
 
-      sendEvent({ type: 'SYNC_EVENT_LOG' }, { showOptimistic: false, userInitiated: false })
-        .finally(() => renderDefaultConversationStartersIfEmpty());
+      sendEvent(
+        { type: 'SYNC_EVENT_LOG', limit: SYNC_EVENT_LOG_LIMIT },
+        { showOptimistic: false, userInitiated: false }
+      ).finally(() => renderDefaultConversationStartersIfEmpty());
       document.getElementById('composer-input').focus();
     }
 
@@ -730,6 +786,7 @@
       state.chatId = null;
       state.settings = null;
       state.lastAssistantBubble = null;
+      resetHistoryPaging();
     }
 
     function toggleDebug() {
@@ -873,9 +930,21 @@
           });
 
           if (res.ok) {
-            await jsonArrayStreamFetchReader(res, (item) => {
-              handleInboundEvent(item);
+            // A SYNC_EVENT_LOG response replays the stored log, so its events describe the past
+            // and must not drive live turn state — same rule as a `history` page.
+            const isReplay = event.type === 'SYNC_EVENT_LOG';
+            let sawSyncMeta = false;
+            const stream = await jsonArrayStreamFetchReader(res, (item) => {
+              if (item && item.type === 'SYNC_EVENT_LOG.META') sawSyncMeta = true;
+              handleInboundEvent(item, isReplay);
             });
+            // A truncated turn that rendered something is left alone. One that rendered nothing
+            // has no reply to keep, and a sync cut before SYNC_EVENT_LOG.META leaves paging state
+            // unset — which hides Load earlier messages and passes a partial transcript off as a
+            // complete one. Both need to reach the shopper so the turn can be retried.
+            if (stream.truncated && (stream.dispatched === 0 || (event.type === 'SYNC_EVENT_LOG' && !sawSyncMeta))) {
+              throw new Error('Stream truncated before the turn produced a usable result');
+            }
             lastHttpError = null;
             break;
           }
@@ -922,7 +991,10 @@
       const isLikelyCors = err instanceof TypeError && /fetch/i.test(err.message);
       if (isLikelyCors) return `${err.message}. This may be a CORS issue — see the README for guidance.`;
 
-      return err?.message || 'Unknown error';
+      // Anything unclassified is a sample-client defect, not something the shopper can act on.
+      // Its text goes to the console; the thread gets the translated fallback.
+      console.error('Unhandled error surfaced to the shopper', err);
+      return t('errorMsg', 'Something went wrong. Please try again.');
     }
 
     async function makeHttpError(response) {
@@ -1094,6 +1166,7 @@
       let buffer = '';
       let lastIndex = -1;
       let parsed = [];
+      let dispatched = 0;
 
       for (;;) {
         const { done, value } = await reader.read();
@@ -1105,31 +1178,203 @@
           try { parsed = JSON.parse(buffer + ']'); } catch { continue; }
         }
         while (lastIndex + 1 < parsed.length) {
+          dispatched += 1;
           await onItem(parsed[++lastIndex]);
         }
       }
 
       buffer += decoder.decode();
-      try { parsed = JSON.parse(buffer); } catch { /* let the trailing check warn */ }
+      // A complete turn is one whose final buffer parses as a whole JSON array. The last
+      // character alone does not show that: a cut after `[{"data":[]` also ends in `]`.
+      let complete = false;
+      try {
+        const finalParse = JSON.parse(buffer);
+        if (Array.isArray(finalParse)) { parsed = finalParse; complete = true; }
+      } catch { /* keep the events the in-flight parse already produced */ }
       while (lastIndex + 1 < parsed.length) {
+        dispatched += 1;
         await onItem(parsed[++lastIndex]);
       }
-      if (!buffer.trim().endsWith(']')) {
-        console.warn('Stream did not terminate with closing bracket');
+      // Truncated turn. Every event parsed before the cut has already been handed to onItem and
+      // rendered, so the caller keeps them; it decides whether what arrived is usable.
+      const truncated = !complete;
+      if (truncated) console.warn('Stream ended before the JSON array closed');
+      return { events: parsed, dispatched, truncated };
+    }
+
+    // =====================================================================
+    // History paging — documentation/05-advanced-cases.md#history-paging-inbound
+    //
+    // A sync replays one bounded page: the newest events. Everything older is fetched a
+    // page at a time from the `history` endpoint, walking BACKWARDS from a cursor the
+    // client already holds. The `history` endpoint never serves the newest page — that one
+    // arrives with the sync, and its cursor comes from the SYNC_EVENT_LOG.META event on
+    // the send-event stream.
+    // =====================================================================
+    function historyLoaderEl() { return document.getElementById('history-loader'); }
+
+    function updateHistoryLoader() {
+      const loader = historyLoaderEl();
+      const btn = document.getElementById('load-older-btn');
+      const canLoadOlder = Boolean(state.historyHasMore && state.historyCursor);
+      // hasMore, never the number of events received: a page can come back short, or even
+      // empty, while there is still history left.
+      loader.hidden = !canLoadOlder && !state.historyError;
+      btn.hidden = !canLoadOlder;
+      btn.disabled = state.historyLoading;
+      btn.textContent = state.historyLoading ? 'Loading…' : 'Load earlier messages';
+
+      const errorEl = document.getElementById('history-error');
+      errorEl.textContent = state.historyError ? `⚠ ${state.historyError}` : '';
+      errorEl.hidden = !state.historyError;
+    }
+
+    async function loadOlderHistory() {
+      if (state.historyLoading || !state.historyCursor) return;
+      state.historyLoading = true;
+      state.historyError = null;
+      updateHistoryLoader();
+
+      const { apiUrl, agentId, apiToken } = state.onboarding;
+      // Captured, not read back off `state` after the await: "New chat" and "Reset" both swap
+      // the chat out from under an in-flight request. Without this the response would render a
+      // previous conversation into the freshly cleared thread and install ITS cursor, so the
+      // load-more button would then page through the wrong chat.
+      const chatId = state.chatId;
+      const abort = new AbortController();
+      state.historyAbort = abort;
+
+      const url = `${apiUrl}/ca/v1/agents/${encodeURIComponent(agentId)}`
+        + `/chats/${encodeURIComponent(chatId)}/history`
+        + `?after=${encodeURIComponent(state.historyCursor)}&limit=${HISTORY_PAGE_LIMIT}`;
+
+      try {
+        const res = await fetch(url, {
+          headers: { 'Accept': 'application/json', 'Authorization': `Bearer ${apiToken}` },
+          signal: abort.signal,
+        });
+        if (!res.ok) throw await makeHttpError(res);
+
+        const page = await res.json();
+        if (state.chatId !== chatId) return;
+
+        renderHistoryPage(page.events || []);
+        state.historyCursor = page.nextCursor || null;
+        state.historyHasMore = Boolean(page.hasMore);
+      } catch (err) {
+        // An abandoned chat is not an error the shopper needs to see.
+        if (abort.signal.aborted || state.chatId !== chatId) return;
+        console.error('history request failed', err);
+        // Shown by the loader rather than through renderError(), which appends to the thread and
+        // scrolls to the newest message: this failure loaded no history, so scrolling the shopper
+        // away from the older content they were reading would lose their place for nothing.
+        // historyCursor is untouched, so pressing the button again just retries.
+        state.historyError = getUserFacingErrorMessage(err);
+      } finally {
+        // Only if no newer load has taken over; resetHistoryPaging() already cleared the flags
+        // for a chat we switched away from.
+        if (state.historyAbort === abort) {
+          state.historyAbort = null;
+          state.historyLoading = false;
+          updateHistoryLoader();
+        }
       }
+    }
+
+    // Events arrive oldest-first and are all older than everything on screen, so the page
+    // is INSERTED ABOVE the existing thread rather than appended. The per-type renderers
+    // only ever append, so the page is rendered normally and the nodes it produced are then
+    // moved up as a block, which keeps their order and reuses every renderer as-is.
+    function renderHistoryPage(events) {
+      const messages = messagesEl();
+      const loader = historyLoaderEl();
+      const anchor = loader.nextSibling;
+      // Oldest message currently held. If it was built from a leading append chunk, the page
+      // we are about to prepend carries the start of that same assistant message.
+      const previousTop = messages.querySelector('.message, .carousel-wrap, .quick-replies');
+      const before = messages.childNodes.length;
+      const scrollHeightBefore = messages.scrollHeight;
+      // Captured up front because the per-type renderers call scrollToBottom() as they go,
+      // which would otherwise leave us restoring from the bottom of the thread.
+      const scrollTopBefore = messages.scrollTop;
+
+      // APPEND_LAST_ASSISTANT_MESSAGE inside the page must fold into the page's own last
+      // assistant bubble, not into whatever is currently at the bottom of the live thread —
+      // and must not leave the live thread pointing at a bubble from the past afterwards.
+      const liveAssistantBubble = state.lastAssistantBubble;
+      state.lastAssistantBubble = null;
+      try {
+        events.forEach(ev => handleInboundEvent(ev, true));
+      } finally {
+        state.lastAssistantBubble = liveAssistantBubble;
+      }
+
+      const rendered = Array.from(messages.childNodes).slice(before);
+      rendered.forEach(node => messages.insertBefore(node, anchor));
+      joinHistorySeam(previousTop, rendered);
+
+      // Keep the shopper looking at the same message instead of jumping to the top: the
+      // thread grew upwards by exactly this much, so the viewport moves down to match.
+      messages.scrollTop = scrollTopBefore + (messages.scrollHeight - scrollHeightBefore);
+    }
+
+    // Rejoin an assistant message that a page boundary split in half.
+    //
+    // `previousTop` is the oldest bubble we held; if it came from an APPEND_LAST_ASSISTANT_MESSAGE
+    // with no parent, the page just prepended ends with the earlier part of that same message.
+    // Merge the two so the transcript reads as one bubble instead of two fragments.
+    //
+    // The surviving bubble keeps whatever marker the prepended page gave it: if that page ALSO
+    // began with an orphan chunk, the seam simply moves up and the next page closes it.
+    function joinHistorySeam(previousTop, rendered) {
+      if (!previousTop || previousTop.dataset.appendOrphan !== '1') return;
+
+      const lastRendered = rendered.filter(node => node.nodeType === Node.ELEMENT_NODE).pop();
+      if (!lastRendered || !lastRendered.classList.contains('assistant')) return;
+
+      setAssistantMarkdown(lastRendered, (lastRendered._mdRaw || '') + (previousTop._mdRaw || ''));
+      // A one-message thread can have the live pointer aimed at the bubble being absorbed.
+      if (state.lastAssistantBubble === previousTop) state.lastAssistantBubble = lastRendered;
+      previousTop.remove();
+    }
+
+    // Everything except the loader, which is a fixture of the scroll container.
+    function clearMessages() {
+      const loader = historyLoaderEl();
+      Array.from(messagesEl().childNodes).forEach(node => {
+        if (node !== loader) node.remove();
+      });
+    }
+
+    // Called on every chat transition — startChat, New chat, Reset. Aborting is what stops an
+    // in-flight page from being applied to the thread that replaced it.
+    function resetHistoryPaging() {
+      if (state.historyAbort) state.historyAbort.abort();
+      state.historyAbort = null;
+      state.historyCursor = null;
+      state.historyHasMore = false;
+      state.historyLoading = false;
+      state.historyError = null;
+      updateHistoryLoader();
     }
 
     // =====================================================================
     // Inbound event handler
     // =====================================================================
-    function handleInboundEvent(event) {
+    // `isReplay` marks events that describe the past rather than the turn in progress: a
+    // `history` page, or the log a SYNC_EVENT_LOG response replays on open. Everything that
+    // renders a bubble is shared; everything that drives LIVE turn state is not. Replayed
+    // events must not move the progress indicator, change the active-agent badge, or re-latch
+    // the fatal error that disables the composer.
+    function handleInboundEvent(event, isReplay = false) {
       let recognised = true;
 
       switch (event.type) {
         case 'ADD_MESSAGE.ASSISTANT.NOTIFICATION':
           // In-place progress update — replaces the previous indicator.
           // Show only event.text (ignore event.toolName).
-          showProgress(event.text || '');
+          // Transient by nature: a replayed one describes a turn that finished long ago.
+          if (!isReplay) showProgress(event.text || '');
           break;
 
         case 'ADD_MESSAGE.ASSISTANT.TEXT':
@@ -1144,7 +1389,12 @@
             );
             scrollToBottom();
           } else {
+            // Nothing to fold into: this chunk's ADD_MESSAGE.ASSISTANT.TEXT fell outside the
+            // page we were given. Pages are bounded by event COUNT, so they can split a
+            // streamed message anywhere. Mark the bubble so the older page carrying the rest
+            // of that message can rejoin it — see joinHistorySeam().
             state.lastAssistantBubble = renderAssistantBubble(event);
+            state.lastAssistantBubble.dataset.appendOrphan = '1';
           }
           break;
 
@@ -1178,7 +1428,22 @@
           break;
 
         case 'METADATA.SELECT_AGENT':
-          if (event.agent) setAgentBadge(`agent: ${event.agent}`);
+          // Skipped on replay: the badge shows the agent handling the conversation now, and an
+          // older page would overwrite it with a stale value.
+          if (event.agent && !isReplay) setAgentBadge(`agent: ${event.agent}`);
+          break;
+
+        case 'SYNC_EVENT_LOG.META':
+          // Opens a SYNC_EVENT_LOG response and describes it: how much history the sync
+          // covered, and where the rest is. NOT a chat message — never rendered. This is
+          // the only cursor into older history a client is given, so a client that skips
+          // this event shows the tail of a long chat as if it were the whole thing.
+          state.historyCursor = event.nextCursor || null;
+          state.historyHasMore = Boolean(event.hasMore);
+          updateHistoryLoader();
+          // event.state / event.stateAsOfSentDate carry the selection fold over the WHOLE
+          // chat. This sample renders no selection UI, so it only logs them; a client with
+          // a compare tray would restore from them here.
           break;
 
         // Accepted silently; available in debug panel
@@ -1194,8 +1459,15 @@
         case 'FATAL_ERROR': {
           // Show the persona's fallback message from general-settings.
           // Never display event.text — that's internal detail.
-          clearProgress();
+          // On replay the bubble is still rendered, so the transcript shows where the
+          // conversation broke — but the composer is NOT re-latched: that error was answered
+          // long ago, and locking the input because the shopper reopened the chat would be absurd.
           const fallback = t('errorMsg', 'Something went wrong. Please try again.');
+          if (isReplay) {
+            renderError(fallback, false);
+            break;
+          }
+          clearProgress();
           renderError(fallback, true);
           setComposerFatal(true);
           break;
@@ -1451,9 +1723,10 @@
         card.appendChild(meta);
       }
 
-      if (p.url) {
+      const productHref = safeProductHref(p.url);
+      if (productHref) {
         const link = document.createElement('a');
-        link.href = p.url;
+        link.href = productHref;
         link.target = '_blank';
         link.rel = 'noopener noreferrer';
         link.textContent = 'View';
@@ -1462,6 +1735,22 @@
       }
 
       return card;
+    }
+
+    // Product URLs come from the catalog and are replayed out of stored history, so they are
+    // server data, not constants: a persisted `javascript:` or `data:` URL would otherwise
+    // become a clickable XSS payload the moment a shopper opens the card. Only http(s) is a
+    // product link; mailto: is allowed for markdown prose (mdSafeHref) but never here.
+    const PRODUCT_ALLOWED_LINK_SCHEMES = ['http:', 'https:'];
+
+    function safeProductHref(url) {
+      if (!url) return null;
+      try {
+        const parsed = new URL(url, window.location.href);
+        return PRODUCT_ALLOWED_LINK_SCHEMES.includes(parsed.protocol) ? parsed.href : null;
+      } catch (err) {
+        return null;
+      }
     }
 
     const CURRENCY_SYMBOLS = {
