@@ -8,6 +8,7 @@ A TypeScript React implementation of the Conversational Agent API client describ
 - Optional Vite env defaults via `.env`
 - `GET /general-settings` with 6-hour `localStorage` cache and stale-cache fallback
 - `POST /chat/{chatId}/send-event` streaming JSON-array parser
+- `GET /chats/{chatId}/history` backwards paging: a **Load earlier messages** button driven by the `SYNC_EVENT_LOG.META` cursor, prepending pages without moving the shopper's scroll position
 - Public Clarity Search API helpers for PDP, PLP, and search-triggered conversation-starter endpoints
 - Search-sample fallback starter questions on an empty search chat
 - Search-triggered suggestion buttons below the input box and Send button while the user types
@@ -66,6 +67,10 @@ The React client exposes typed helpers in `src/api.ts` for all public Clarity Se
 - `getPlpQuestions` — `POST /catalog/plp`
 - `getSuggestions` — `GET /suggestions`
 
+Chat history paging lives next to them in the same file:
+
+- `getChatHistory` — `GET /chats/{chatId}/history`
+
 The UI currently uses `getSuggestions` for the search/autosuggest sample flow: an empty search chat shows `SEARCH_FALLBACK_STARTER_QUESTIONS`, and typing at least two characters fetches search-triggered conversation starters from Clarity Search. PDP and PLP clients should use the contextual product/listing endpoints instead of these hard-coded fallback values. Suggestions are rendered below the composer row. They are progressive enhancement only — failures are logged and do not block chat.
 
 ## Testing HTTP error handling
@@ -77,6 +82,18 @@ Open the **Debug** panel and use the simulation buttons:
 - **500** — displays the server-error message: `Something went wrong, please try again later.`
 
 These buttons simulate UI behavior only; they do not call the backend. Real `5xx` responses from `send-event` are retried briefly before showing the server-error message. `400` and `429` responses are not retried.
+
+## History paging
+
+A `SYNC_EVENT_LOG` replays one bounded page, not the whole conversation. This client asks for a deliberately small one (`SYNC_EVENT_LOG_LIMIT = 20`, against a server default of 500) so paging is exercised on an ordinary chat; a production client can omit `limit` entirely.
+
+The response opens with a `SYNC_EVENT_LOG.META` event. It describes the sync itself and feeds paging state rather than the thread: it carries `hasMore`, the `nextCursor` into older history, and a snapshot of the shopper's selection state folded over the whole chat. It is the **only** source of a history cursor, so a client that drops it shows the tail of a long conversation as though it were complete.
+
+`loadOlderHistory` in `src/App.tsx` spends that cursor on `GET /chats/{chatId}/history?after=…`, one page at a time. Three details are worth copying into a real integration:
+
+- **Pages are prepended, not appended.** Events come back oldest-first and are all older than what is on screen. `MessageList` detects the prepend and holds the viewport on the message the shopper was reading rather than jumping to either end.
+- **The button is driven by `hasMore`, never by page length.** A page can come back short — empty, even — while history remains, because some events are filtered out after the page is selected.
+- **Replayed events do not drive live turn state.** `historyEventsToMessages` is deliberately separate from the live `handleInboundEvent`: a page from last week must not move the progress indicator, change the active-agent badge, or re-trigger the fatal-error latch that disables the composer.
 
 ## Notes
 

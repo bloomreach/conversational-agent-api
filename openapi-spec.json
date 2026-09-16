@@ -619,6 +619,105 @@
         ]
       }
     },
+    "/ca/v1/agents/{agentId}/chats/{chatId}/history": {
+      "get": {
+        "description": "Page backwards through one chat's transcript, oldest-first within the page. Use it to load messages older than the window SYNC_EVENT_LOG replayed.\n\nThis endpoint only ever walks backwards from a point the client already holds, so `after` is required and there is no first-page case: the newest slice of a chat comes from SYNC_EVENT_LOG on the send-event stream, and the SYNC_EVENT_LOG.META event that opens that response hands out the first cursor.\n\nPage on `hasMore` and `nextCursor`, never on how many events came back. A page can be shorter than `limit`, empty included, while there is still history left — server-side filtering runs after the window is selected.",
+        "summary": "Page backwards through a chat transcript",
+        "parameters": [
+          {
+            "name": "agentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "chatId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Cursor to page backwards from: `nextCursor` of the SYNC_EVENT_LOG.META event for the first page, then `nextCursor` of the previous page. Opaque — pass it back verbatim and do not construct or parse one. \"after\" is meant in paging order, which here is older in time. An unparsable cursor is a 400 rather than a silent restart at the newest page."
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 100,
+              "maximum": 500
+            },
+            "description": "Events per page. Omitted returns 100; larger values are clamped to 500. A long chat carries carousel and product payloads on every turn, so prefer several small pages over one large one."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "200 response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "required": [
+                    "events",
+                    "hasMore"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/HistoryEvent"
+                      },
+                      "description": "One page of chat-log events, oldest-first — the same order SYNC_EVENT_LOG replays them in. The page is older than everything the client already holds, so prepend it above the existing transcript. De-duplicate by `_id`."
+                    },
+                    "nextCursor": {
+                      "nullable": true,
+                      "type": "string",
+                      "description": "Feed back as `after` to get the next (older) page. Null when the start of the chat has been reached."
+                    },
+                    "hasMore": {
+                      "type": "boolean",
+                      "description": "True when older events remain beyond this page. The only correct thing to drive a load-more control from — a short or empty page does not mean the chat has ended."
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request — `after` is missing or is not a cursor this API issued. Re-sync with SYNC_EVENT_LOG to obtain a fresh one rather than retrying with the same value."
+          },
+          "404": {
+            "description": "Not Found — unknown agentId, or a chatId that does not belong to it."
+          },
+          "429": {
+            "description": "Too Many Requests — rate limit exceeded. Back off before retrying."
+          },
+          "500": {
+            "description": "Internal Server Error — backend error."
+          }
+        },
+        "tags": [
+          "Core"
+        ],
+        "security": [
+          {
+            "apiToken": []
+          }
+        ]
+      }
+    },
     "/ca/v1/agents/{agentId}/catalog/items": {
       "post": {
         "tags": [
@@ -2436,6 +2535,14 @@
           "welcomeUnnecessary": {
             "nullable": true,
             "type": "boolean"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "default": 500,
+            "maximum": 500,
+            "description": "How many of the newest events to replay in this sync. Omitted replays 500; larger values are clamped to 500. This asks rather than dictates — read what you were actually given from the SYNC_EVENT_LOG.META event that opens the response. A client that renders only the last few messages up front should ask for less here and page the rest in through `GET /ca/v1/agents/{agentId}/chats/{chatId}/history`."
           }
         }
       },
@@ -3631,6 +3738,9 @@
           },
           {
             "$ref": "#/components/schemas/ErrorEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SyncEventLogMetaEvent"
           }
         ],
         "discriminator": {
@@ -3650,7 +3760,8 @@
             "ADD_MESSAGE.ASSISTANT.COLD_START": "#/components/schemas/AddMessageAssistantColdStartEvent",
             "FE.SET_CONTEXT": "#/components/schemas/FeSetContextEvent",
             "FATAL_ERROR": "#/components/schemas/FatalErrorEvent",
-            "ERROR": "#/components/schemas/ErrorEvent"
+            "ERROR": "#/components/schemas/ErrorEvent",
+            "SYNC_EVENT_LOG.META": "#/components/schemas/SyncEventLogMetaEvent"
           }
         }
       },
@@ -3722,6 +3833,178 @@
             "ERROR": "#/components/schemas/ErrorEvent"
           }
         }
+      },
+      "HistoryEvent": {
+        "description": "One event from a chat `history` page. The same chat-log events the send-event stream delivers, minus SYNC_EVENT_LOG.META, which describes a sync response and never belongs to a page. **Ignore any event whose `type` is not listed here** — for the same reason, and with the same consequences for a strict generated client, as InboundEvent.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/AppendLastAssistantMessageEvent"
+          },
+          {
+            "$ref": "#/components/schemas/SelectedItemsEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserGenByBtnEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserTextEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserDirectCallEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageUserCompareEvent"
+          },
+          {
+            "$ref": "#/components/schemas/MetadataSelectAgentEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantTextEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantCarouselEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantQuickReplyEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantNotificationEvent"
+          },
+          {
+            "$ref": "#/components/schemas/AddMessageAssistantColdStartEvent"
+          },
+          {
+            "$ref": "#/components/schemas/FeSetContextEvent"
+          },
+          {
+            "$ref": "#/components/schemas/FatalErrorEvent"
+          },
+          {
+            "$ref": "#/components/schemas/ErrorEvent"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "APPEND_LAST_ASSISTANT_MESSAGE": "#/components/schemas/AppendLastAssistantMessageEvent",
+            "SELECTED_ITEMS": "#/components/schemas/SelectedItemsEvent",
+            "ADD_MESSAGE.USER.GEN_BY_BTN": "#/components/schemas/AddMessageUserGenByBtnEvent",
+            "ADD_MESSAGE.USER.TEXT": "#/components/schemas/AddMessageUserTextEvent",
+            "ADD_MESSAGE.USER.DIRECT_CALL": "#/components/schemas/AddMessageUserDirectCallEvent",
+            "ADD_MESSAGE.USER.COMPARE": "#/components/schemas/AddMessageUserCompareEvent",
+            "METADATA.SELECT_AGENT": "#/components/schemas/MetadataSelectAgentEvent",
+            "ADD_MESSAGE.ASSISTANT.TEXT": "#/components/schemas/AddMessageAssistantTextEvent",
+            "ADD_MESSAGE.ASSISTANT.CAROUSEL": "#/components/schemas/AddMessageAssistantCarouselEvent",
+            "ADD_MESSAGE.ASSISTANT.QUICK_REPLY": "#/components/schemas/AddMessageAssistantQuickReplyEvent",
+            "ADD_MESSAGE.ASSISTANT.NOTIFICATION": "#/components/schemas/AddMessageAssistantNotificationEvent",
+            "ADD_MESSAGE.ASSISTANT.COLD_START": "#/components/schemas/AddMessageAssistantColdStartEvent",
+            "FE.SET_CONTEXT": "#/components/schemas/FeSetContextEvent",
+            "FATAL_ERROR": "#/components/schemas/FatalErrorEvent",
+            "ERROR": "#/components/schemas/ErrorEvent"
+          }
+        }
+      },
+      "SyncEventLogMetaEvent": {
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "hasMore"
+        ],
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "SYNC_EVENT_LOG.META"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "True when the chat holds events older than the window this sync replayed. Show a load-more affordance on it, never on the number of events received."
+          },
+          "nextCursor": {
+            "nullable": true,
+            "type": "string",
+            "description": "Opaque cursor to the page immediately before this window. Pass it verbatim as the `after` query parameter of the chat `history` endpoint. Null when the sync already covered the chat from its start."
+          },
+          "state": {
+            "nullable": true,
+            "type": "object",
+            "required": [
+              "selectedList"
+            ],
+            "properties": {
+              "selectedList": {
+                "type": "array",
+                "items": {
+                  "required": [
+                    "id"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "isSelectedFromLastBotResponse": {
+                      "nullable": true,
+                      "type": "boolean"
+                    },
+                    "idType": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "selectedList_generatedFromAI": {
+                "nullable": true
+              },
+              "lastUserSelectedList": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "required": [
+                    "id"
+                  ],
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "isSelectedFromLastBotResponse": {
+                      "nullable": true,
+                      "type": "boolean"
+                    },
+                    "idType": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Selection state folded over the WHOLE chat, not just the replayed window — which is what makes a small `limit` usable, since a client cannot recompute this from events it was never sent. A snapshot taken when the sync was served, NOT a live value: restore UI from it on load, but do not keep deciding on it mid-conversation. Null for a chat that has never been folded."
+          },
+          "stateAsOfSentDate": {
+            "nullable": true,
+            "type": "string",
+            "description": "`sentDate` of the newest event of this window, and the point `state` above is current as of. It is what makes the snapshot usable while paging: SELECTED_ITEMS events OLDER than this are already folded into `state` and must not be applied again, while any that arrive after it must be. Null when the window came back empty."
+          }
+        },
+        "description": "Describes the sync response it opens, and is not a chat message: it arrives once, before the replayed events, and only in answer to SYNC_EVENT_LOG. It is the only place a cursor into chat history is handed out, so a client that pages MUST read it. Do not render it, and do not store it in the transcript."
       }
     },
     "securitySchemes": {
@@ -3736,7 +4019,7 @@
   "tags": [
     {
       "name": "Core",
-      "description": "Core chat endpoints for persona settings and send-event streaming."
+      "description": "Core chat endpoints for persona settings, send-event streaming, and chat history paging."
     },
     {
       "name": "Conversation Starters",

@@ -101,6 +101,15 @@ button, input, textarea, select { font: inherit; }
 .carousel-empty { align-self: flex-start; padding: 4px 0; color: var(--text-muted); font-size: 12px; font-style: italic; }
 
 .quick-reply-block { align-self: flex-start; max-width: 90%; }
+.history-loader { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 2px 0 6px; }
+.history-error { color: var(--error-text); background: var(--error-bg); border-radius: 8px; padding: 6px 12px; font-size: 12px; text-align: center; }
+.history-loader button {
+  padding: 5px 14px; border: 1px solid var(--border); border-radius: 999px;
+  background: var(--surface); color: var(--text-muted); font-family: inherit; font-size: 13px; cursor: pointer;
+}
+.history-loader button:hover:not(:disabled) { background: var(--system-bubble); }
+.history-loader button:disabled { opacity: .5; cursor: default; }
+
 .quick-replies { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 0; }
 .quick-reply-btn { padding: 6px 14px; border: 1px solid var(--primary); border-radius: 999px; background: var(--surface); color: var(--primary); cursor: pointer; }
 .quick-reply-btn:hover:not(:disabled) { background: #eff6ff; }

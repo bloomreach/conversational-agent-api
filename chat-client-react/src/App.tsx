@@ -1,6 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v7 as uuidv7 } from 'uuid'
-import { HttpError, getGeneralSettings, getProductById, getSuggestions, makeEvent, sendEventStream } from './api'
+import {
+  HttpError,
+  getChatHistory,
+  getGeneralSettings,
+  getProductById,
+  getSuggestions,
+  makeEvent,
+  sendEventStream,
+} from './api'
 import { Composer } from './components/Composer'
 import { DebugPanel } from './components/DebugPanel'
 import { Header } from './components/Header'
@@ -13,16 +21,26 @@ import type {
   AssistantTextEvent,
   ChatEvent,
   GeneralSettings,
+  HistoryEvent,
   MetadataSelectAgentEvent,
   OnboardingConfig,
   OutboundEventInput,
+  ProductItem,
   ConversationStarter,
   RenderMessage,
+  SyncEventLogMetaEvent,
 } from './types'
 import { getEnvOnboarding, isUserVisibleUserEvent, translate, userEventText, uuid } from './utils'
 
 const SUGGESTIONS_DEBOUNCE_MS = 300
 const SUGGESTIONS_LIMIT = 5
+// How many of the most recent events SYNC_EVENT_LOG replays when a saved chat is reopened.
+// Set well below the server default of 500 so this sample exercises paging on an ordinary
+// chat; a production client can omit `limit`. Older events are not lost either way — they
+// are fetched from the `history` endpoint, see loadOlderHistory().
+const SYNC_EVENT_LOG_LIMIT = 20
+// Events per `history` page. Server default is 100, clamped to 500.
+const HISTORY_PAGE_LIMIT = 20
 // Search-sample fallback placeholders shown before chat starts on an empty
 // search/autosuggest surface. PDP and PLP clients should use the contextual
 // conversation-starter endpoints instead of these hard-coded sample values.
@@ -49,9 +67,110 @@ function getUserFacingErrorMessage(error: unknown, t: (key: string, fallback: st
     return t('errorMsg', 'The assistant took too long to respond. Please try again.')
   }
 
-  if (error instanceof TypeError) return `${error.message}. This may be a network or CORS issue.`
-  if (error instanceof Error) return error.message
-  return 'Unknown error'
+  // Narrowed to fetch-shaped TypeErrors: an ordinary programming TypeError from a render
+  // handler is not a network fault and must not be labelled as one.
+  const isLikelyCors = error instanceof TypeError && /fetch/i.test(error.message)
+  if (isLikelyCors) return `${error.message}. This may be a CORS issue — see the README for guidance.`
+
+  // Anything unclassified is a sample-client defect, not something the shopper can act on.
+  // Its text goes to the console; the thread gets the translated fallback.
+  console.error('Unhandled error surfaced to the shopper', error)
+  return t('errorMsg', 'Something went wrong. Please try again.')
+}
+
+// Carousel events carry product ids but not always an image. Shared by the live stream and by
+// replayed history pages so both render the same card.
+async function enrichCarouselProducts(config: OnboardingConfig, products: ProductItem[]): Promise<ProductItem[]> {
+  return Promise.all(
+    products.map(async (product) => {
+      if (product.image) return product
+      try {
+        const response = await getProductById(config, product.id, { skipQuestionSelection: true })
+        const data = response.response.item?.data
+        const image = typeof data?.thumb_image === 'string' ? data.thumb_image : null
+        return image ? { ...product, image } : product
+      } catch (error) {
+        console.warn(`Could not load image for product ${product.id}`, error)
+        return product
+      }
+    }),
+  )
+}
+
+/**
+ * Turn one `history` page into renderable messages.
+ *
+ * Separate from handleInboundEvent on purpose, and not a duplicate of it: that handler also
+ * drives live turn state - the progress indicator, the active-agent badge, the fatal-error
+ * latch that disables the composer. A page of events from last week must not touch any of
+ * those. What is left is the pure event-to-bubble mapping, which is what this does.
+ *
+ * Events arrive oldest-first and are returned in the same order, ready to be prepended above
+ * the existing thread.
+ */
+async function historyEventsToMessages(
+  config: OnboardingConfig,
+  events: HistoryEvent[],
+  t: (key: string, fallback: string) => string,
+): Promise<RenderMessage[]> {
+  const messages: RenderMessage[] = []
+
+  for (const event of events) {
+    switch (event.type) {
+      case 'ADD_MESSAGE.ASSISTANT.TEXT':
+      case 'ADD_MESSAGE.ASSISTANT.COLD_START':
+        messages.push({ id: event._id, kind: 'assistant', text: (event as AssistantTextEvent).text || '', raw: event })
+        break
+
+      case 'APPEND_LAST_ASSISTANT_MESSAGE': {
+        const chunk = (event as AssistantTextEvent).text || ''
+        // Fold into the last assistant bubble of THIS page only. A chunk whose bubble sits in
+        // an older page starts its own bubble rather than reaching across the page boundary.
+        const index = messages.map((message) => message.kind).lastIndexOf('assistant')
+        const target = index === -1 ? null : messages[index]
+        if (target && target.kind === 'assistant') {
+          messages[index] = { ...target, text: `${target.text}${chunk}` }
+        } else {
+          messages.push({ id: event._id, kind: 'assistant', text: chunk, appendOrphan: true, raw: event })
+        }
+        break
+      }
+
+      case 'ADD_MESSAGE.ASSISTANT.CAROUSEL': {
+        const carousel = event as AssistantCarouselEvent
+        const products = await enrichCarouselProducts(config, carousel.data ?? [])
+        messages.push({ id: event._id, kind: 'carousel', products, raw: carousel })
+        break
+      }
+
+      case 'ADD_MESSAGE.ASSISTANT.QUICK_REPLY':
+        messages.push({
+          id: event._id,
+          kind: 'quickReply',
+          text: (event as AssistantQuickReplyEvent).text,
+          replies: (event as AssistantQuickReplyEvent).data ?? [],
+          raw: event as AssistantQuickReplyEvent,
+        })
+        break
+
+      case 'FATAL_ERROR':
+        // Rendered so the transcript still shows where the conversation broke, but without the
+        // fatal latch: that error was answered long ago and must not disable the composer now.
+        messages.push({ id: event._id, kind: 'error', text: t('errorMsg', 'Something went wrong. Please try again.'), raw: event })
+        break
+
+      // Progress notifications are transient, ERROR is telemetry, METADATA.SELECT_AGENT is a
+      // stale badge value, and FE.SET_CONTEXT / SELECTED_ITEMS drive no bubble. All skipped -
+      // as is any type this client does not recognise, which the contract requires.
+      default:
+        if (isUserVisibleUserEvent(event.type)) {
+          messages.push({ id: event._id, kind: 'user', text: userEventText(event), raw: event })
+        }
+        break
+    }
+  }
+
+  return messages
 }
 
 export default function App() {
@@ -59,6 +178,11 @@ export default function App() {
   const [endCustomerId, setEndCustomerId] = useState(() => readOrCreate(LS.endCustomerId, uuid))
   const [chatId, setChatId] = useState(() => readOrCreate(LS.chatId, uuid))
   const [settings, setSettings] = useState<GeneralSettings | null>(null)
+  // Settings also live in a ref, written synchronously beside every setSettings call. Boot loads
+  // the persona and replays history in the same async run, before React re-renders with the new
+  // state, so a `t` closed over `settings` would resolve every translated string in that replay
+  // against null and fall back to English.
+  const settingsRef = useRef<GeneralSettings | null>(null)
   const [messages, setMessages] = useState<RenderMessage[]>([])
   const [debugEvents, setDebugEvents] = useState<ChatEvent[]>([])
   const [progressText, setProgressText] = useState<string | null>(null)
@@ -69,6 +193,19 @@ export default function App() {
   const [onboardingError, setOnboardingError] = useState<string | null>(null)
   const [composerText, setComposerText] = useState('')
   const [suggestionStarters, setSuggestionStarters] = useState<ConversationStarter[]>([])
+  // Paging state, all of it seeded by the SYNC_EVENT_LOG.META event that opens a sync
+  // response. Without that event there is no cursor and older history is unreachable.
+  const [historyCursor, setHistoryCursor] = useState<string | null>(null)
+  const [historyHasMore, setHistoryHasMore] = useState(false)
+  const [historyLoading, setHistoryLoading] = useState(false)
+  const [historyError, setHistoryError] = useState<string | null>(null)
+  // Signals a prepended page to MessageList's scroll effect. See its `prependToken` prop.
+  const [prependToken, setPrependToken] = useState(0)
+  // Bumped by every transition that replaces the thread — New chat, Reset, new onboarding.
+  // A history request captures the value it started under and abandons itself if it no longer
+  // matches, so a slow page (or its carousel image enrichment) cannot prepend a previous
+  // conversation into the freshly cleared thread and install ITS cursor.
+  const threadGeneration = useRef(0)
   const startupRanFor = useRef<string | null>(null)
 
   const disabled = inflight || fatal
@@ -80,13 +217,40 @@ export default function App() {
       : []
   const startersHeading = trimmedComposerText ? 'Conversation starters' : 'Try asking'
 
-  const t = useCallback((key: string, fallback: string) => translate(settings, key, fallback), [settings])
+  const t = useCallback((key: string, fallback: string) => translate(settingsRef.current, key, fallback), [])
 
   const appendMessage = useCallback((message: RenderMessage) => {
     setMessages((current) => {
       if (current.some((item) => item.id === message.id)) return current
       return [...current, message]
     })
+  }, [])
+
+  // A history page is entirely older than what is on screen, so it goes ABOVE the thread.
+  // De-duplicated by `_id` like every other path: the newest page of a sync can overlap
+  // whatever the client already held.
+  //
+  // It also rejoins an assistant message that a page boundary split in half: if the oldest
+  // bubble held is an `appendOrphan` and this page ends with an assistant bubble, the two are
+  // fragments of one message and are merged. The surviving bubble keeps this page's own marker,
+  // so if this page ALSO began mid-stream the seam just moves up and the next page closes it.
+  const prependMessages = useCallback((older: RenderMessage[]) => {
+    setMessages((current) => {
+      const held = new Set(current.map((item) => item.id))
+      const incoming = older.filter((item) => !held.has(item.id))
+      if (incoming.length === 0) return current
+
+      const head = current[0]
+      const tail = incoming[incoming.length - 1]
+      if (head?.kind === 'assistant' && head.appendOrphan && tail?.kind === 'assistant') {
+        const merged: RenderMessage = { ...tail, text: `${tail.text}${head.text}` }
+        return [...incoming.slice(0, -1), merged, ...current.slice(1)]
+      }
+      return [...incoming, ...current]
+    })
+    // Outside the updater, which must stay pure. Bumped even when everything was de-duplicated
+    // away: the effect then corrects by a zero height delta, which leaves the viewport alone.
+    setPrependToken((token) => token + 1)
   }, [])
 
   const sendEvent = useCallback(
@@ -114,7 +278,8 @@ export default function App() {
           chatId,
           endCustomerId,
           event,
-          onEvent: (item) => handleInboundEvent(item as ChatEvent),
+          // A SYNC_EVENT_LOG response replays the stored log, so its events describe the past.
+          onEvent: (item) => handleInboundEvent(item as ChatEvent, event.type === 'SYNC_EVENT_LOG'),
         })
       } catch (error) {
         const message = getUserFacingErrorMessage(error, t)
@@ -133,11 +298,15 @@ export default function App() {
     [appendMessage, chatId, config, endCustomerId, inflight, settings, t],
   )
 
+  // `isReplay` marks events that describe the past rather than the turn in progress: the log a
+  // SYNC_EVENT_LOG response replays on open. Everything that renders a bubble is shared;
+  // everything that drives LIVE turn state is not. (A `history` page takes its own path through
+  // historyEventsToMessages, which never touches live state at all.)
   const handleInboundEvent = useCallback(
-    async (event: ChatEvent) => {
+    async (event: ChatEvent, isReplay = false) => {
       switch (event.type) {
         case 'ADD_MESSAGE.ASSISTANT.NOTIFICATION':
-          setProgressText(typeof event.text === 'string' ? event.text : '')
+          if (!isReplay) setProgressText(typeof event.text === 'string' ? event.text : '')
           break
 
         case 'ADD_MESSAGE.ASSISTANT.TEXT':
@@ -149,7 +318,9 @@ export default function App() {
           setMessages((current) => {
             const lastAssistantIndex = [...current].reverse().findIndex((message) => message.kind === 'assistant')
             if (lastAssistantIndex === -1) {
-              return [...current, { id: event._id, kind: 'assistant', text: (event as AssistantTextEvent).text || '', raw: event }]
+              // Nothing to fold into: the start of this message fell outside the window.
+              // Flagged so an older page can rejoin the halves — see prependMessages().
+              return [...current, { id: event._id, kind: 'assistant', text: (event as AssistantTextEvent).text || '', appendOrphan: true, raw: event }]
             }
             const index = current.length - 1 - lastAssistantIndex
             return current.map((message, messageIndex) =>
@@ -162,21 +333,7 @@ export default function App() {
 
         case 'ADD_MESSAGE.ASSISTANT.CAROUSEL': {
           const carousel = event as AssistantCarouselEvent
-          const products = carousel.data ?? []
-          const enrichedProducts = await Promise.all(
-            products.map(async (product) => {
-              if (product.image) return product
-              try {
-                const response = await getProductById(config!, product.id, { skipQuestionSelection: true })
-                const data = response.response.item?.data
-                const image = typeof data?.thumb_image === 'string' ? data.thumb_image : null
-                return image ? { ...product, image } : product
-              } catch (error) {
-                console.warn(`Could not load image for product ${product.id}`, error)
-                return product
-              }
-            }),
-          )
+          const enrichedProducts = await enrichCarouselProducts(config!, carousel.data ?? [])
           appendMessage({ id: event._id, kind: 'carousel', products: enrichedProducts, raw: carousel })
           break
         }
@@ -192,19 +349,42 @@ export default function App() {
           break
 
         case 'METADATA.SELECT_AGENT':
-          setActiveAgent((event as MetadataSelectAgentEvent).agent || null)
+          if (!isReplay) setActiveAgent((event as MetadataSelectAgentEvent).agent || null)
           break
+
+        case 'SYNC_EVENT_LOG.META': {
+          // Opens a SYNC_EVENT_LOG response and describes it: how much history the sync
+          // covered, and where the rest is. NOT a chat message, so nothing is rendered. This
+          // is the only cursor into older history a client is given — skip it and the tail of
+          // a long chat is shown as though it were the whole conversation.
+          const meta = event as SyncEventLogMetaEvent
+          setHistoryCursor(meta.nextCursor ?? null)
+          setHistoryHasMore(Boolean(meta.hasMore))
+          // meta.state / meta.stateAsOfSentDate carry the selection fold over the WHOLE chat.
+          // This sample renders no selection UI, so they are only logged to the debug panel;
+          // a client with a compare tray would restore from them here.
+          break
+        }
 
         case 'ERROR':
         case 'FE.SET_CONTEXT':
         case 'SELECTED_ITEMS':
           break
 
-        case 'FATAL_ERROR':
+        case 'FATAL_ERROR': {
+          // Replayed: render the bubble so the transcript shows where the conversation broke, but
+          // do not re-latch the composer — that error was answered long ago, and locking the input
+          // because the shopper reopened the chat would strand them with no way to type.
+          const text = t('errorMsg', 'Something went wrong. Please try again.')
+          if (isReplay) {
+            appendMessage({ id: event._id, kind: 'error', text, raw: event })
+            break
+          }
           setProgressText(null)
-          appendMessage({ id: event._id, kind: 'error', text: t('errorMsg', 'Something went wrong. Please try again.'), fatal: true, raw: event })
+          appendMessage({ id: event._id, kind: 'error', text, fatal: true, raw: event })
           setFatal(true)
           break
+        }
 
         default:
           // Anything not handled above falls through here and is ignored unless it is a
@@ -223,6 +403,39 @@ export default function App() {
     },
     [appendMessage, config, t],
   )
+
+  const loadOlderHistory = useCallback(async () => {
+    if (!config || historyLoading || !historyCursor) return
+    const generation = threadGeneration.current
+    const isStale = () => threadGeneration.current !== generation
+
+    setHistoryLoading(true)
+    setHistoryError(null)
+    try {
+      const page = await getChatHistory(config, chatId, historyCursor, { limit: HISTORY_PAGE_LIMIT })
+      if (isStale()) return
+      // Checked again after the enrichment await: it fetches an image per product and is by
+      // far the longest part of this call.
+      const older = await historyEventsToMessages(config, page.events ?? [], t)
+      if (isStale()) return
+
+      prependMessages(older)
+      setHistoryCursor(page.nextCursor ?? null)
+      // hasMore, never the length of the page: a page can come back short, or empty, while
+      // there is still history left.
+      setHistoryHasMore(Boolean(page.hasMore))
+      setDebugEvents((current) => [...current, ...((page.events ?? []) as ChatEvent[])])
+    } catch (error) {
+      // An abandoned chat is not an error the shopper needs to see.
+      if (isStale()) return
+      // Surfaced next to the load-more control, not appended to the thread: this failure loaded
+      // no history, and an error message at the bottom would scroll the shopper away from the
+      // older content they were reading. `historyCursor` is untouched, so the retry just works.
+      setHistoryError(getUserFacingErrorMessage(error, t))
+    } finally {
+      if (!isStale()) setHistoryLoading(false)
+    }
+  }, [chatId, config, historyCursor, historyLoading, prependMessages, t])
 
   useEffect(() => {
     setSuggestionStarters([])
@@ -274,10 +487,18 @@ export default function App() {
       try {
         const loadedSettings = await getGeneralSettings(activeConfig)
         if (isStale()) return
+        settingsRef.current = loadedSettings
         setSettings(loadedSettings)
         setOnboardingError(null)
         await sendEvent({ type: 'FE.SET_CONTEXT', currency: activeConfig.currency }, { showOptimistic: false, userInitiated: false })
-        if (!isStale()) await sendEvent({ type: 'SYNC_EVENT_LOG' }, { showOptimistic: false, userInitiated: false })
+        // The response opens with SYNC_EVENT_LOG.META, which is where the cursor to anything
+        // older than this page comes from — see loadOlderHistory().
+        if (!isStale()) {
+          await sendEvent(
+            { type: 'SYNC_EVENT_LOG', limit: SYNC_EVENT_LOG_LIMIT },
+            { showOptimistic: false, userInitiated: false },
+          )
+        }
       } catch (error) {
         if (isStale()) return
         setOnboardingError(error instanceof Error ? error.message : 'Could not load persona settings')
@@ -290,6 +511,16 @@ export default function App() {
     void boot()
   }, [chatId, config, sendEvent])
 
+  // Called on every transition that replaces the thread. The generation bump is what stops an
+  // in-flight page from being applied to the conversation that replaced it.
+  const resetHistoryPaging = () => {
+    threadGeneration.current += 1
+    setHistoryCursor(null)
+    setHistoryHasMore(false)
+    setHistoryLoading(false)
+    setHistoryError(null)
+  }
+
   const onOnboardingSubmit = (nextConfig: OnboardingConfig, nextEndCustomerId: string) => {
     writeJSON(LS.onboarding, nextConfig)
     const effectiveEndCustomerId = nextEndCustomerId || uuid()
@@ -299,6 +530,7 @@ export default function App() {
     setChatId(readOrCreate(LS.chatId, uuid))
     setMessages([])
     setDebugEvents([])
+    resetHistoryPaging()
     setFatal(false)
     setInflight(false)
     setComposerText('')
@@ -314,6 +546,7 @@ export default function App() {
     setChatId(next)
     setMessages([])
     setDebugEvents([])
+    resetHistoryPaging()
     setProgressText(null)
     setActiveAgent(null)
     setFatal(false)
@@ -326,9 +559,11 @@ export default function App() {
     localStorage.removeItem(LS.onboarding)
     localStorage.removeItem(LS.chatId)
     setConfig(null)
+    settingsRef.current = null
     setSettings(null)
     setMessages([])
     setDebugEvents([])
+    resetHistoryPaging()
     setFatal(false)
     setInflight(false)
     setComposerText('')
@@ -386,6 +621,11 @@ export default function App() {
           currency={config.currency}
           disabled={disabled}
           onQuickReply={onQuickReply}
+          canLoadOlder={historyHasMore && historyCursor !== null}
+          loadingOlder={historyLoading}
+          onLoadOlder={loadOlderHistory}
+          prependToken={prependToken}
+          historyError={historyError}
         />
         <Composer
           settings={settings}
@@ -404,7 +644,7 @@ export default function App() {
       </div>
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeAgent, config, debugEvents, debugOpen, disabled, displayedStarters, endCustomerId, messages, onboardingError, progressText, settings, startersHeading])
+  }, [activeAgent, config, debugEvents, debugOpen, disabled, displayedStarters, endCustomerId, historyCursor, historyError, historyHasMore, historyLoading, loadOlderHistory, messages, onboardingError, prependToken, progressText, settings, startersHeading])
 
   return content
 }

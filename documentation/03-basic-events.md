@@ -8,7 +8,7 @@ The everyday building blocks: the shopper's text, the assistant's text and its s
 
 `ADD_MESSAGE.USER.TEXT`
 
-<img src="images/evt-user-text.svg" align="right" width="260" alt="Mock chat showing a right-aligned user text bubble" />
+<img src="images/evt-user-text.svg" width="320" alt="Mock chat showing a right-aligned user text bubble" />
 
 ### The shopper types a message
 
@@ -23,13 +23,11 @@ Right-aligned bubble. The server echoes this same event back on the turn — if 
 
 Quick-reply selections do **not** use this event — they are always sent as `ADD_MESSAGE.USER.DIRECT_CALL` (see [Quick replies](04-rich-messages.md#quick-replies-inbound)), even when the option has no `target`/`payload`.
 
-<br clear="right" />
-
 ## Assistant text message <sup>`Inbound`</sup>
 
 `ADD_MESSAGE.ASSISTANT.TEXT`
 
-<img src="images/evt-assistant-text.svg" align="right" width="260" alt="Mock chat showing a left-aligned assistant markdown reply" />
+<img src="images/evt-assistant-text.svg" width="320" alt="Mock chat showing a left-aligned assistant markdown reply" />
 
 ### A complete (or starting) assistant message
 
@@ -47,13 +45,11 @@ Quick-reply selections do **not** use this event — they are always sent as `AD
 
 Render as GitHub Flavored Markdown (links, tables, lists). It may be the seed that later `APPEND` chunks fold into. `product_id_link_mapping` helps rewrite inline product links to PDP URLs.
 
-<br clear="right" />
-
 ## Streaming chunk <sup>`Inbound`</sup>
 
 `APPEND_LAST_ASSISTANT_MESSAGE`
 
-<img src="images/evt-append.svg" align="right" width="260" alt="Mock chat showing an assistant message streaming in chunk by chunk" />
+<img src="images/evt-append.svg" width="320" alt="Mock chat showing an assistant message streaming in chunk by chunk" />
 
 ### Fold into the previous assistant bubble
 
@@ -72,13 +68,11 @@ case 'APPEND_LAST_ASSISTANT_MESSAGE':
   else { lastAssistantMsg = {...event, type: 'ADD_MESSAGE.ASSISTANT.TEXT'}; append() }
 ```
 
-<br clear="right" />
-
 ## Progress notification <sup>`Inbound`</sup>
 
 `ADD_MESSAGE.ASSISTANT.NOTIFICATION`
 
-<img src="images/evt-notification.svg" align="right" width="260" alt="Mock chat showing an in-place progress notification" />
+<img src="images/evt-notification.svg" width="320" alt="Mock chat showing an in-place progress notification" />
 
 ### In-place progress update
 
@@ -95,13 +89,11 @@ case 'APPEND_LAST_ASSISTANT_MESSAGE':
 - **Clear when the turn completes** — keep it visible while messages stream in; remove it only after the request finishes and all response events have been received.
 - **Initial state** — show `notificationThinking` the moment the user submits; the first notification overwrites it.
 
-<br clear="right" />
-
 ## Welcome / cold start <sup>`Both`</sup>
 
 `ADD_MESSAGE.ASSISTANT.COLD_START`
 
-<img src="images/evt-cold-start.svg" align="right" width="260" alt="Mock chat showing the welcome / cold-start screen" />
+<img src="images/evt-cold-start.svg" width="320" alt="Mock chat showing the welcome / cold-start screen" />
 
 ### The blank-slate welcome screen
 
@@ -118,8 +110,6 @@ case 'APPEND_LAST_ASSISTANT_MESSAGE':
 ```
 
 Rendered before the first real message. Carries a welcome `text`, optional starter `quickReply` chips, and products to show. This is the actual welcome message object saved for replay, but sending `ADD_MESSAGE.ASSISTANT.COLD_START` directly does not persist it in conversation history. Persist welcome state for replay by sending the outbound `PERSIST_COLD_START` event with the cold-start message in its `events` payload.
-
-<br clear="right" />
 
 ---
 

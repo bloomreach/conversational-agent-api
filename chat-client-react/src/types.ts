@@ -199,6 +199,37 @@ export interface SyncEventLogEvent extends EventEnvelope {
   type: 'SYNC_EVENT_LOG'
   lastProcessedEventId?: string | null
   welcomeUnnecessary?: boolean | null
+  /**
+   * How many of the newest events to replay. Omitted replays 500; larger values are clamped
+   * to 500. Everything older stays reachable through the `history` endpoint, using the cursor
+   * from the SYNC_EVENT_LOG.META event that opens the response.
+   */
+  limit?: number | null
+}
+
+/** The shopper's selection state, folded over the whole chat rather than the synced window. */
+export interface DeliverableChatState {
+  selectedList: { id: string; isSelectedFromLastBotResponse?: boolean | null; idType?: string | null }[]
+  selectedList_generatedFromAI?: unknown
+  lastUserSelectedList?: { id: string; isSelectedFromLastBotResponse?: boolean | null; idType?: string | null }[] | null
+}
+
+/**
+ * Opens a SYNC_EVENT_LOG response and describes it. Inbound only, never a chat message, and
+ * never part of a `history` page — it belongs to one sync response. It carries the only cursor
+ * into older history a client is given, so dropping it makes a truncated transcript
+ * indistinguishable from a complete one.
+ */
+export interface SyncEventLogMetaEvent extends EventEnvelope {
+  type: 'SYNC_EVENT_LOG.META'
+  /** Older events exist beyond this window. Drive a load-more control from this, not from length. */
+  hasMore: boolean
+  /** Opaque cursor to the page before this window; pass verbatim as `after`. Null at the chat start. */
+  nextCursor: string | null
+  /** Snapshot taken when the sync was served — restore from it on load, don't keep deciding on it. */
+  state: DeliverableChatState | null
+  /** `sentDate` the snapshot above is current as of; anchors it while paging backwards. */
+  stateAsOfSentDate: string | null
 }
 
 export type ContextRemovalKey = 'pageList' | 'pageProduct' | 'miniPageProduct' | 'shoppingCartList'
@@ -306,7 +337,21 @@ export type ChatEvent =
   | AssistantNotificationEvent
   | UserCompareEvent
   | MetadataSelectAgentEvent
+  | SyncEventLogMetaEvent
   | GenericEvent
+
+/** One event from a `history` page: chat-log events only, never SYNC_EVENT_LOG.META. */
+export type HistoryEvent = Exclude<ChatEvent, SyncEventLogMetaEvent>
+
+/** Response of `GET /ca/v1/agents/{agentId}/chats/{chatId}/history`. */
+export interface ChatHistoryPage {
+  /** Oldest-first, and all older than what the client already holds — prepend, don't append. */
+  events: HistoryEvent[]
+  /** Feed back as `after` for the next (older) page. Null once the chat start is reached. */
+  nextCursor: string | null
+  /** Older events remain beyond this page. A short or empty page does not mean the chat ended. */
+  hasMore: boolean
+}
 
 export type OutboundEventInput = OutboundEvent extends infer Event
   ? Event extends OutboundEvent
@@ -315,6 +360,19 @@ export type OutboundEventInput = OutboundEvent extends infer Event
   : never
 
 export type RenderMessage =
-  | { id: string; kind: 'user' | 'assistant' | 'system' | 'error'; text: string; fatal?: boolean; raw?: ChatEvent }
+  | {
+      id: string
+      kind: 'user' | 'assistant' | 'system' | 'error'
+      text: string
+      fatal?: boolean
+      /**
+       * Built from an APPEND_LAST_ASSISTANT_MESSAGE chunk that had no message to fold into,
+       * because the window it arrived in began mid-stream. Windows are bounded by event
+       * COUNT, so they split a streamed assistant message anywhere. Marks the bubble as the
+       * tail of a message whose start is in the page before it — see prependMessages().
+       */
+      appendOrphan?: boolean
+      raw?: ChatEvent
+    }
   | { id: string; kind: 'carousel'; products: ProductItem[]; raw: AssistantCarouselEvent }
   | { id: string; kind: 'quickReply'; text?: string | null; replies: AssistantQuickReplyEvent['data']; raw: AssistantQuickReplyEvent }

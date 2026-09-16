@@ -31,7 +31,7 @@ Then visit <http://localhost:8000>. Origin will be `http://localhost:8000`. Some
 
 3. Fetches authenticated `GET .../general-settings` to apply the agent's name, logo, and input placeholder. Persona branding (`assistantName`, `assistantLogo`, and `description`) should be configured in the CoCoAaS backend persona configuration; the client only uses local defaults when those fields are omitted. The response is cached in `localStorage` for 6 hours, keyed by `agentId`; reloads within the TTL reuse the cache and skip the network call, and a matching cached response can still be used if a later refresh fails so branding does not disappear entirely.
 
-4. Sends `SYNC_EVENT_LOG` to hydrate any existing conversation tied to the persisted `chatId`.
+4. Sends `SYNC_EVENT_LOG` to hydrate any existing conversation tied to the persisted `chatId`. It asks for a deliberately small page (`limit: 20`, against a server default of 500) so that paging is exercised on an ordinary chat rather than only on a very long one; a production client can omit `limit`. The response opens with `SYNC_EVENT_LOG.META`, and the client reads `hasMore` / `nextCursor` from it to show the **Load earlier messages** button. Older pages come from a plain REST call, `GET .../history?after=<cursor>`, with `SYNC_EVENT_LOG.META` supplying the first cursor.
 
 5. Shows default starter questions below the input box and Send button on an empty chat. Once the user types at least two characters, the client fetches search-triggered Clarity Search suggestions and replaces the defaults with returned conversation-starter questions. Tapping any starter sends it as `ADD_MESSAGE.USER.TEXT`.
 
@@ -39,6 +39,7 @@ Then visit <http://localhost:8000>. Origin will be `http://localhost:8000`. Some
    - User → server: `ADD_MESSAGE.USER.TEXT` (composer input and conversation starters), `ADD_MESSAGE.USER.DIRECT_CALL` (every quick-reply tap — always DIRECT_CALL, never USER.TEXT, copying any `target`/`payload` verbatim)
    - Server → client: `ADD_MESSAGE.ASSISTANT.TEXT` (and `APPEND_LAST_ASSISTANT_MESSAGE` streaming chunks), `ADD_MESSAGE.ASSISTANT.CAROUSEL`, `ADD_MESSAGE.ASSISTANT.QUICK_REPLY`, `ADD_MESSAGE.ASSISTANT.COLD_START`, `ADD_MESSAGE.ASSISTANT.NOTIFICATION`, per-turn echoed/replayed user events, `METADATA.SELECT_AGENT`. Other event types are accepted silently and visible in the debug panel — that is required behaviour, not incidental: the stream also carries internal event types excluded from `../openapi-spec.json`, and new ones may be added without that counting as a breaking change, so an unrecognised `type` must never raise.
    - `ADD_MESSAGE.ASSISTANT.TEXT` is markdown. `mdRender()` supports a deliberately small subset — bold, italic, unordered/ordered lists and links — and builds DOM nodes rather than an HTML string, so assistant text is only ever inserted as a text node. Link URLs are accepted only for `http:`, `https:` and `mailto:`; anything else (`javascript:`, `data:`, …) is left as literal text. If you extend it, keep that shape: switching to `innerHTML` turns a formatting helper into an XSS surface.
+   - `SYNC_EVENT_LOG.META` is read but never displayed, because it describes the sync response rather than the conversation. It carries `hasMore` and `nextCursor`, which are the only way to request older history. A client that ignores this event shows just the most recent part of a long chat, with nothing to indicate that earlier messages exist.
    - `ERROR` events are backend telemetry (non-fatal warnings such as `AGENT.ERROR`); the client logs them to the debug panel and does **not** show them to the user.
    - `FATAL_ERROR` events render the agent's `translated.errorMsg` fallback and disable the composer. The raw `event.text` is never shown to the user.
    - `ADD_MESSAGE.ASSISTANT.NOTIFICATION` events are rendered as a single, in-place progress chip that updates as new notifications arrive. A "Thinking…" placeholder is shown immediately on submit; the chip stays visible while messages stream in and is cleared only when the request completes (all response events received).
@@ -47,8 +48,11 @@ Then visit <http://localhost:8000>. Origin will be `http://localhost:8000`. Some
 
 8. Streaming responses are parsed using the JSON-array-stream pattern documented in `documentation/02-how-the-chat-integration-works.md` (buffer + try-parse + try-parse-with-closing-bracket).
 
+9. **History paging.** When `SYNC_EVENT_LOG.META` reports `hasMore`, a **Load earlier messages** button appears at the top of the thread. It calls `GET .../chats/{chatId}/history?after=<cursor>&limit=20`, walking backwards one page at a time. Pages arrive oldest-first and are inserted *above* the existing thread, with the scroll position adjusted so the shopper keeps looking at the same message. The button is driven by `hasMore`, never by how many events a page returned — a page can be short, or empty, while history remains.
+
 ## UI controls
 
+- **Load earlier messages** — appears above the thread while older history exists. Fetches the previous page from the `history` endpoint and prepends it. Hidden once the start of the conversation is reached.
 - **New chat** — rotates `chatId` and clears the message list. `endCustomerId` is preserved (same user, new conversation). Previous `chatId`s are archived in `localStorage` under `clarityTest.chatHistory` for inspection.
 - **Debug** — toggles a panel showing the raw inbound event stream. The panel also contains HTTP error simulation buttons for testing UI-only handling of 400, 429, and 500 responses without calling the backend.
 - **Reset** — clears the onboarding values and returns to the form. `endCustomerId` is preserved.
@@ -109,6 +113,8 @@ Run through these once against a real backend to confirm the docs are sufficient
 - [ ] If the assistant emits quick replies, tapping any one dispatches `ADD_MESSAGE.USER.DIRECT_CALL` (always DIRECT_CALL, never USER.TEXT; visible in DevTools Network).
 - [ ] "New chat" rotates `chatId` and the next message exchange uses the new ID.
 - [ ] Reload preserves `endCustomerId`, `chatId`, and onboarding. The chat is re-hydrated via `SYNC_EVENT_LOG` (debug panel shows replayed events).
+- [ ] In a conversation longer than 20 events, reloading shows **Load earlier messages**; clicking it prepends the previous page without moving the visible message, and the button disappears at the start of the chat.
+- [ ] The debug panel shows exactly one `SYNC_EVENT_LOG.META` per sync, carrying `hasMore` and `nextCursor`, and it appears there only.
 - [ ] Misconfiguring `apiUrl` shows a clear error and returns to the onboarding form.
 
 If anything on the checklist fails for a reason not described in the docs, that's a documentation gap.
