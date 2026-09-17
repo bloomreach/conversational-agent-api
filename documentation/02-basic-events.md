@@ -1,6 +1,6 @@
-[← Back to How the chat integration works](02-how-the-chat-integration-works.md)
+[← Back to How the chat integration works](01-how-the-chat-integration-works.md)
 
-# 3. Basic event types (messages)
+# 2. Basic event types (messages)
 
 The everyday building blocks: the shopper's text, the assistant's text and its streaming chunks, the in-place progress indicator, and the welcome message.
 
@@ -21,7 +21,7 @@ The everyday building blocks: the shopper's text, the assistant's text and its s
 
 Right-aligned bubble. The server echoes this same event back on the turn — if you render optimistically, de-duplicate the echoed copy by `_id`.
 
-Quick-reply selections do **not** use this event — they are always sent as `ADD_MESSAGE.USER.DIRECT_CALL` (see [Quick replies](04-rich-messages.md#quick-replies-inbound)), even when the option has no `target`/`payload`.
+Quick-reply selections do **not** use this event — they are always sent as `ADD_MESSAGE.USER.DIRECT_CALL` (see [Quick replies](03-rich-messages.md#quick-replies-inbound)), even when the option has no `target`/`payload`.
 
 ## Assistant text message <sup>`Inbound`</sup>
 
@@ -113,4 +113,4 @@ Rendered before the first real message. Carries a welcome `text`, optional start
 
 ---
 
-[← Chapter 2 — How the chat integration works](02-how-the-chat-integration-works.md) · [Chapter 4 — Rich messages →](04-rich-messages.md)
+[← Chapter 1 — How the chat integration works](01-how-the-chat-integration-works.md) · [Chapter 3 — Rich messages →](03-rich-messages.md)

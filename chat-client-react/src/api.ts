@@ -387,7 +387,7 @@ export async function jsonArrayStreamFetchReader(
 
   // Truncated turn. Every event parsed before the cut has already been handed to onItem and
   // rendered, so the caller keeps them; it decides whether what arrived is usable. See
-  // documentation/02-how-the-chat-integration-works.md#parse-a-single-growing-array-incrementally.
+  // documentation/01-how-the-chat-integration-works.md#parse-a-single-growing-array-incrementally.
   const truncated = !complete
   if (truncated) console.warn('Stream ended before the JSON array closed')
 

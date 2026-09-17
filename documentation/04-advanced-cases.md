@@ -1,6 +1,6 @@
-[← Back to Rich messages](04-rich-messages.md)
+[← Back to Rich messages](03-rich-messages.md)
 
-# 5. Advanced cases
+# 4. Advanced cases
 
 Direct calls triggered by quick replies, context synchronization, history restoration and paging, feedback, and error handling. These power the richer flows and keep the UI in sync with the backend.
 
@@ -223,4 +223,4 @@ Powers both per-message thumbs up/down and the survey overlay. `score` is the ra
 
 ---
 
-[← Chapter 4 — Rich messages](04-rich-messages.md) · [Chapter 6 — Conversation starters →](06-conversation-starters.md)
+[← Chapter 3 — Rich messages](03-rich-messages.md) · [Chapter 5 — Conversation starters →](05-conversation-starters.md)

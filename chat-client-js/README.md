@@ -46,7 +46,7 @@ Then visit <http://localhost:8000>. Origin will be `http://localhost:8000`. Some
 
 7. **Request concurrency.** While a `send-event` request is in flight, the composer, quick-reply buttons, and conversation-starter buttons are disabled. The client matches the backend's 60-second server timeout with an `AbortController`. On timeout, a fallback error is shown and the composer is re-enabled.
 
-8. Streaming responses are parsed using the JSON-array-stream pattern documented in `documentation/02-how-the-chat-integration-works.md` (buffer + try-parse + try-parse-with-closing-bracket).
+8. Streaming responses are parsed using the JSON-array-stream pattern documented in `documentation/01-how-the-chat-integration-works.md` (buffer + try-parse + try-parse-with-closing-bracket).
 
 9. **History paging.** When `SYNC_EVENT_LOG.META` reports `hasMore`, a **Load earlier messages** button appears at the top of the thread. It calls `GET .../chats/{chatId}/history?after=<cursor>&limit=20`, walking backwards one page at a time. Pages arrive oldest-first and are inserted *above* the existing thread, with the scroll position adjusted so the shopper keeps looking at the same message. The button is driven by `hasMore`, never by how many events a page returned — a page can be short, or empty, while history remains.
 

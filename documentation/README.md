@@ -5,17 +5,18 @@ The [`openapi-spec.json`](../openapi-spec.json) is the source of truth — when 
 
 ## Contents
 
-1. **Getting Started** (this page)
-2. [How the chat integration works](02-how-the-chat-integration-works.md)
-3. [Basic event types (messages)](03-basic-events.md)
-4. [Rich messages](04-rich-messages.md)
-5. [Advanced cases](05-advanced-cases.md)
-6. [Conversation starters](06-conversation-starters.md)
-7. [Reference](07-reference.md)
+**Getting Started** (this page)
+
+1. [How the chat integration works](01-how-the-chat-integration-works.md)
+2. [Basic event types (messages)](02-basic-events.md)
+3. [Rich messages](03-rich-messages.md)
+4. [Advanced cases](04-advanced-cases.md)
+5. [Conversation starters](05-conversation-starters.md)
+6. [Reference](06-reference.md)
 
 ---
 
-## 1. Getting Started
+## Getting Started
 
 ### Create an API token and find the agent ID
 
@@ -51,7 +52,7 @@ A successful response confirms that the API URL and agent ID are correct. Use th
 
 Bringing the chat client to life is a short, ordered sequence. First, gather your [required integration configuration](#static-setup-and-runtime-identifiers) — the API URL, agent ID, API token, and storefront currency. Then, as the chat client mounts, run three steps in order: [fetch branding & translations](#step-1--fetch-branding--translations-inbound) so the UI is fully localized before it paints, [push the current storefront context](#step-2--set-the-current-context-outbound) so replies are relevant to what is shown in the outer storefront page, and [sync the event log](#step-3--restore-existing-history-outbound), which replays past messages for a conversation already under way and returns the cold-start welcome for a new one.
 
-A long conversation replays only its newest page, so the sync response opens with the cursor to everything older, and a **Load earlier messages** button walks backwards through the rest one page at a time. [Chapter 2 · From mount to history](02-how-the-chat-integration-works.md#from-mount-to-history) draws the whole sequence, paging loop included.
+A long conversation replays only its newest page, so the sync response opens with the cursor to everything older, and a **Load earlier messages** button walks backwards through the rest one page at a time. [Chapter 1 · From mount to history](01-how-the-chat-integration-works.md#from-mount-to-history) draws the whole sequence, paging loop included.
 
 From here on, every interaction is modeled as an **event**. On each chat turn, the client sends one JSON object to `send-event`: an `event`, the current page `url`, and the shopper identifier `endCustomerId`. The server responds with a streaming JSON array of inbound events that the UI renders into the conversation thread. Events flow in one of three directions:
 
@@ -82,18 +83,18 @@ Everything the client needs falls into three groups, distinguished by who owns e
 
 ### Runtime API calls
 
-The whole integration is a one-time settings fetch, a single streaming chat channel, a history endpoint for older events, and optional pre-chat [conversation starters](06-conversation-starters.md). All endpoints use the `/ca/v1/agents/{agentId}` route family and require `Authorization: Bearer <api-token>`.
+The whole integration is a one-time settings fetch, a single streaming chat channel, a history endpoint for older events, and optional pre-chat [conversation starters](05-conversation-starters.md). All endpoints use the `/ca/v1/agents/{agentId}` route family and require `Authorization: Bearer <api-token>`.
 
 | Method | Endpoint | Purpose |
 |---|---|---|
 | `GET` | `/ca/v1/agents/{agentId}/general-settings` | Branding + full i18n dictionary. Called once on mount, cached. Bearer token required. |
 | `POST` | `/ca/v1/agents/{agentId}/chats/{chatId}/send-event` | The whole chat channel: one outbound event in, a stream of inbound events back. Bearer token required. |
-| `GET` | `/ca/v1/agents/{agentId}/chats/{chatId}/history?after=…` | [Older events](05-advanced-cases.md#history-paging-inbound) beyond the page a sync replayed. Bearer token required. |
-| `GET` | `/ca/v1/agents/{agentId}/catalog/items/{itemId}` | [PDP](06-conversation-starters.md#pdp--product-detail-page-inbound) starter questions for the product on the page. Bearer token required. |
-| `POST` | `/ca/v1/agents/{agentId}/catalog/plp` | [PLP](06-conversation-starters.md#plp--product-listing-page-inbound) category-level questions from a product list. Bearer token required. |
-| `GET` | `/ca/v1/agents/{agentId}/suggestions?q=…` | [Search](06-conversation-starters.md#search--autosuggest-inbound) autosuggest questions for a typed query. Bearer token required. |
+| `GET` | `/ca/v1/agents/{agentId}/chats/{chatId}/history?after=…` | [Older events](04-advanced-cases.md#history-paging-inbound) beyond the page a sync replayed. Bearer token required. |
+| `GET` | `/ca/v1/agents/{agentId}/catalog/items/{itemId}` | [PDP](05-conversation-starters.md#pdp--product-detail-page-inbound) starter questions for the product on the page. Bearer token required. |
+| `POST` | `/ca/v1/agents/{agentId}/catalog/plp` | [PLP](05-conversation-starters.md#plp--product-listing-page-inbound) category-level questions from a product list. Bearer token required. |
+| `GET` | `/ca/v1/agents/{agentId}/suggestions?q=…` | [Search](05-conversation-starters.md#search--autosuggest-inbound) autosuggest questions for a typed query. Bearer token required. |
 
-The first three are the **core** surface; the three `clarity-search` paths are optional **conversation starters** shown before the first message. See [Chapter 6](06-conversation-starters.md) for their request/response details.
+The first three are the **core** surface; the three `clarity-search` paths are optional **conversation starters** shown before the first message. See [Chapter 5](05-conversation-starters.md) for their request/response details.
 
 ### Step 1 — Fetch branding & translations <sup>`Inbound`</sup>
 
@@ -129,7 +130,7 @@ applyBrandingAndI18n(await getGeneralSettingsCached())
 
 `FE.SET_CONTEXT` via send-event
 
-Tell the assistant what is shown in the outer storefront page so replies stay relevant. Pass the configured `currency` here, plus whatever the surface knows about (product IDs, cart contents, category, filters). See [`FE.SET_CONTEXT`](05-advanced-cases.md#set-context-both) for the full field list.
+Tell the assistant what is shown in the outer storefront page so replies stay relevant. Pass the configured `currency` here, plus whatever the surface knows about (product IDs, cart contents, category, filters). See [`FE.SET_CONTEXT`](04-advanced-cases.md#set-context-both) for the full field list.
 
 Steps 2 and 3 both post to `send-event`, so define one small helper to reuse:
 
@@ -160,14 +161,14 @@ sendEvent({
 
 `SYNC_EVENT_LOG` via send-event
 
-Send this on every mount, and again after every **New chat** — for a brand-new `chatId` as much as an existing one. What differs is the answer, not whether you ask. Reopening a conversation replays its past events so the thread is restored; de-duplicate them by `_id`, since they may already exist locally. A brand-new `chatId` has nothing to replay, and the server answers with the [cold-start welcome message](03-basic-events.md#welcome--cold-start-both) instead — skip the sync and the shopper opens a blank chat. See [`SYNC_EVENT_LOG`](05-advanced-cases.md#history-restoration-outbound) for details.
+Send this on every mount, and again after every **New chat** — for a brand-new `chatId` as much as an existing one. What differs is the answer, not whether you ask. Reopening a conversation replays its past events so the thread is restored; de-duplicate them by `_id`, since they may already exist locally. A brand-new `chatId` has nothing to replay, and the server answers with the [cold-start welcome message](02-basic-events.md#welcome--cold-start-both) instead — skip the sync and the shopper opens a blank chat. See [`SYNC_EVENT_LOG`](04-advanced-cases.md#history-restoration-outbound) for details.
 
 ```js
 sendEvent({ type: 'SYNC_EVENT_LOG' })
 ```
 
-A sync replays only the newest page of a long conversation, so the response opens with a `SYNC_EVENT_LOG.META` event carrying `hasMore` and a cursor for everything older. Handle it — otherwise a shopper returning to a long chat sees a truncated thread that looks complete. See [History paging](05-advanced-cases.md#history-paging-inbound).
+A sync replays only the newest page of a long conversation, so the response opens with a `SYNC_EVENT_LOG.META` event carrying `hasMore` and a cursor for everything older. Handle it — otherwise a shopper returning to a long chat sees a truncated thread that looks complete. See [History paging](04-advanced-cases.md#history-paging-inbound).
 
 ---
 
-Next: [Chapter 2 — How the chat integration works](02-how-the-chat-integration-works.md)
+Next: [Chapter 1 — How the chat integration works](01-how-the-chat-integration-works.md)
