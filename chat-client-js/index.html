@@ -456,16 +456,16 @@
       <label>
         currency
         <select id="f-currency" required>
-          <option value="GBP">GBP — £</option>
-          <option value="USD">USD — $</option>
-          <option value="EUR">EUR — €</option>
-          <option value="JPY">JPY — ¥</option>
           <option value="AUD">AUD — A$</option>
           <option value="CAD">CAD — C$</option>
           <option value="CHF">CHF</option>
-          <option value="SEK">SEK</option>
-          <option value="NOK">NOK</option>
           <option value="DKK">DKK</option>
+          <option value="EUR">EUR — €</option>
+          <option value="GBP" selected>GBP — £</option>
+          <option value="JPY">JPY — ¥</option>
+          <option value="NOK">NOK</option>
+          <option value="SEK">SEK</option>
+          <option value="USD">USD — $</option>
         </select>
         <span class="field-note">used for price formatting and passed to the backend via FE.SET_CONTEXT</span>
       </label>
@@ -553,7 +553,7 @@
     const REQUEST_TIMEOUT_MS = 55 * 1000;
     const SEND_EVENT_RETRY_ATTEMPTS = 2;
 
-    const CURRENCY_OPTIONS = ['GBP', 'USD', 'EUR', 'JPY', 'AUD', 'CAD', 'CHF', 'SEK', 'NOK', 'DKK'];
+    const CURRENCY_OPTIONS = ['AUD', 'CAD', 'CHF', 'DKK', 'EUR', 'GBP', 'JPY', 'NOK', 'SEK', 'USD'];
 
     // How many of the most recent events SYNC_EVENT_LOG replays when a saved chat is reopened.
     // Set well below the server default of 500 so this sample exercises paging on a
@@ -1757,7 +1757,7 @@
     }
 
     const CURRENCY_SYMBOLS = {
-      GBP: '£', USD: '$', EUR: '€', JPY: '¥', AUD: 'A$', CAD: 'C$', CHF: 'CHF ', SEK: 'kr ', NOK: 'kr ', DKK: 'kr ',
+      AUD: 'A$', CAD: 'C$', CHF: 'CHF ', DKK: 'kr ', EUR: '€', GBP: '£', JPY: '¥', NOK: 'kr ', SEK: 'kr ', USD: '$',
     };
     function formatPrice(price, currency) {
       // Backend may return currency: null. Fall back to the FE-configured

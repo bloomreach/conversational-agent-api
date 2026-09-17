@@ -1,4 +1,4 @@
-export type Currency = 'GBP' | 'USD' | 'EUR' | 'JPY' | 'AUD' | 'CAD' | 'CHF' | 'SEK' | 'NOK' | 'DKK' | string
+export type Currency = 'AUD' | 'CAD' | 'CHF' | 'DKK' | 'EUR' | 'GBP' | 'JPY' | 'NOK' | 'SEK' | 'USD' | string
 
 export interface OnboardingConfig {
   apiUrl: string

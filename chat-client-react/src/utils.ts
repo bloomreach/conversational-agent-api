@@ -1,7 +1,7 @@
 import { v7 as uuidv7 } from 'uuid'
 import type { ChatEvent, Currency, GeneralSettings, OnboardingConfig, ProductItem } from './types'
 
-export const CURRENCY_OPTIONS = ['GBP', 'USD', 'EUR', 'JPY', 'AUD', 'CAD', 'CHF', 'SEK', 'NOK', 'DKK'] as const
+export const CURRENCY_OPTIONS = ['AUD', 'CAD', 'CHF', 'DKK', 'EUR', 'GBP', 'JPY', 'NOK', 'SEK', 'USD'] as const
 
 export function uuid(): string {
   try {
@@ -38,16 +38,16 @@ export function translate(settings: GeneralSettings | null, key: string, fallbac
 }
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
-  GBP: '£',
-  USD: '$',
-  EUR: '€',
-  JPY: '¥',
   AUD: 'A$',
   CAD: 'C$',
   CHF: 'CHF ',
-  SEK: 'kr ',
-  NOK: 'kr ',
   DKK: 'kr ',
+  EUR: '€',
+  GBP: '£',
+  JPY: '¥',
+  NOK: 'kr ',
+  SEK: 'kr ',
+  USD: '$',
 }
 
 export function formatPrice(price: ProductItem['price'], currency: string | null | undefined, fallbackCurrency: Currency): string {
