@@ -1,6 +1,6 @@
-[← Back to Advanced cases](05-advanced-cases.md)
+[← Back to Advanced cases](04-advanced-cases.md)
 
-# 6. Conversation starters
+# 5. Conversation starters
 
 Pre-chat suggestions from public Clarity Search APIs. Call these **before** the first `send-event`. When the shopper selects one, send its text as a normal `ADD_MESSAGE.USER.TEXT`. These paths use the same public V1 prefix and require the Bearer token: `/ca/v1/agents/{agentId}/catalog/...`
 
@@ -64,4 +64,4 @@ Params: `q` (req), `query_type` (default keyword), `include_products`, `include_
 
 ---
 
-[← Chapter 5 — Advanced cases](05-advanced-cases.md) · [Chapter 7 — Reference →](07-reference.md)
+[← Chapter 4 — Advanced cases](04-advanced-cases.md) · [Chapter 6 — Reference →](06-reference.md)

@@ -1,16 +1,16 @@
 [← Back to Getting Started](README.md)
 
-# 2. How the chat integration works
+# 1. How the chat integration works
 
 ## Storefront and chat client
 
-The web experience is composed of **two layers**. The **outer layer** is the merchant's own storefront page — for example a product-detail page (PDP), a product-listing/category page (PLP), or a search-results/autosuggest surface — which defines the [context](05-advanced-cases.md#set-context-both). The **inner layer** is the Conversational Agent chat client UI that floats on top of it, and is everything documented in this guide.
+The web experience is composed of **two layers**. The **outer layer** is the merchant's own storefront page — for example a product-detail page (PDP), a product-listing/category page (PLP), or a search-results/autosuggest surface — which defines the [context](04-advanced-cases.md#set-context-both). The **inner layer** is the Conversational Agent chat client UI that floats on top of it, and is everything documented in this guide.
 
 The chat client itself has **two main views**. The **Welcome view** is the blank-slate state shown before the shopper says anything — it presents the agent's branding and a few actionable **conversation starters** to invite the first message. The moment a message is exchanged, the chat client switches to the **Active chat view**, a scrollable thread that renders every assistant and user turn: text replies, streaming chunks, product carousels, and quick-reply suggestions.
 
-**Conversation starters** are pre-chat suggestion chips fetched from public Clarity Search endpoints — tuned to whatever the shopper is looking at (a product page, a listing page, or a search query). Selecting one simply sends its text as the first user message. See [Chapter 6 · Conversation Starters](06-conversation-starters.md) for the endpoints and payloads.
+**Conversation starters** are pre-chat suggestion chips fetched from public Clarity Search endpoints — tuned to whatever the shopper is looking at (a product page, a listing page, or a search query). Selecting one simply sends its text as the first user message. See [Chapter 5 · Conversation Starters](05-conversation-starters.md) for the endpoints and payloads.
 
-Throughout, the assistant relies on **context**: a snapshot of what is shown in the outer storefront page (product IDs, cart contents, active category or filters, and currency). Keeping this in sync is what lets replies stay relevant — e.g. answering "is it waterproof?" about the exact product on screen. Context is pushed to the backend whenever the page or cart state changes via the [`FE.SET_CONTEXT`](05-advanced-cases.md#set-context-both) event.
+Throughout, the assistant relies on **context**: a snapshot of what is shown in the outer storefront page (product IDs, cart contents, active category or filters, and currency). Keeping this in sync is what lets replies stay relevant — e.g. answering "is it waterproof?" about the exact product on screen. Context is pushed to the backend whenever the page or cart state changes via the [`FE.SET_CONTEXT`](04-advanced-cases.md#set-context-both) event.
 
 The two wireframes below show each view as the chat client docked inside the outer storefront layer, and label which event drives each region and in which direction it flows.
 
@@ -65,7 +65,7 @@ How the pieces above relate. A conversation owns one history — the whole event
 
 ![UML class diagram of the chat conversation domain model](images/chat-domain-model.svg)
 
-A page is a window over the log, not a stored container. The newest one arrives as the answer to `SYNC_EVENT_LOG`, and is the only one you do not ask for by cursor; every older one is requested from the `history` endpoint with the cursor the previous page handed you. See [History paging](05-advanced-cases.md#history-paging-inbound).
+A page is a window over the log, not a stored container. The newest one arrives as the answer to `SYNC_EVENT_LOG`, and is the only one you do not ask for by cursor; every older one is requested from the `history` endpoint with the cursor the previous page handed you. See [History paging](04-advanced-cases.md#history-paging-inbound).
 
 Each event renders at most one message. Most produce a bubble in the thread; the rest supply state the client applies instead — the current context, the shopper's selection, and the paging fields on `SYNC_EVENT_LOG.META`. The thread therefore renders a subset of the log, which is what makes it a projection rather than a copy.
 
@@ -73,14 +73,14 @@ The four subtypes along the foot of the diagram are that switch, and each has it
 
 | Subtype | Renders as | Detail |
 |---|---|---|
-| `TextMessage` | one bubble in the thread | [User text](03-basic-events.md#user-text-message-outbound-echoed) · [Assistant text](03-basic-events.md#assistant-text-message-inbound) · [Quick-reply selection](05-advanced-cases.md#direct-call-outbound-echoed) |
-| `Carousel` | one row of product cards | [Product carousel](04-rich-messages.md#product-carousel-inbound) |
-| `QuickReply` | chips under the message input | [Quick replies](04-rich-messages.md#quick-replies-inbound) |
-| `ControlEvent` | nothing — it sets client state, with one exception | [Set context](05-advanced-cases.md#set-context-both) · [Errors](05-advanced-cases.md#errors-inbound) |
+| `TextMessage` | one bubble in the thread | [User text](02-basic-events.md#user-text-message-outbound-echoed) · [Assistant text](02-basic-events.md#assistant-text-message-inbound) · [Quick-reply selection](04-advanced-cases.md#direct-call-outbound-echoed) |
+| `Carousel` | one row of product cards | [Product carousel](03-rich-messages.md#product-carousel-inbound) |
+| `QuickReply` | chips under the message input | [Quick replies](03-rich-messages.md#quick-replies-inbound) |
+| `ControlEvent` | nothing — it sets client state, with one exception | [Set context](04-advanced-cases.md#set-context-both) · [Errors](04-advanced-cases.md#errors-inbound) |
 
-That exception is `FATAL_ERROR`. It belongs to the control family but is the one member you must render: show the translated fallback message, stop the current stream, and let the shopper retry or start a new chat. Its sibling `ERROR` really is silent — backend telemetry, fine in a debug panel, never in the thread. See [Errors](05-advanced-cases.md#errors-inbound).
+That exception is `FATAL_ERROR`. It belongs to the control family but is the one member you must render: show the translated fallback message, stop the current stream, and let the shopper retry or start a new chat. Its sibling `ERROR` really is silent — backend telemetry, fine in a debug panel, never in the thread. See [Errors](04-advanced-cases.md#errors-inbound).
 
-`QuickReply` is the one worth pausing on, because it is the only subtype that renders outside the thread. The assistant sends a list of suggested answers; you draw them as chips beneath the input, not as a bubble. They are input affordances rather than conversation, which is why picking one leaves no trace of the chips themselves — the selection goes back as an `ADD_MESSAGE.USER.DIRECT_CALL` carrying the chip's label, and it is that message which appears in the thread. See [Quick replies](04-rich-messages.md#quick-replies-inbound) for the payload and the exact rule for `target`/`payload`.
+`QuickReply` is the one worth pausing on, because it is the only subtype that renders outside the thread. The assistant sends a list of suggested answers; you draw them as chips beneath the input, not as a bubble. They are input affordances rather than conversation, which is why picking one leaves no trace of the chips themselves — the selection goes back as an `ADD_MESSAGE.USER.DIRECT_CALL` carrying the chip's label, and it is that message which appears in the thread. See [Quick replies](03-rich-messages.md#quick-replies-inbound) for the payload and the exact rule for `target`/`payload`.
 
 
 ## From mount to history
@@ -93,9 +93,9 @@ The model above says what the pieces are; this section says how the client gets 
 |---|---|---|
 | Resolve `chatId` | none — `localStorage` or a fresh UUID v7 | Every mount |
 | [Branding & translations](README.md#step-1--fetch-branding--translations-inbound) | `GET general-settings` | Once per session, cached 6 h |
-| [Current context](05-advanced-cases.md#set-context-both) | `FE.SET_CONTEXT` via `send-event` | Every mount, then on every page / cart change |
-| [History restoration](05-advanced-cases.md#history-restoration-outbound) | `SYNC_EVENT_LOG` via `send-event` | Every mount and every **New chat** — a fresh `chatId` gets a cold start back |
-| [Older pages](05-advanced-cases.md#history-paging-inbound) | `GET history?after=<cursor>` | While `hasMore`, behind **Load earlier messages** |
+| [Current context](04-advanced-cases.md#set-context-both) | `FE.SET_CONTEXT` via `send-event` | Every mount, then on every page / cart change |
+| [History restoration](04-advanced-cases.md#history-restoration-outbound) | `SYNC_EVENT_LOG` via `send-event` | Every mount and every **New chat** — a fresh `chatId` gets a cold start back |
+| [Older pages](04-advanced-cases.md#history-paging-inbound) | `GET history?after=<cursor>` | While `hasMore`, behind **Load earlier messages** |
 
 The `loop` frame is the `Page → Cursor` association from the domain model, walked backwards: every response hands back the cursor for the page before it, and `hasMore` — never the number of events returned — decides whether the button stays.
 
@@ -160,13 +160,13 @@ Try `JSON.parse(buffer)` (closed array), else `JSON.parse(buffer + ']')` (in-fli
 
 **Keep what arrived, then check that something did.** Every event parsed before the cut has already been dispatched and rendered, so a truncated turn usually leaves the shopper holding a real, if short, reply. Log the truncation for your own telemetry, clear the progress indicator, re-enable the input, and show nothing further: an error message beneath a readable answer is a fault the shopper can neither act on nor tell apart from a genuinely brief reply.
 
-Two truncations do need surfacing, because they leave you with nothing to keep. A turn cut before its first event renders no reply at all. A `SYNC_EVENT_LOG` cut before `SYNC_EVENT_LOG.META` leaves paging state unset, which hides the **Load earlier messages** button and presents a partial transcript as a complete one — the silent truncation [History paging](05-advanced-cases.md#history-paging-inbound) warns about. Treat both as a recoverable error and let the shopper retry.
+Two truncations do need surfacing, because they leave you with nothing to keep. A turn cut before its first event renders no reply at all. A `SYNC_EVENT_LOG` cut before `SYNC_EVENT_LOG.META` leaves paging state unset, which hides the **Load earlier messages** button and presents a partial transcript as a complete one — the silent truncation [History paging](04-advanced-cases.md#history-paging-inbound) warns about. Treat both as a recoverable error and let the shopper retry.
 
 > ⚠️ **Ignore event types you don't recognise.** The stream also carries internal event types that are deliberately left out of this contract, and new types may be added without that counting as a breaking change. Switch on `event.type` and make the `default` branch a no-op. This matters most for generated clients: a strict `oneOf`/discriminator deserializer (Go `ValueByDiscriminator`, Jackson `@JsonSubTypes` without a `defaultImpl`, and similar) will **throw** on an unmapped `type` unless you give it a fallback.
 
 ### One inbound event describes the response
 
-`SYNC_EVENT_LOG.META` describes the sync response itself. It arrives first in the answer to `SYNC_EVENT_LOG` and reports whether older events remain (`hasMore`) and the cursor used to request them (`nextCursor`). Copy those fields into your paging state and discard the event — the thread is built from the events that follow it. See [History paging](05-advanced-cases.md#history-paging-inbound).
+`SYNC_EVENT_LOG.META` describes the sync response itself. It arrives first in the answer to `SYNC_EVENT_LOG` and reports whether older events remain (`hasMore`) and the cursor used to request them (`nextCursor`). Copy those fields into your paging state and discard the event — the thread is built from the events that follow it. See [History paging](04-advanced-cases.md#history-paging-inbound).
 
 ### Group events into one reply
 
@@ -189,4 +189,4 @@ It groups whole events, which is independent of `APPEND_LAST_ASSISTANT_MESSAGE` 
 
 ---
 
-[← Chapter 1 — Getting Started](README.md) · [Chapter 3 — Basic event types →](03-basic-events.md)
+[← Getting Started](README.md) · [Chapter 2 — Basic event types →](02-basic-events.md)
