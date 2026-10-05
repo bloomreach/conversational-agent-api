@@ -36,7 +36,6 @@ Quick-reply selections do **not** use this event — they are always sent as `AD
   type: "ADD_MESSAGE.ASSISTANT.TEXT",
   sentDate: string,              // ISO date-time
   text: string,
-  agent?: string,
   marker?: string,
   skipToneOfVoice?: boolean,
   product_id_link_mapping?: string[],

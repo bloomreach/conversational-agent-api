@@ -266,7 +266,6 @@ export interface PersistColdStartEvent extends EventEnvelope {
 export interface AssistantTextEvent extends EventEnvelope {
   type: 'ADD_MESSAGE.ASSISTANT.TEXT' | 'ADD_MESSAGE.ASSISTANT.COLD_START' | 'APPEND_LAST_ASSISTANT_MESSAGE'
   text: string
-  agent?: string | null
   marker?: string | null
   skipToneOfVoice?: boolean | null
   product_id_link_mapping?: string[] | null

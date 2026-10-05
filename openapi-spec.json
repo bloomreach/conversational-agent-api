@@ -35,10 +35,6 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "required": [
-                    "translated",
-                    "staticReplies"
-                  ],
                   "type": "object",
                   "properties": {
                     "assistantLogo": {
@@ -62,83 +58,6 @@
                       "description": "Optional persona branding field configured in CoCoAaS/admin. May be null when not configured; clients should fall back to default/local branding."
                     },
                     "translated": {
-                      "required": [
-                        "liveChat",
-                        "addToCart",
-                        "adding",
-                        "added",
-                        "addToCartFailed",
-                        "back",
-                        "carouselAsk",
-                        "close",
-                        "cancel",
-                        "followup",
-                        "description",
-                        "showMore",
-                        "select",
-                        "selected",
-                        "selectAll",
-                        "selectModeMessage",
-                        "unreadMessages",
-                        "findSimilar",
-                        "add",
-                        "feedbackThank",
-                        "goToProductPage",
-                        "showSimilar",
-                        "showSimilarSingle",
-                        "showSimilarFull",
-                        "compare",
-                        "compareFull",
-                        "compareSelected",
-                        "andXMore",
-                        "clearChat",
-                        "giveFeedback",
-                        "debugMode",
-                        "legalNotice",
-                        "today",
-                        "yesterday",
-                        "inputPlaceholder",
-                        "inputFollowUp",
-                        "detail",
-                        "selectedProduct",
-                        "deselectAll",
-                        "noProductsFound",
-                        "optionAvailable",
-                        "optionsAvailable",
-                        "optional",
-                        "personalExpert",
-                        "tellUsMore",
-                        "tryAgain",
-                        "errorMsg",
-                        "rawError",
-                        "nicerLines",
-                        "aboutClarity",
-                        "clearPageText",
-                        "skip",
-                        "submit",
-                        "feedback_placeholder",
-                        "welcomeMessage",
-                        "surveyFeedback_satisfied",
-                        "surveyFeedback_notSatisfied",
-                        "surveyFeedback_rateConversation",
-                        "surveyFeedback_shareThoughts",
-                        "surveyFeedback_inputPlaceholder",
-                        "surveyFeedback_thankYou",
-                        "surveyFeedback_thankYouSubtext",
-                        "view",
-                        "viewDetails",
-                        "fileNumberError",
-                        "fileSizeError",
-                        "connectingToLiveAgent",
-                        "connectedToLiveAgent",
-                        "backWithAssistant",
-                        "uploadFile",
-                        "endConversation",
-                        "seeAllResults",
-                        "goodResponse",
-                        "badResponse",
-                        "pageContextUpdated"
-                      ],
                       "type": "object",
                       "properties": {
                         "liveChat": {
@@ -154,6 +73,9 @@
                           "type": "string"
                         },
                         "addToCartFailed": {
+                          "type": "string"
+                        },
+                        "buyNow": {
                           "type": "string"
                         },
                         "back": {
@@ -365,8 +287,102 @@
                         },
                         "pageContextUpdated": {
                           "type": "string"
+                        },
+                        "formFieldRequired": {
+                          "type": "string"
+                        },
+                        "formInvalidEmail": {
+                          "type": "string"
+                        },
+                        "formMinLength": {
+                          "type": "string"
+                        },
+                        "formMaxLength": {
+                          "type": "string"
                         }
-                      }
+                      },
+                      "required": [
+                        "liveChat",
+                        "addToCart",
+                        "adding",
+                        "added",
+                        "addToCartFailed",
+                        "buyNow",
+                        "back",
+                        "carouselAsk",
+                        "close",
+                        "cancel",
+                        "followup",
+                        "description",
+                        "showMore",
+                        "select",
+                        "selected",
+                        "selectAll",
+                        "selectModeMessage",
+                        "unreadMessages",
+                        "findSimilar",
+                        "add",
+                        "feedbackThank",
+                        "goToProductPage",
+                        "showSimilar",
+                        "showSimilarSingle",
+                        "showSimilarFull",
+                        "compare",
+                        "compareFull",
+                        "compareSelected",
+                        "andXMore",
+                        "clearChat",
+                        "giveFeedback",
+                        "debugMode",
+                        "legalNotice",
+                        "today",
+                        "yesterday",
+                        "inputPlaceholder",
+                        "inputFollowUp",
+                        "detail",
+                        "selectedProduct",
+                        "deselectAll",
+                        "noProductsFound",
+                        "optionAvailable",
+                        "optionsAvailable",
+                        "optional",
+                        "personalExpert",
+                        "tellUsMore",
+                        "tryAgain",
+                        "errorMsg",
+                        "rawError",
+                        "nicerLines",
+                        "aboutClarity",
+                        "clearPageText",
+                        "skip",
+                        "submit",
+                        "feedback_placeholder",
+                        "welcomeMessage",
+                        "surveyFeedback_satisfied",
+                        "surveyFeedback_notSatisfied",
+                        "surveyFeedback_rateConversation",
+                        "surveyFeedback_shareThoughts",
+                        "surveyFeedback_inputPlaceholder",
+                        "surveyFeedback_thankYou",
+                        "surveyFeedback_thankYouSubtext",
+                        "view",
+                        "viewDetails",
+                        "fileNumberError",
+                        "fileSizeError",
+                        "connectingToLiveAgent",
+                        "connectedToLiveAgent",
+                        "backWithAssistant",
+                        "uploadFile",
+                        "endConversation",
+                        "seeAllResults",
+                        "goodResponse",
+                        "badResponse",
+                        "pageContextUpdated",
+                        "formFieldRequired",
+                        "formInvalidEmail",
+                        "formMinLength",
+                        "formMaxLength"
+                      ]
                     },
                     "menuSettings": {
                       "nullable": true,
@@ -397,6 +413,13 @@
                         "category_attr_name_for_logging": {
                           "nullable": true,
                           "type": "string"
+                        },
+                        "stock_attr_names": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
                         },
                         "use_text_notification": {
                           "nullable": true,
@@ -439,14 +462,6 @@
                               }
                             }
                           }
-                        },
-                        "stock_attr_names": {
-                          "nullable": true,
-                          "type": "array",
-                          "items": {
-                            "type": "string"
-                          },
-                          "description": "Names of product attributes the backend uses to convey stock information. Observed in live responses but not formally in the spec; documented here for completeness."
                         }
                       }
                     },
@@ -460,6 +475,10 @@
                       }
                     }
                   },
+                  "required": [
+                    "translated",
+                    "staticReplies"
+                  ],
                   "description": "Persona settings, UI translations, and optional branding. Branding fields (assistantLogo, assistantName, agentPersonaName, description) are optional persona/customer-settings values; clients should provide default/local branding fallbacks."
                 }
               }
@@ -504,7 +523,8 @@
             "name": "chatId",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "description": "Generated by the client (UUID v7). A chat does not have to exist: its first turn on send-event creates it under the project and persona (agent) this request addresses. A chatId that already exists under another project or persona answers 404 with { \"code\": \"CHAT_SCOPE_MISMATCH\" }; the client should then start over with a new chatId. history answers the same body for a chat that has not been created yet, so a client regenerates its chatId on the code from send-event only."
             }
           }
         ],
@@ -513,10 +533,6 @@
           "content": {
             "application/json": {
               "schema": {
-                "required": [
-                  "event",
-                  "url"
-                ],
                 "type": "object",
                 "properties": {
                   "event": {
@@ -528,6 +544,10 @@
                   "localeTime": {
                     "nullable": true,
                     "type": "string"
+                  },
+                  "apple": {
+                    "nullable": true,
+                    "type": "number"
                   },
                   "endCustomerId": {
                     "nullable": true,
@@ -541,6 +561,15 @@
                     "nullable": true,
                     "type": "boolean"
                   },
+                  "testerGroup": {
+                    "nullable": true,
+                    "type": "string",
+                    "enum": [
+                      "internal",
+                      "customized",
+                      null
+                    ]
+                  },
                   "agentPayload": {
                     "nullable": true,
                     "type": "object",
@@ -549,24 +578,7 @@
                         "nullable": true,
                         "type": "array",
                         "items": {
-                          "required": [
-                            "type",
-                            "data"
-                          ],
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "type": "string",
-                              "enum": [
-                                "custom",
-                                "file"
-                              ]
-                            },
-                            "data": {
-                              "type": "object",
-                              "additionalProperties": {}
-                            }
-                          }
+                          "$ref": "#/components/schemas/AgentOutboundAttachment"
                         }
                       },
                       "variables": {
@@ -576,7 +588,11 @@
                       }
                     }
                   }
-                }
+                },
+                "required": [
+                  "event",
+                  "url"
+                ]
               }
             }
           }
@@ -608,7 +624,6 @@
             "description": "Internal Server Error — backend error."
           }
         },
-        "description": "Send one event to the chat and receive a streaming JSON array of events in response. Only one send-event request should be in flight per chat at a time — disable user input until the stream completes. The backend will hold the connection open for up to 60 seconds; clients should match this with an AbortController to avoid stalled connections locking the UI. The response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same _id to avoid showing the shopper's message twice.",
         "tags": [
           "Core"
         ],
@@ -616,7 +631,8 @@
           {
             "apiToken": []
           }
-        ]
+        ],
+        "description": "Send one event to the chat and receive a streaming JSON array of events in response. The response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same _id to avoid showing the shopper's message twice."
       }
     },
     "/ca/v1/agents/{agentId}/chats/{chatId}/history": {
@@ -2181,13 +2197,7 @@
           }
         }
       },
-      "AddMessageUserGenByBtnEvent": {
-        "required": [
-          "_id",
-          "type",
-          "sentDate",
-          "text"
-        ],
+      "AddMessageAssistantCarouselEvent": {
         "type": "object",
         "properties": {
           "_id": {
@@ -2196,7 +2206,7 @@
           "type": {
             "type": "string",
             "enum": [
-              "ADD_MESSAGE.USER.GEN_BY_BTN"
+              "ADD_MESSAGE.ASSISTANT.CAROUSEL"
             ]
           },
           "sentDate": {},
@@ -2207,389 +2217,10 @@
           "id": {
             "nullable": true,
             "type": "string"
-          },
-          "text": {
-            "type": "string",
-            "enum": [
-              "SHOW_SIMILAR",
-              "COMPARISON"
-            ]
-          },
-          "label": {
-            "nullable": true,
-            "type": "string"
-          }
-        }
-      },
-      "FeSetContextEvent": {
-        "required": [
-          "_id",
-          "type",
-          "sentDate"
-        ],
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "FE.SET_CONTEXT"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "currentItemIds": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "currentItemIdsType": {
-            "nullable": true,
-            "type": "string",
-            "enum": [
-              "product_id",
-              "item_id"
-            ]
-          },
-          "currentItemId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "miniPageProduct": {
-            "nullable": true,
-            "type": "string",
-            "description": "MiniPDP product context value. Source: tFeSetContextEvent.miniPageProduct (T.null_string)."
-          },
-          "cartItemIds": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "userContextFilter": {
-            "nullable": true,
-            "type": "object",
-            "additionalProperties": {}
-          },
-          "currency": {
-            "nullable": true,
-            "type": "string",
-            "description": "Frontend/customer-supplied valid ISO 4217 currency code (for example USD, GBP, or EUR). Product data may omit currency; clients should use this configured currency for product-card price formatting and pass it in FE.SET_CONTEXT.currency."
-          },
-          "plpCategoryName": {
-            "nullable": true,
-            "type": "string"
-          },
-          "plpCategoryDescription": {
-            "nullable": true,
-            "type": "string"
-          },
-          "urlQueryParams": {
-            "nullable": true,
-            "type": "string"
-          },
-          "uid": {
-            "nullable": true,
-            "type": "string"
-          },
-          "remove": {
-            "nullable": true,
-            "type": "array",
-            "description": "Context buckets to unset for partial context edits.",
-            "items": {
-              "type": "string",
-              "enum": [
-                "pageList",
-                "pageProduct",
-                "miniPageProduct",
-                "shoppingCartList"
-              ]
-            }
-          }
-        }
-      },
-      "AddMessageUserTextEvent": {
-        "required": [
-          "_id",
-          "type",
-          "sentDate",
-          "text"
-        ],
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "ADD_MESSAGE.USER.TEXT"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          },
-          "_metadata": {
-            "nullable": true,
-            "type": "object",
-            "properties": {
-              "engVer": {
-                "nullable": true,
-                "type": "string",
-                "description": "Public metadata: backend engine/version marker when provided."
-              },
-              "queries": {
-                "nullable": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
-              }
-            },
-            "description": "Public metadata fields."
-          }
-        }
-      },
-      "AddMessageUserDirectCallEvent": {
-        "required": [
-          "_id",
-          "type",
-          "sentDate"
-        ],
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "ADD_MESSAGE.USER.DIRECT_CALL"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "target": {
-            "nullable": true,
-            "type": "string",
-            "enum": [
-              "results_summarizer",
-              "search_in_catalog",
-              "sqr_with_search_or_extraction",
-              "products_expert_question",
-              "find_similar_or_compatible_products",
-              "post_search"
-            ],
-            "description": "Public direct-call target. Do not send undocumented/internal target names."
-          },
-          "text": {
-            "nullable": true,
-            "type": "string"
-          },
-          "invisible": {
-            "nullable": true,
-            "type": "boolean"
-          },
-          "source": {
-            "nullable": true,
-            "type": "string",
-            "enum": [
-              "DISCOVERY_SUGGESTION",
-              "DISCOVERY_QR",
-              "DISCOVERY",
-              "DEFAULT",
-              "WEBLAYER"
-            ]
-          },
-          "payload": {
-            "nullable": true,
-            "type": "object",
-            "additionalProperties": {},
-            "description": "Target-specific free-form payload for ADD_MESSAGE.USER.DIRECT_CALL. Public direct-call targets accept these shapes; preserve and forward unknown fields when echoing a server-provided quick-reply payload. search_in_catalog: {query?, filters?, userContextFilter?}. sqr_with_search_or_extraction: {query?, question?, productIds?, itemIds?}. products_expert_question: {question?, productIds?, itemIds?, product?}. find_similar_or_compatible_products: {productId?, itemId?, id?, ids?, mode?}. results_summarizer: {query?, productIds?, itemIds?, products?}. post_search: {query?, productIds?, itemIds?, selectedProductIds?}."
-          },
-          "_metadata": {
-            "nullable": true,
-            "type": "object",
-            "properties": {
-              "engVer": {
-                "nullable": true,
-                "type": "string",
-                "description": "Public metadata: backend engine/version marker when provided."
-              },
-              "queries": {
-                "nullable": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
-              }
-            },
-            "description": "Public metadata fields."
-          }
-        },
-        "description": "User direct-call event for public direct-call targets. Sent for EVERY quick-reply selection (always DIRECT_CALL, never ADD_MESSAGE.USER.TEXT), whether or not the option carries a target/payload; copy any server-provided target/payload back verbatim. Can also be constructed with the documented target-specific payload shapes."
-      },
-      "AddMessageUserFeedbackEvent": {
-        "required": [
-          "_id",
-          "type",
-          "sentDate"
-        ],
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "ADD_MESSAGE.USER.FEEDBACK"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "score": {
-            "nullable": true,
-            "type": "number"
-          },
-          "text": {
-            "nullable": true,
-            "type": "string"
-          },
-          "messages": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          }
-        }
-      },
-      "SyncEventLogEvent": {
-        "required": [
-          "_id",
-          "type",
-          "sentDate"
-        ],
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "SYNC_EVENT_LOG"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "lastProcessedEventId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "welcomeUnnecessary": {
-            "nullable": true,
-            "type": "boolean"
-          },
-          "limit": {
-            "type": "integer",
-            "format": "int32",
-            "nullable": true,
-            "default": 500,
-            "maximum": 500,
-            "description": "How many of the newest events to replay in this sync. Omitted replays 500; larger values are clamped to 500. This asks rather than dictates — read what you were actually given from the SYNC_EVENT_LOG.META event that opens the response. A client that renders only the last few messages up front should ask for less here and page the rest in through `GET /ca/v1/agents/{agentId}/chats/{chatId}/history`."
-          }
-        }
-      },
-      "SelectedItemsEvent": {
-        "required": [
-          "_id",
-          "type",
-          "sentDate",
-          "ids"
-        ],
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "SELECTED_ITEMS"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "ids": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
-          },
-          "generatedFromAI": {
-            "nullable": true,
-            "type": "boolean"
           },
           "data": {
-            "nullable": true,
             "type": "array",
             "items": {
-              "required": [
-                "id"
-              ],
               "type": "object",
               "properties": {
                 "id": {
@@ -2608,24 +2239,36 @@
                   "type": "string"
                 },
                 "price": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "number"
                     },
                     {
                       "type": "string"
+                    },
+                    {
+                      "type": "string",
+                      "nullable": true,
+                      "enum": [
+                        null
+                      ]
                     }
                   ]
                 },
                 "originalPrice": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "number"
                     },
                     {
                       "type": "string"
+                    },
+                    {
+                      "type": "string",
+                      "nullable": true,
+                      "enum": [
+                        null
+                      ]
                     }
                   ]
                 },
@@ -2649,9 +2292,6 @@
                   "nullable": true,
                   "type": "array",
                   "items": {
-                    "required": [
-                      "question"
-                    ],
                     "type": "object",
                     "properties": {
                       "question": {
@@ -2665,7 +2305,10 @@
                         "nullable": true,
                         "type": "string"
                       }
-                    }
+                    },
+                    "required": [
+                      "question"
+                    ]
                   }
                 },
                 "extraVariantFields": {
@@ -2702,62 +2345,54 @@
                     }
                   }
                 }
-              }
+              },
+              "required": [
+                "id"
+              ]
             }
           },
-          "isSelectedFromLastBotResponse": {
+          "categoryName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "rephrasedQuery": {
+            "nullable": true,
+            "type": "string"
+          },
+          "_metadata": {
             "nullable": true,
             "type": "object",
-            "additionalProperties": {
-              "type": "boolean"
-            }
-          }
-        }
-      },
-      "PersistColdStartEvent": {
-        "required": [
-          "_id",
-          "type",
-          "sentDate"
-        ],
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "PERSIST_COLD_START"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "events": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReplayEvent"
+            "properties": {
+              "engVer": {
+                "nullable": true,
+                "type": "string",
+                "description": "Public metadata: backend engine/version marker when provided."
+              },
+              "queries": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
+              }
             },
-            "description": "Welcome/cold-start events to persist for future replay, including the ADD_MESSAGE.ASSISTANT.COLD_START message shown on the blank-slate screen."
+            "description": "Public metadata fields."
+          },
+          "batchId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Groups the events that make up ONE assistant reply. A single reply can arrive as several events - text, then a carousel, then quick replies - and those share a batchId, so a client can render the first part while the rest still streams in. Two different batchIds are two separate replies. Optional: it is absent on events recorded before it existed, and on every user event, so treat a missing value as \"no grouping information\" and fall back to grouping consecutive events from the same role that arrive close together."
           }
         },
-        "description": "Persists welcome/cold-start events for future replay. Use this event to save the ADD_MESSAGE.ASSISTANT.COLD_START message; sending the cold-start message itself does not store it in conversation history."
-      },
-      "AddMessageAssistantColdStartEvent": {
         "required": [
           "_id",
           "type",
           "sentDate",
-          "text"
-        ],
+          "data"
+        ]
+      },
+      "AddMessageAssistantColdStartEvent": {
         "type": "object",
         "properties": {
           "_id": {
@@ -2798,17 +2433,11 @@
           },
           "quickReply": {
             "nullable": true,
-            "required": [
-              "data"
-            ],
             "type": "object",
             "properties": {
               "data": {
                 "type": "array",
                 "items": {
-                  "required": [
-                    "label"
-                  ],
                   "type": "object",
                   "properties": {
                     "label": {
@@ -2828,17 +2457,24 @@
                         "sqr_with_search_or_extraction",
                         "products_expert_question",
                         "find_similar_or_compatible_products",
-                        "post_search"
+                        "post_search",
+                        null
                       ]
                     }
-                  }
+                  },
+                  "required": [
+                    "label"
+                  ]
                 }
               },
               "text": {
                 "nullable": true,
                 "type": "string"
               }
-            }
+            },
+            "required": [
+              "data"
+            ]
           },
           "initialContext": {
             "nullable": true,
@@ -2856,7 +2492,8 @@
                 "type": "string",
                 "enum": [
                   "product_id",
-                  "item_id"
+                  "item_id",
+                  null
                 ]
               },
               "currentItemId": {
@@ -2915,15 +2552,142 @@
             }
           }
         },
-        "description": "Actual welcome/cold-start message rendered by the UI and replayed later. Sending ADD_MESSAGE.ASSISTANT.COLD_START directly does not persist it in conversation history. To save the welcome state for future replay, send PERSIST_COLD_START with this event in its events payload."
-      },
-      "AddMessageAssistantTextEvent": {
         "required": [
           "_id",
           "type",
           "sentDate",
           "text"
         ],
+        "description": "Actual welcome/cold-start message rendered by the UI and replayed later. Sending ADD_MESSAGE.ASSISTANT.COLD_START directly does not persist it in conversation history. To save the welcome state for future replay, send PERSIST_COLD_START with this event in its events payload."
+      },
+      "AddMessageAssistantNotificationEvent": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.ASSISTANT.NOTIFICATION"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "toolName": {
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "toolName",
+          "text"
+        ],
+        "description": "In-place progress update. Render only the `text` field; `toolName` is internal. Each notification REPLACES the previous one (and replaces the initial \"Thinking…\" placeholder). Do NOT clear the progress indicator when the first content event arrives; keep it visible while messages stream in and clear it only after the request completes and all response events have been received."
+      },
+      "AddMessageAssistantQuickReplyEvent": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.ASSISTANT.QUICK_REPLY"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string"
+                },
+                "payload": {
+                  "nullable": true,
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "target": {
+                  "nullable": true,
+                  "type": "string",
+                  "enum": [
+                    "results_summarizer",
+                    "search_in_catalog",
+                    "sqr_with_search_or_extraction",
+                    "products_expert_question",
+                    "find_similar_or_compatible_products",
+                    "post_search",
+                    null
+                  ]
+                }
+              },
+              "required": [
+                "label"
+              ]
+            }
+          },
+          "text": {
+            "nullable": true,
+            "type": "string"
+          },
+          "_metadata": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "engVer": {
+                "nullable": true,
+                "type": "string",
+                "description": "Public metadata: backend engine/version marker when provided."
+              },
+              "queries": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
+              }
+            },
+            "description": "Public metadata fields."
+          },
+          "batchId": {
+            "type": "string",
+            "nullable": true,
+            "description": "Groups the events that make up ONE assistant reply. A single reply can arrive as several events - text, then a carousel, then quick replies - and those share a batchId, so a client can render the first part while the rest still streams in. Two different batchIds are two separate replies. Optional: it is absent on events recorded before it existed, and on every user event, so treat a missing value as \"no grouping information\" and fall back to grouping consecutive events from the same role that arrive close together."
+          }
+        },
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "data"
+        ]
+      },
+      "AddMessageAssistantTextEvent": {
         "type": "object",
         "properties": {
           "_id": {
@@ -2982,178 +2746,808 @@
             },
             "description": "Public metadata fields."
           },
-          "agent": {
-            "nullable": true,
-            "type": "string"
-          },
           "batchId": {
             "type": "string",
             "nullable": true,
             "description": "Groups the events that make up ONE assistant reply. A single reply can arrive as several events - text, then a carousel, then quick replies - and those share a batchId, so a client can render the first part while the rest still streams in. Two different batchIds are two separate replies. Optional: it is absent on events recorded before it existed, and on every user event, so treat a missing value as \"no grouping information\" and fall back to grouping consecutive events from the same role that arrive close together."
           }
-        }
-      },
-      "FatalErrorEvent": {
-        "required": [
-          "_id",
-          "type",
-          "sentDate"
-        ],
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "FATAL_ERROR"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "text": {
-            "nullable": true,
-            "type": "string"
-          },
-          "exception": {
-            "nullable": true,
-            "required": [
-              "message",
-              "type",
-              "stack"
-            ],
-            "type": "object",
-            "properties": {
-              "message": {},
-              "type": {
-                "type": "string"
-              },
-              "stack": {
-                "type": "string"
-              }
-            }
-          },
-          "request": {
-            "nullable": true,
-            "required": [
-              "url",
-              "method"
-            ],
-            "type": "object",
-            "properties": {
-              "url": {
-                "type": "string"
-              },
-              "method": {
-                "type": "string"
-              },
-              "headers": {},
-              "body": {}
-            }
-          },
-          "error_category": {
-            "nullable": true,
-            "type": "string"
-          },
-          "is_retryable": {
-            "nullable": true,
-            "type": "boolean"
-          }
         },
-        "description": "Fatal, user-facing error. Clients should display the fallback message from general-settings (translated.errorMsg) and stop accepting input for the current turn. The event.text contains internal detail and should NOT be shown to end-users."
-      },
-      "ErrorEvent": {
-        "required": [
-          "_id",
-          "type",
-          "sentDate"
-        ],
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "ERROR"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "text": {
-            "nullable": true,
-            "type": "string"
-          },
-          "exception": {
-            "nullable": true,
-            "required": [
-              "message",
-              "type",
-              "stack"
-            ],
-            "type": "object",
-            "properties": {
-              "message": {},
-              "type": {
-                "type": "string"
-              },
-              "stack": {
-                "type": "string"
-              }
-            }
-          },
-          "request": {
-            "nullable": true,
-            "required": [
-              "url",
-              "method"
-            ],
-            "type": "object",
-            "properties": {
-              "url": {
-                "type": "string"
-              },
-              "method": {
-                "type": "string"
-              },
-              "headers": {},
-              "body": {}
-            }
-          },
-          "error_category": {
-            "nullable": true,
-            "type": "string"
-          },
-          "is_retryable": {
-            "nullable": true,
-            "type": "boolean"
-          }
-        },
-        "description": "Non-fatal warning emitted by the backend (e.g. internal AGENT.ERROR telemetry). Clients must NOT surface these to end-users — they should be ignored in the UI (logging to a debug panel is fine)."
-      },
-      "AppendLastAssistantMessageEvent": {
         "required": [
           "_id",
           "type",
           "sentDate",
           "text"
+        ]
+      },
+      "AddMessageUserCompareEvent": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.USER.COMPARE"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "ids"
+        ]
+      },
+      "AddMessageUserDirectCallEvent": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.USER.DIRECT_CALL"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "target": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "results_summarizer",
+              "search_in_catalog",
+              "sqr_with_search_or_extraction",
+              "products_expert_question",
+              "find_similar_or_compatible_products",
+              "post_search",
+              null
+            ],
+            "description": "Public direct-call target. Do not send undocumented/internal target names."
+          },
+          "text": {
+            "nullable": true,
+            "type": "string"
+          },
+          "invisible": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "source": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "DISCOVERY_SUGGESTION",
+              "DISCOVERY_QR",
+              "DISCOVERY",
+              "DEFAULT",
+              "WEBLAYER",
+              null
+            ]
+          },
+          "payload": {
+            "nullable": true,
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Target-specific free-form payload for ADD_MESSAGE.USER.DIRECT_CALL. Public direct-call targets accept these shapes; preserve and forward unknown fields when echoing a server-provided quick-reply payload. search_in_catalog: {query?, filters?, userContextFilter?}. sqr_with_search_or_extraction: {query?, question?, productIds?, itemIds?}. products_expert_question: {question?, productIds?, itemIds?, product?}. find_similar_or_compatible_products: {productId?, itemId?, id?, ids?, mode?}. results_summarizer: {query?, productIds?, itemIds?, products?}. post_search: {query?, productIds?, itemIds?, selectedProductIds?}."
+          },
+          "_metadata": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "engVer": {
+                "nullable": true,
+                "type": "string",
+                "description": "Public metadata: backend engine/version marker when provided."
+              },
+              "queries": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
+              }
+            },
+            "description": "Public metadata fields."
+          }
+        },
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
         ],
+        "description": "User direct-call event for public direct-call targets. Sent for EVERY quick-reply selection (always DIRECT_CALL, never ADD_MESSAGE.USER.TEXT), whether or not the option carries a target/payload; copy any server-provided target/payload back verbatim. Can also be constructed with the documented target-specific payload shapes."
+      },
+      "AddMessageUserFeedbackEvent": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.USER.FEEDBACK"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "score": {
+            "nullable": true,
+            "type": "number"
+          },
+          "text": {
+            "nullable": true,
+            "type": "string"
+          },
+          "messages": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
+        ]
+      },
+      "AddMessageUserGenByBtnEvent": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.USER.GEN_BY_BTN"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "text": {
+            "type": "string",
+            "enum": [
+              "SHOW_SIMILAR",
+              "COMPARISON"
+            ]
+          },
+          "label": {
+            "nullable": true,
+            "type": "string"
+          },
+          "_metadata": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "engVer": {
+                "nullable": true,
+                "type": "string",
+                "description": "Public metadata: backend engine/version marker when provided."
+              },
+              "queries": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
+              }
+            },
+            "description": "Public metadata fields."
+          }
+        },
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "text"
+        ]
+      },
+      "AddMessageUserTextEvent": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "ADD_MESSAGE.USER.TEXT"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "text": {
+            "type": "string"
+          },
+          "_metadata": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "engVer": {
+                "nullable": true,
+                "type": "string",
+                "description": "Public metadata: backend engine/version marker when provided."
+              },
+              "queries": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
+              }
+            },
+            "description": "Public metadata fields."
+          }
+        },
+        "required": [
+          "_id",
+          "type",
+          "sentDate",
+          "text"
+        ]
+      },
+      "AgentInboundAttachment": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "custom"
+                ]
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "carousel"
+                    ]
+                  },
+                  "entries": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "image": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "title": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "subtitles": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "buttons": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "label": {
+                                "type": "string"
+                              },
+                              "action": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "send-message",
+                                      "open-link"
+                                    ]
+                                  },
+                                  "link": {
+                                    "nullable": true,
+                                    "type": "string"
+                                  },
+                                  "message": {
+                                    "nullable": true,
+                                    "type": "object",
+                                    "properties": {
+                                      "text": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "text"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type"
+                                ]
+                              }
+                            },
+                            "required": [
+                              "label",
+                              "action"
+                            ]
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "entries"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "custom"
+                ]
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "button-group"
+                    ]
+                  },
+                  "buttons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "text": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "payload": {
+                          "nullable": true,
+                          "type": "object",
+                          "additionalProperties": {}
+                        },
+                        "link": {
+                          "nullable": true,
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "text"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "buttons"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "custom"
+                ]
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "copy-button-list"
+                    ]
+                  },
+                  "copyButtons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "textToCopy": {
+                          "type": "string"
+                        },
+                        "copyLabel": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "copiedLabel": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "textToCopy",
+                        "copiedLabel"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "copyButtons"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "custom"
+                ]
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "image"
+                    ]
+                  },
+                  "url": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "type",
+                  "url"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "custom"
+                ]
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "form"
+                    ]
+                  },
+                  "formMessageId": {
+                    "type": "string"
+                  },
+                  "blockChatInput": {
+                    "type": "boolean"
+                  },
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text",
+                            "email",
+                            "select"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "placeholder": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "minSize": {
+                          "nullable": true,
+                          "type": "number"
+                        },
+                        "maxSize": {
+                          "nullable": true,
+                          "type": "number"
+                        },
+                        "options": {
+                          "nullable": true,
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              },
+                              "label": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name",
+                              "label"
+                            ]
+                          }
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "name",
+                        "label"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "formMessageId",
+                  "blockChatInput",
+                  "fields"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "file"
+                ]
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "filename": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "key"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ]
+          }
+        ]
+      },
+      "AgentOutboundAttachment": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "custom"
+                ]
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "button-click"
+                    ]
+                  },
+                  "value": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "payload": {
+                    "nullable": true,
+                    "type": "object",
+                    "additionalProperties": {}
+                  }
+                },
+                "required": [
+                  "type"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "custom"
+                ]
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "form-submit"
+                    ]
+                  },
+                  "formMessageId": {
+                    "type": "string"
+                  },
+                  "fields": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "text",
+                            "email",
+                            "select"
+                          ]
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "label": {
+                          "type": "string"
+                        },
+                        "value": {
+                          "type": "string"
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "name",
+                        "label",
+                        "value"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "type",
+                  "formMessageId",
+                  "fields"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ]
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "file"
+                ]
+              },
+              "data": {
+                "type": "object",
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "filename": {
+                    "nullable": true,
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "key"
+                ]
+              }
+            },
+            "required": [
+              "type",
+              "data"
+            ]
+          }
+        ]
+      },
+      "AppendLastAssistantMessageEvent": {
         "type": "object",
         "properties": {
           "_id": {
@@ -3197,15 +3591,15 @@
             },
             "description": "Public metadata fields."
           }
-        }
-      },
-      "AddMessageUserCompareEvent": {
+        },
         "required": [
           "_id",
           "type",
           "sentDate",
-          "ids"
-        ],
+          "text"
+        ]
+      },
+      "ErrorEvent": {
         "type": "object",
         "properties": {
           "_id": {
@@ -3214,7 +3608,7 @@
           "type": {
             "type": "string",
             "enum": [
-              "ADD_MESSAGE.USER.COMPARE"
+              "ERROR"
             ]
           },
           "sentDate": {},
@@ -3226,23 +3620,239 @@
             "nullable": true,
             "type": "string"
           },
-          "ids": {
+          "text": {
+            "nullable": true,
+            "type": "string"
+          },
+          "exception": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "message": {},
+              "type": {
+                "type": "string"
+              },
+              "stack": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message",
+              "type",
+              "stack"
+            ]
+          },
+          "request": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string"
+              },
+              "headers": {},
+              "body": {}
+            },
+            "required": [
+              "url",
+              "method"
+            ]
+          },
+          "error_category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "is_retryable": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
+        ],
+        "description": "Non-fatal warning emitted by the backend (e.g. internal AGENT.ERROR telemetry). Clients must NOT surface these to end-users — they should be ignored in the UI (logging to a debug panel is fine)."
+      },
+      "FatalErrorEvent": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "FATAL_ERROR"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "text": {
+            "nullable": true,
+            "type": "string"
+          },
+          "exception": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "message": {},
+              "type": {
+                "type": "string"
+              },
+              "stack": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "message",
+              "type",
+              "stack"
+            ]
+          },
+          "request": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "url": {
+                "type": "string"
+              },
+              "method": {
+                "type": "string"
+              },
+              "headers": {},
+              "body": {}
+            },
+            "required": [
+              "url",
+              "method"
+            ]
+          },
+          "error_category": {
+            "nullable": true,
+            "type": "string"
+          },
+          "is_retryable": {
+            "nullable": true,
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
+        ]
+      },
+      "FeSetContextEvent": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "FE.SET_CONTEXT"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "currentItemIds": {
+            "nullable": true,
             "type": "array",
             "items": {
               "type": "string"
             }
+          },
+          "currentItemIdsType": {
+            "nullable": true,
+            "type": "string",
+            "enum": [
+              "product_id",
+              "item_id",
+              null
+            ]
+          },
+          "currentItemId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "miniPageProduct": {
+            "nullable": true,
+            "type": "string",
+            "description": "MiniPDP product context value. Source: tFeSetContextEvent.miniPageProduct (T.null_string)."
+          },
+          "cartItemIds": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "userContextFilter": {
+            "nullable": true,
+            "type": "object",
+            "additionalProperties": {}
+          },
+          "currency": {
+            "nullable": true,
+            "type": "string",
+            "description": "Frontend/customer-supplied valid ISO 4217 currency code (for example USD, GBP, or EUR). Product data may omit currency; clients should use this configured currency for product-card price formatting and pass it in FE.SET_CONTEXT.currency."
+          },
+          "plpCategoryName": {
+            "nullable": true,
+            "type": "string"
+          },
+          "plpCategoryDescription": {
+            "nullable": true,
+            "type": "string"
+          },
+          "urlQueryParams": {
+            "nullable": true,
+            "type": "string"
+          },
+          "uid": {
+            "nullable": true,
+            "type": "string"
+          },
+          "remove": {
+            "nullable": true,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "pageList",
+                "pageProduct",
+                "miniPageProduct",
+                "shoppingCartList"
+              ]
+            },
+            "description": "Context buckets to unset for partial context edits."
           }
-        }
-      },
-      "MetadataSelectAgentEvent": {
+        },
         "required": [
           "_id",
           "type",
-          "sentDate",
-          "agent",
-          "conversationId",
-          "userMessage"
-        ],
+          "sentDate"
+        ]
+      },
+      "MetadataSelectAgentEvent": {
         "type": "object",
         "properties": {
           "_id": {
@@ -3297,7 +3907,10 @@
             "enum": [
               "ended",
               "transfer",
-              "error"
+              "error",
+              "live_agent",
+              "live_chat_ended",
+              null
             ]
           },
           "error": {
@@ -3308,38 +3921,28 @@
             "nullable": true,
             "type": "array",
             "items": {
-              "required": [
-                "type",
-                "data"
-              ],
-              "type": "object",
-              "properties": {
-                "type": {
-                  "type": "string",
-                  "enum": [
-                    "custom",
-                    "file"
-                  ]
-                },
-                "data": {
-                  "type": "object",
-                  "additionalProperties": {}
-                }
-              }
+              "$ref": "#/components/schemas/AgentInboundAttachment"
             }
           },
           "userMessage": {
             "type": "string"
+          },
+          "userPayload": {
+            "nullable": true,
+            "type": "object",
+            "additionalProperties": {}
           }
-        }
-      },
-      "AddMessageAssistantCarouselEvent": {
+        },
         "required": [
           "_id",
           "type",
           "sentDate",
-          "data"
-        ],
+          "agent",
+          "conversationId",
+          "userMessage"
+        ]
+      },
+      "PersistColdStartEvent": {
         "type": "object",
         "properties": {
           "_id": {
@@ -3348,7 +3951,7 @@
           "type": {
             "type": "string",
             "enum": [
-              "ADD_MESSAGE.ASSISTANT.CAROUSEL"
+              "PERSIST_COLD_START"
             ]
           },
           "sentDate": {},
@@ -3360,12 +3963,57 @@
             "nullable": true,
             "type": "string"
           },
-          "data": {
+          "events": {
+            "nullable": true,
             "type": "array",
             "items": {
-              "required": [
-                "id"
-              ],
+              "$ref": "#/components/schemas/ReplayEvent"
+            },
+            "description": "Welcome/cold-start events to persist for future replay, including the ADD_MESSAGE.ASSISTANT.COLD_START message shown on the blank-slate screen."
+          }
+        },
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
+        ],
+        "description": "Persists welcome/cold-start events for future replay. Use this event to save the ADD_MESSAGE.ASSISTANT.COLD_START message; sending the cold-start message itself does not store it in conversation history."
+      },
+      "SelectedItemsEvent": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "SELECTED_ITEMS"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "generatedFromAI": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "data": {
+            "nullable": true,
+            "type": "array",
+            "items": {
               "type": "object",
               "properties": {
                 "id": {
@@ -3384,24 +4032,36 @@
                   "type": "string"
                 },
                 "price": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "number"
                     },
                     {
                       "type": "string"
+                    },
+                    {
+                      "type": "string",
+                      "nullable": true,
+                      "enum": [
+                        null
+                      ]
                     }
                   ]
                 },
                 "originalPrice": {
-                  "nullable": true,
                   "oneOf": [
                     {
                       "type": "number"
                     },
                     {
                       "type": "string"
+                    },
+                    {
+                      "type": "string",
+                      "nullable": true,
+                      "enum": [
+                        null
+                      ]
                     }
                   ]
                 },
@@ -3425,9 +4085,6 @@
                   "nullable": true,
                   "type": "array",
                   "items": {
-                    "required": [
-                      "question"
-                    ],
                     "type": "object",
                     "properties": {
                       "question": {
@@ -3441,7 +4098,10 @@
                         "nullable": true,
                         "type": "string"
                       }
-                    }
+                    },
+                    "required": [
+                      "question"
+                    ]
                   }
                 },
                 "extraVariantFields": {
@@ -3478,51 +4138,28 @@
                     }
                   }
                 }
-              }
+              },
+              "required": [
+                "id"
+              ]
             }
           },
-          "categoryName": {
-            "nullable": true,
-            "type": "string"
-          },
-          "rephrasedQuery": {
-            "nullable": true,
-            "type": "string"
-          },
-          "_metadata": {
+          "isSelectedFromLastBotResponse": {
             "nullable": true,
             "type": "object",
-            "properties": {
-              "engVer": {
-                "nullable": true,
-                "type": "string",
-                "description": "Public metadata: backend engine/version marker when provided."
-              },
-              "queries": {
-                "nullable": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
-              }
-            },
-            "description": "Public metadata fields."
-          },
-          "batchId": {
-            "type": "string",
-            "nullable": true,
-            "description": "Groups the events that make up ONE assistant reply. A single reply can arrive as several events - text, then a carousel, then quick replies - and those share a batchId, so a client can render the first part while the rest still streams in. Two different batchIds are two separate replies. Optional: it is absent on events recorded before it existed, and on every user event, so treat a missing value as \"no grouping information\" and fall back to grouping consecutive events from the same role that arrive close together."
+            "additionalProperties": {
+              "type": "boolean"
+            }
           }
-        }
-      },
-      "AddMessageAssistantQuickReplyEvent": {
+        },
         "required": [
           "_id",
           "type",
           "sentDate",
-          "data"
-        ],
+          "ids"
+        ]
+      },
+      "SyncEventLogEvent": {
         "type": "object",
         "properties": {
           "_id": {
@@ -3531,7 +4168,7 @@
           "type": {
             "type": "string",
             "enum": [
-              "ADD_MESSAGE.ASSISTANT.QUICK_REPLY"
+              "SYNC_EVENT_LOG"
             ]
           },
           "sentDate": {},
@@ -3543,104 +4180,128 @@
             "nullable": true,
             "type": "string"
           },
-          "data": {
-            "type": "array",
-            "items": {
-              "required": [
-                "label"
-              ],
-              "type": "object",
-              "properties": {
-                "label": {
-                  "type": "string"
-                },
-                "payload": {
-                  "nullable": true,
+          "lastProcessedEventId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "welcomeUnnecessary": {
+            "nullable": true,
+            "type": "boolean"
+          },
+          "limit": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true,
+            "default": 500,
+            "maximum": 500,
+            "description": "How many of the newest events to replay in this sync. Omitted replays 500; larger values are clamped to 500. This asks rather than dictates — read what you were actually given from the SYNC_EVENT_LOG.META event that opens the response. A client that renders only the last few messages up front should ask for less here and page the rest in through `GET /ca/v1/agents/{agentId}/chats/{chatId}/history`."
+          }
+        },
+        "required": [
+          "_id",
+          "type",
+          "sentDate"
+        ]
+      },
+      "SyncEventLogMetaEvent": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "SYNC_EVENT_LOG.META"
+            ]
+          },
+          "sentDate": {},
+          "chatId": {
+            "nullable": true,
+            "type": "string"
+          },
+          "id": {
+            "nullable": true,
+            "type": "string"
+          },
+          "hasMore": {
+            "type": "boolean",
+            "description": "True when the chat holds events older than the window this sync replayed. Show a load-more affordance on it, never on the number of events received."
+          },
+          "nextCursor": {
+            "nullable": true,
+            "type": "string",
+            "description": "Opaque cursor to the page immediately before this window. Pass it verbatim as the `after` query parameter of the chat `history` endpoint. Null when the sync already covered the chat from its start."
+          },
+          "state": {
+            "nullable": true,
+            "type": "object",
+            "properties": {
+              "selectedList": {
+                "type": "array",
+                "items": {
                   "type": "object",
-                  "additionalProperties": {}
-                },
-                "target": {
-                  "nullable": true,
-                  "type": "string",
-                  "enum": [
-                    "results_summarizer",
-                    "search_in_catalog",
-                    "sqr_with_search_or_extraction",
-                    "products_expert_question",
-                    "find_similar_or_compatible_products",
-                    "post_search"
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "isSelectedFromLastBotResponse": {
+                      "nullable": true,
+                      "type": "boolean"
+                    },
+                    "idType": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
+                  ]
+                }
+              },
+              "selectedList_generatedFromAI": {},
+              "lastUserSelectedList": {
+                "nullable": true,
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "isSelectedFromLastBotResponse": {
+                      "nullable": true,
+                      "type": "boolean"
+                    },
+                    "idType": {
+                      "nullable": true,
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id"
                   ]
                 }
               }
-            }
-          },
-          "text": {
-            "nullable": true,
-            "type": "string"
-          },
-          "_metadata": {
-            "nullable": true,
-            "type": "object",
-            "properties": {
-              "engVer": {
-                "nullable": true,
-                "type": "string",
-                "description": "Public metadata: backend engine/version marker when provided."
-              },
-              "queries": {
-                "nullable": true,
-                "type": "array",
-                "items": {
-                  "type": "string"
-                },
-                "description": "Public metadata: exact search queries the assistant ran. Currently meaningful on assistant carousel events and useful for an optional, merchant-configured see-all-results hand-off to a storefront search page (not shown by default)."
-              }
             },
-            "description": "Public metadata fields."
+            "required": [
+              "selectedList"
+            ],
+            "description": "Selection state folded over the WHOLE chat, not just the replayed window — which is what makes a small `limit` usable, since a client cannot recompute this from events it was never sent. A snapshot taken when the sync was served, NOT a live value: restore UI from it on load, but do not keep deciding on it mid-conversation. Null for a chat that has never been folded."
           },
-          "batchId": {
-            "type": "string",
+          "stateAsOfSentDate": {
             "nullable": true,
-            "description": "Groups the events that make up ONE assistant reply. A single reply can arrive as several events - text, then a carousel, then quick replies - and those share a batchId, so a client can render the first part while the rest still streams in. Two different batchIds are two separate replies. Optional: it is absent on events recorded before it existed, and on every user event, so treat a missing value as \"no grouping information\" and fall back to grouping consecutive events from the same role that arrive close together."
+            "type": "string",
+            "description": "`sentDate` of the newest event of this window, and the point `state` above is current as of. It is what makes the snapshot usable while paging: SELECTED_ITEMS events OLDER than this are already folded into `state` and must not be applied again, while any that arrive after it must be. Null when the window came back empty."
           }
-        }
-      },
-      "AddMessageAssistantNotificationEvent": {
+        },
         "required": [
           "_id",
           "type",
           "sentDate",
-          "toolName",
-          "text"
+          "hasMore"
         ],
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "ADD_MESSAGE.ASSISTANT.NOTIFICATION"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "toolName": {
-            "type": "string"
-          },
-          "text": {
-            "type": "string"
-          }
-        },
-        "description": "In-place progress update. Render only the `text` field; `toolName` is internal. Each notification REPLACES the previous one (and replaces the initial \"Thinking…\" placeholder). Do NOT clear the progress indicator when the first content event arrives; keep it visible while messages stream in and clear it only after the request completes and all response events have been received."
+        "description": "Describes the sync response it opens, and is not a chat message: it arrives once, before the replayed events, and only in answer to SYNC_EVENT_LOG. It is the only place a cursor into chat history is handed out, so a client that pages MUST read it. Do not render it, and do not store it in the transcript."
       },
       "OutboundEvent": {
         "oneOf": [
@@ -3903,108 +4564,6 @@
             "ERROR": "#/components/schemas/ErrorEvent"
           }
         }
-      },
-      "SyncEventLogMetaEvent": {
-        "required": [
-          "_id",
-          "type",
-          "sentDate",
-          "hasMore"
-        ],
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "SYNC_EVENT_LOG.META"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "hasMore": {
-            "type": "boolean",
-            "description": "True when the chat holds events older than the window this sync replayed. Show a load-more affordance on it, never on the number of events received."
-          },
-          "nextCursor": {
-            "nullable": true,
-            "type": "string",
-            "description": "Opaque cursor to the page immediately before this window. Pass it verbatim as the `after` query parameter of the chat `history` endpoint. Null when the sync already covered the chat from its start."
-          },
-          "state": {
-            "nullable": true,
-            "type": "object",
-            "required": [
-              "selectedList"
-            ],
-            "properties": {
-              "selectedList": {
-                "type": "array",
-                "items": {
-                  "required": [
-                    "id"
-                  ],
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "isSelectedFromLastBotResponse": {
-                      "nullable": true,
-                      "type": "boolean"
-                    },
-                    "idType": {
-                      "nullable": true,
-                      "type": "string"
-                    }
-                  }
-                }
-              },
-              "selectedList_generatedFromAI": {
-                "nullable": true
-              },
-              "lastUserSelectedList": {
-                "nullable": true,
-                "type": "array",
-                "items": {
-                  "required": [
-                    "id"
-                  ],
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string"
-                    },
-                    "isSelectedFromLastBotResponse": {
-                      "nullable": true,
-                      "type": "boolean"
-                    },
-                    "idType": {
-                      "nullable": true,
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            },
-            "description": "Selection state folded over the WHOLE chat, not just the replayed window — which is what makes a small `limit` usable, since a client cannot recompute this from events it was never sent. A snapshot taken when the sync was served, NOT a live value: restore UI from it on load, but do not keep deciding on it mid-conversation. Null for a chat that has never been folded."
-          },
-          "stateAsOfSentDate": {
-            "nullable": true,
-            "type": "string",
-            "description": "`sentDate` of the newest event of this window, and the point `state` above is current as of. It is what makes the snapshot usable while paging: SELECTED_ITEMS events OLDER than this are already folded into `state` and must not be applied again, while any that arrive after it must be. Null when the window came back empty."
-          }
-        },
-        "description": "Describes the sync response it opens, and is not a chat message: it arrives once, before the replayed events, and only in answer to SYNC_EVENT_LOG. It is the only place a cursor into chat history is handed out, so a client that pages MUST read it. Do not render it, and do not store it in the transcript."
       }
     },
     "securitySchemes": {
