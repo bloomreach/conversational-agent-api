@@ -2,7 +2,7 @@
   "openapi": "3.0.3",
   "info": {
     "version": "v1.0.0",
-    "title": "Clarity API"
+    "title": "Conversational agent API"
   },
   "servers": [
     {
@@ -500,6 +500,8 @@
         "tags": [
           "Core"
         ],
+        "summary": "Get assistant settings",
+        "operationId": "get-assistant-settings",
         "security": [
           {
             "apiToken": []
@@ -627,18 +629,20 @@
         "tags": [
           "Core"
         ],
+        "summary": "Send an event",
+        "operationId": "send-an-event",
         "security": [
           {
             "apiToken": []
           }
         ],
-        "description": "Send one event to the chat and receive a streaming JSON array of events in response. The response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same _id to avoid showing the shopper's message twice."
+        "description": "Send one event to the chat and receive a streaming JSON array of events in response.\n\nThe response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same id to avoid showing the shopper's message twice."
       }
     },
     "/ca/v1/agents/{agentId}/chats/{chatId}/history": {
       "get": {
-        "description": "Page backwards through one chat's transcript, oldest-first within the page. Use it to load messages older than the window SYNC_EVENT_LOG replayed.\n\nThis endpoint only ever walks backwards from a point the client already holds, so `after` is required and there is no first-page case: the newest slice of a chat comes from SYNC_EVENT_LOG on the send-event stream, and the SYNC_EVENT_LOG.META event that opens that response hands out the first cursor.\n\nPage on `hasMore` and `nextCursor`, never on how many events came back. A page can be shorter than `limit`, empty included, while there is still history left — server-side filtering runs after the window is selected.",
-        "summary": "Page backwards through a chat transcript",
+        "description": "Get the chat history (the transcript) of one chat: the older messages and events that came before the ones the client already has. Each response is one page of the transcript, with the oldest event first, so call it again with the returned cursor to keep going back in time.\n\nThe chat history always starts from a point the client already holds, so `after` is required. The newest part of the transcript is not fetched here: it arrives as SYNC_EVENT_LOG on the send-event stream, and the SYNC_EVENT_LOG.META event at the start of that response contains the cursor for the first page.\n\nTo decide whether to keep paging, check `hasMore` and use `nextCursor` for the next request. Do not rely on the number of events returned: a page can have fewer events than `limit`, or none at all, while older history is still available, because some events are filtered out after the page is selected.",
+        "summary": "Get chat history",
         "parameters": [
           {
             "name": "agentId",
@@ -727,6 +731,7 @@
         "tags": [
           "Core"
         ],
+        "operationId": "get-chat-history",
         "security": [
           {
             "apiToken": []
@@ -737,7 +742,7 @@
     "/ca/v1/agents/{agentId}/catalog/items": {
       "post": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getProductsById",
         "parameters": [
@@ -823,7 +828,7 @@
     "/ca/v1/agents/{agentId}/catalog/items/{itemId}": {
       "get": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getProductById",
         "parameters": [
@@ -952,7 +957,7 @@
     "/ca/v1/agents/{agentId}/catalog/items/{itemId}/questions": {
       "get": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getProductQuestionsById",
         "parameters": [
@@ -1046,7 +1051,7 @@
     "/ca/v1/agents/{agentId}/catalog/parent_product/{productId}": {
       "get": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getParentProduct",
         "parameters": [
@@ -1166,7 +1171,7 @@
     "/ca/v1/agents/{agentId}/catalog/parent_products": {
       "post": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getParentProducts",
         "parameters": [
@@ -1252,7 +1257,7 @@
     "/ca/v1/agents/{agentId}/catalog/plp": {
       "post": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getPlpQuestions",
         "parameters": [
@@ -1328,7 +1333,7 @@
     "/ca/v1/agents/{agentId}/suggestions": {
       "get": {
         "tags": [
-          "Conversation Starters"
+          "Conversation starters"
         ],
         "operationId": "getSuggestions",
         "parameters": [
@@ -4581,7 +4586,7 @@
       "description": "Core chat endpoints for persona settings, send-event streaming, and chat history paging."
     },
     {
-      "name": "Conversation Starters",
+      "name": "Conversation starters",
       "description": "Pre-chat Clarity Search endpoints for PDP, PLP, and search/autosuggest conversation-starter questions."
     }
   ]

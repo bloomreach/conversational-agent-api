@@ -93,21 +93,21 @@
   </g>
 
   <!-- Starter question 1 -->
-  <g data-title="Starter question 1" data-evt="Conversation Starters → ADD_MESSAGE.USER.TEXT" data-dir="in">
+  <g data-title="Starter question 1" data-evt="Conversation starters → ADD_MESSAGE.USER.TEXT" data-dir="in">
     <rect class="wf-chip" x="46" y="204" width="208" height="30" rx="15"/>
     <text class="wf-t" x="150" y="222" text-anchor="middle">Starter question 1</text>
     <rect class="hit" x="46" y="204" width="208" height="30" rx="15"/>
   </g>
 
   <!-- Starter question 2 -->
-  <g data-title="Starter question 2" data-evt="Conversation Starters → ADD_MESSAGE.USER.TEXT" data-dir="in">
+  <g data-title="Starter question 2" data-evt="Conversation starters → ADD_MESSAGE.USER.TEXT" data-dir="in">
     <rect class="wf-chip" x="46" y="242" width="208" height="30" rx="15"/>
     <text class="wf-t" x="150" y="260" text-anchor="middle">Starter question 2</text>
     <rect class="hit" x="46" y="242" width="208" height="30" rx="15"/>
   </g>
 
   <!-- Starter question 3 -->
-  <g data-title="Starter question 3" data-evt="Conversation Starters → ADD_MESSAGE.USER.TEXT" data-dir="in">
+  <g data-title="Starter question 3" data-evt="Conversation starters → ADD_MESSAGE.USER.TEXT" data-dir="in">
     <rect class="wf-chip" x="46" y="280" width="208" height="30" rx="15"/>
     <text class="wf-t" x="150" y="298" text-anchor="middle">Starter question 3</text>
     <rect class="hit" x="46" y="280" width="208" height="30" rx="15"/>
