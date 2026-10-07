@@ -8,7 +8,7 @@ The web experience is composed of **two layers**. The **outer layer** is the mer
 
 The chat client itself has **two main views**. The **Welcome view** is the blank-slate state shown before the shopper says anything — it presents the agent's branding and a few actionable **conversation starters** to invite the first message. The moment a message is exchanged, the chat client switches to the **Active chat view**, a scrollable thread that renders every assistant and user turn: text replies, streaming chunks, product carousels, and quick-reply suggestions.
 
-**Conversation starters** are pre-chat suggestion chips fetched from public Clarity Search endpoints — tuned to whatever the shopper is looking at (a product page, a listing page, or a search query). Selecting one simply sends its text as the first user message. See [Chapter 5 · Conversation Starters](05-conversation-starters.md) for the endpoints and payloads.
+**Conversation starters** are pre-chat suggestion chips fetched from public Clarity Search endpoints — tuned to whatever the shopper is looking at (a product page, a listing page, or a search query). Selecting one simply sends its text as the first user message. See [Chapter 5 · Conversation starters](05-conversation-starters.md) for the endpoints and payloads.
 
 Throughout, the assistant relies on **context**: a snapshot of what is shown in the outer storefront page (product IDs, cart contents, active category or filters, and currency). Keeping this in sync is what lets replies stay relevant — e.g. answering "is it waterproof?" about the exact product on screen. Context is pushed to the backend whenever the page or cart state changes via the [`FE.SET_CONTEXT`](04-advanced-cases.md#set-context-both) event.
 
@@ -28,7 +28,7 @@ Outer layer: the storefront page (PDP / PLP / search). Inner layer: the Conversa
 | Close chat | UI only — no event | — |
 | Agent Logo (large, welcome) | `GET general-settings` | Inbound |
 | Welcome message | `ADD_MESSAGE.ASSISTANT.COLD_START` | Both |
-| Starter questions 1–3 | Conversation Starters → `ADD_MESSAGE.USER.TEXT` | Inbound |
+| Starter questions 1–3 | Conversation starters → `ADD_MESSAGE.USER.TEXT` | Inbound |
 | Chat input box | `ADD_MESSAGE.USER.TEXT` | Outbound |
 
 ### Active chat — messages, carousel & suggestions
