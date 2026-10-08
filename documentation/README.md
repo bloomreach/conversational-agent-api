@@ -18,15 +18,25 @@ The [`openapi-spec.json`](../openapi-spec.json) is the source of truth — when 
 
 ## Getting Started
 
-### Create an API token and find the agent ID
+### Obtain integration credentials
 
 Before integrating the API, obtain the **agent ID** and an **API token**. Bloomreach should provide the **API URL** for your environment.
 
-1. In the left menu, select **Conversational Agent** → **API**.
-2. Click **+ New token** and fill in the form.
-3. Copy the generated token to the clipboard and store it securely for use by your integration.
-4. In the left menu, select **Conversational Agent** → **Agents**. In the table, find the agent you want to integrate and hover over its row. Click the dropdown menu next to its **Edit** button, then select **View Agent ID**.
-5. Use the API URL provided by Bloomreach for your environment.
+#### Create a new API token
+
+1. In the left menu, select **Conversational Agent** > **API**.
+2. Click **+ New token**.
+3. Enter a **token name**.
+4. Optionally, add a **description** of what the token is used for.
+5. Click **Generate token**.
+6. Copy the generated token to the clipboard and store it securely for use by your integration.
+
+The [Manage API tokens](https://documentation.bloomreach.com/clarity/reference/manage-api-tokens) guide explains how to manage and revoke active tokens.
+
+#### Find the agent ID and API URL
+
+1. In the left menu, select **Conversational Agent** → **Agents**. In the table, find the agent you want to integrate and hover over its row. Click the dropdown menu next to its **Edit** button, then select **View Agent ID**.
+2. Use the API URL provided by Bloomreach for your environment.
 
 Your integration configuration should look like this:
 
