@@ -19,10 +19,13 @@ All require `Authorization: Bearer <api-token>`.
 |---|---|---|
 | `200` | Stream of events. Read until `]`. | Parse the streaming JSON array; render events as they arrive. |
 | `400` | Invalid event format / missing field; on `history`, a missing or unrecognised `after` cursor. | Send valid event objects and required request fields. Re-sync to obtain a fresh cursor rather than retrying the same one. |
-| `404` | Unknown `agentId` or `chatId`. | Verify the identifiers. |
+| `401` / `403` | Missing, malformed or revoked API token, or a token of another project than the agent's. | Check the token; don't retry with the same one. |
+| `404` | Unknown `agentId` (empty body). On `send-event` / `history`, a `chatId` that exists under another agent answers `{ "code": "CHAT_SCOPE_MISMATCH" }`. | Verify the `agentId`. On `CHAT_SCOPE_MISMATCH` from `send-event`, start over with a new `chatId`. |
 | `409` | Conflict with current resource state. | Re-check context; retry only after the state changes. |
 | `429` | Rate-limited. | Back off; don't retry in a tight loop. |
 | `500` | Backend error (may still emit `ERROR`/`FATAL_ERROR`). | Contact Bloomreach if it persists. |
+
+Error responses have an empty body unless the [OpenAPI spec](../openapi-spec.json) declares one: the `CHAT_SCOPE_MISMATCH` 404 above, the `ValidationError` 400 of the core routes (`{ "error": { "type": "ZodValidationError", "reason": [{ "path", "errors" }] } }`, naming each invalid field) and the catalog/suggestions `ErrorBody`. Dispatch on the status code, not on body text.
 
 Network drops are normal during streaming — handle `TypeError: network error` (e.g. on page refresh) silently.
 
