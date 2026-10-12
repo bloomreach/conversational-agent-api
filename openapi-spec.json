@@ -404,7 +404,8 @@
                           "nullable": true,
                           "type": "boolean"
                         }
-                      }
+                      },
+                      "description": "Omitted when none of its fields is configured for the agent."
                     },
                     "customerSettings": {
                       "nullable": true,
@@ -485,7 +486,14 @@
             }
           },
           "400": {
-            "description": "Bad Request — invalid request parameters."
+            "description": "Bad Request — invalid request parameters (ValidationError body).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
           },
           "404": {
             "description": "Not Found — unknown agentId."
@@ -614,10 +622,24 @@
             }
           },
           "400": {
-            "description": "Bad Request — invalid event format or missing required field."
+            "description": "Bad Request — invalid event format or missing required field (ValidationError body).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Not Found — unknown agentId or chatId."
+            "description": "Not Found — unknown agentId (empty body), or a chatId that exists under another agent (CHAT_SCOPE_MISMATCH body).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatScopeMismatchError"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests — rate limit exceeded. Back off before retrying."
@@ -716,10 +738,24 @@
             }
           },
           "400": {
-            "description": "Bad Request — `after` is missing or is not a cursor this API issued. Re-sync with SYNC_EVENT_LOG to obtain a fresh one rather than retrying with the same value."
+            "description": "Bad Request — `after` is missing or is not a cursor this API issued. Re-sync with SYNC_EVENT_LOG to obtain a fresh one rather than retrying with the same value.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidationError"
+                }
+              }
+            }
           },
           "404": {
-            "description": "Not Found — unknown agentId, or a chatId that does not belong to it."
+            "description": "Not Found — unknown agentId (empty body), or a chatId that does not belong to it (CHAT_SCOPE_MISMATCH body).",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatScopeMismatchError"
+                }
+              }
+            }
           },
           "429": {
             "description": "Too Many Requests — rate limit exceeded. Back off before retrying."
@@ -762,7 +798,7 @@
               "type": "boolean",
               "default": false
             },
-            "description": "Return all stored questions unselected. PDP endpoints only."
+            "description": "Return all stored questions unselected, ignoring `limitQuestions`. For debugging; not intended for a production UI. PDP endpoints only."
           }
         ],
         "requestBody": {
@@ -874,7 +910,8 @@
               "type": "integer",
               "format": "int32",
               "default": 5
-            }
+            },
+            "description": "Maximum number of questions to select. Ignored with `skipQuestionSelection=true`, which returns all stored questions."
           },
           {
             "name": "fields",
@@ -882,7 +919,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Attributes to keep in each product's `data`, each prefixed with `data.` and named as in the returned `data` (e.g. `data.title`, `data.price`). A name without the prefix or not in the catalog is ignored without an error, so a list of only such names returns an empty `data`. Comma-separated, without spaces after the commas."
           },
           {
             "name": "includeImplicitFilter",
@@ -891,7 +929,8 @@
             "schema": {
               "type": "boolean",
               "default": false
-            }
+            },
+            "description": "Filter the returned variants by the agent's implicit query constraint (for example, only variants in stock), when the agent has one configured. Affects only which variants are returned, so only with variants requested; it adds no filter options or other fields to the response, and has no effect for an agent without such a constraint."
           },
           {
             "name": "skipQuestionSelection",
@@ -901,7 +940,7 @@
               "type": "boolean",
               "default": false
             },
-            "description": "Return all stored questions unselected. PDP endpoints only."
+            "description": "Return all stored questions unselected, ignoring `limitQuestions`. For debugging; not intended for a production UI. PDP endpoints only."
           }
         ],
         "responses": {
@@ -985,7 +1024,8 @@
               "type": "integer",
               "format": "int32",
               "default": 5
-            }
+            },
+            "description": "Maximum number of questions to select. Ignored with `skipQuestionSelection=true`, which returns all stored questions."
           },
           {
             "name": "skipQuestionSelection",
@@ -995,7 +1035,7 @@
               "type": "boolean",
               "default": false
             },
-            "description": "Return all stored questions unselected. PDP endpoints only."
+            "description": "Return all stored questions unselected, ignoring `limitQuestions`. For debugging; not intended for a production UI. PDP endpoints only."
           }
         ],
         "responses": {
@@ -1079,7 +1119,8 @@
               "type": "integer",
               "format": "int32",
               "default": 5
-            }
+            },
+            "description": "Maximum number of questions to select. Ignored with `skipQuestionSelection=true`, which returns all stored questions."
           },
           {
             "name": "fields",
@@ -1087,7 +1128,8 @@
             "required": false,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "Attributes to keep in each product's `data`, each prefixed with `data.` and named as in the returned `data` (e.g. `data.title`, `data.price`). A name without the prefix or not in the catalog is ignored without an error, so a list of only such names returns an empty `data`. Comma-separated, without spaces after the commas. Applies to the variants' `data` only, so only with `includeVariants=true`."
           },
           {
             "name": "includeVariants",
@@ -1105,7 +1147,8 @@
             "schema": {
               "type": "boolean",
               "default": true
-            }
+            },
+            "description": "Filter the returned variants by the agent's implicit query constraint (for example, only variants in stock), when the agent has one configured. Affects only which variants are returned, so only with variants requested; it adds no filter options or other fields to the response, and has no effect for an agent without such a constraint."
           },
           {
             "name": "skipQuestionSelection",
@@ -1115,7 +1158,7 @@
               "type": "boolean",
               "default": false
             },
-            "description": "Return all stored questions unselected. PDP endpoints only."
+            "description": "Return all stored questions unselected, ignoring `limitQuestions`. For debugging; not intended for a production UI. PDP endpoints only."
           }
         ],
         "responses": {
@@ -1191,7 +1234,7 @@
               "type": "boolean",
               "default": false
             },
-            "description": "Return all stored questions unselected. PDP endpoints only."
+            "description": "Return all stored questions unselected, ignoring `limitQuestions`. For debugging; not intended for a production UI. PDP endpoints only."
           }
         ],
         "requestBody": {
@@ -1737,7 +1780,8 @@
           },
           "weight": {
             "type": "number",
-            "format": "double"
+            "format": "double",
+            "description": "Relative selection weight from the question weights uploaded for the agent. `-1` means not rated yet, which every question is until weights are uploaded; `0` means low priority."
           },
           "topic": {
             "type": "string"
@@ -1798,12 +1842,6 @@
           },
           "sub_schema": {
             "$ref": "#/components/schemas/Schema"
-          },
-          "trace": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Trace"
-            }
           }
         }
       },
@@ -1868,25 +1906,9 @@
           }
         }
       },
-      "Trace": {
-        "type": "object",
-        "properties": {
-          "msg": {
-            "type": "string"
-          },
-          "duration": {
-            "type": "integer",
-            "format": "int64"
-          }
-        }
-      },
       "PlpRequestBody": {
         "type": "object",
         "properties": {
-          "trace": {
-            "type": "boolean",
-            "default": false
-          },
           "plp_name": {
             "type": "string"
           },
@@ -1984,10 +2006,12 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Attributes to keep in each variant's `data`, each prefixed with `data.` and named as in the returned `data` (e.g. `data.title`, `data.price`). A name without the prefix or not in the catalog is ignored without an error, so a list of only such names returns an empty `data`."
           },
           "include_implicit_filter_variants": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Filter the returned variants by the agent's implicit query constraint (for example, only variants in stock), when the agent has one configured. Affects only which variants are returned, so only with variants requested; it adds no filter options or other fields to the response, and has no effect for an agent without such a constraint."
           },
           "filter_variants": {
             "$ref": "#/components/schemas/JsonNode"
@@ -2002,7 +2026,8 @@
           "limit_questions": {
             "type": "integer",
             "format": "int32",
-            "default": 5
+            "default": 5,
+            "description": "Maximum number of questions to select. Ignored with `skipQuestionSelection=true`, which returns all stored questions."
           }
         },
         "anyOf": [
@@ -2100,11 +2125,13 @@
           "limitQuestions": {
             "type": "integer",
             "format": "int32",
-            "default": 5
+            "default": 5,
+            "description": "Maximum number of questions to select. Ignored with `skipQuestionSelection=true`, which returns all stored questions."
           },
           "includeImplicitFilter": {
             "type": "boolean",
-            "default": false
+            "default": false,
+            "description": "Filter the returned variants by the agent's implicit query constraint (for example, only variants in stock), when the agent has one configured. Affects only which variants are returned, so only with variants requested; it adds no filter options or other fields to the response, and has no effect for an agent without such a constraint."
           },
           "boost_config": {
             "$ref": "#/components/schemas/BoostConfiguration"
@@ -2113,7 +2140,8 @@
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Attributes to keep in each product's `data`, each prefixed with `data.` and named as in the returned `data` (e.g. `data.title`, `data.price`). A name without the prefix or not in the catalog is ignored without an error, so a list of only such names returns an empty `data`."
           }
         },
         "required": [
@@ -4307,6 +4335,72 @@
           "hasMore"
         ],
         "description": "Describes the sync response it opens, and is not a chat message: it arrives once, before the replayed events, and only in answer to SYNC_EVENT_LOG. It is the only place a cursor into chat history is handed out, so a client that pages MUST read it. Do not render it, and do not store it in the transcript."
+      },
+      "ChatScopeMismatchError": {
+        "type": "object",
+        "description": "The chatId exists under another project or persona (agent). Start over with a new chatId. history answers the same body for a chat that has not been created yet, so a client regenerates its chatId on this code from send-event only.",
+        "properties": {
+          "code": {
+            "type": "string",
+            "enum": [
+              "CHAT_SCOPE_MISMATCH"
+            ]
+          },
+          "error": {
+            "type": "string",
+            "description": "Human-readable reason. Do not parse it; dispatch on `code`."
+          }
+        },
+        "required": [
+          "code"
+        ]
+      },
+      "ValidationError": {
+        "type": "object",
+        "description": "The request failed validation. `error.reason` names each offending field, so a client can report or fix it. Other 400s (for example an agent that is not configured) have an empty body.",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "ZodValidationError"
+                ]
+              },
+              "reason": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "path": {
+                      "type": "string",
+                      "description": "Dot-separated path of the invalid field in the request."
+                    },
+                    "errors": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "description": "What is wrong with it. Human-readable; do not parse."
+                    }
+                  },
+                  "required": [
+                    "path",
+                    "errors"
+                  ]
+                }
+              }
+            },
+            "required": [
+              "type",
+              "reason"
+            ]
+          }
+        },
+        "required": [
+          "error"
+        ]
       },
       "OutboundEvent": {
         "oneOf": [
