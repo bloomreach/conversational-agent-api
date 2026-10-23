@@ -104,11 +104,13 @@ case 'APPEND_LAST_ASSISTANT_MESSAGE':
   engText?: string,
   areCartProducts?: boolean,
   productIdsToShow?: string[],
-  initialContext?: object,
+  initialContext?: object,       // recorded with the greeting only; send context with FE.SET_CONTEXT
   quickReply?: { label: string; target?: string; payload?: object }[] }
 ```
 
-Rendered before the first real message. Carries a welcome `text`, optional starter `quickReply` chips, and products to show. This is the actual welcome message object saved for replay, but sending `ADD_MESSAGE.ASSISTANT.COLD_START` directly does not persist it in conversation history. Persist welcome state for replay by sending the outbound `PERSIST_COLD_START` event with the cold-start message in its `events` payload.
+Asks for the greeting of a chat the shopper has not written in yet. Send it when the [sync](04-advanced-cases.md#history-restoration-outbound) of a new `chatId` returns nothing, with the welcome `text` (`translated.welcomeMessage` from `general-settings`). `initialContext` is only recorded with the greeting: the agent gets the shopper's context from [`FE.SET_CONTEXT`](04-advanced-cases.md#set-context-both), sent right before the first message. The server echoes it and streams the greeting as `ADD_MESSAGE.ASSISTANT.TEXT`, plus quick replies or products depending on the agent. Render that greeting — the echoed cold start is a marker, not a bubble, and replayed transcripts carry both.
+
+A greeting nobody answers creates no conversation. The server keeps it for 24 hours: a sync of the chat in that time replays it, and the shopper's first message stores it in front of the conversation. Send the cold starts on screen as `openingInputs` in the body of that first message (`send-event`'s optional `openingInputs` field): if the kept greeting has expired, the newest one is run again and stored. Never resend the cold start to restore a greeting — sync instead.
 
 ---
 

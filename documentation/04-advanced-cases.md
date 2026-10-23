@@ -93,11 +93,11 @@ Sent for **every** quick-reply selection — always `DIRECT_CALL`, never `USER.T
   uid?: string }
 ```
 
-Send whenever page / cart / filter state changes so responses stay relevant. Pass the FE-configured `currency` here. Use `remove` to clear previously sent context groups, such as page-list or cart state. The server may also assert context state back with the same object — apply it to local state.
+Send right before the shopper's first message, and whenever page / cart / filter state changes after that, so responses stay relevant. Not on mount: a request that only sets context is not a shopper action — on a chat that is not stored yet it is kept with the greeting and stored with the first message. Context merges like in a stored chat: send only what changed if you like, and use `remove` to clear what no longer applies. Pass the FE-configured `currency` here. Use `remove` to clear previously sent context groups, such as page-list or cart state. The server may also assert context state back with the same object — apply it to local state.
 
 ## History restoration <sup>`Outbound`</sup>
 
-`SYNC_EVENT_LOG` · `PERSIST_COLD_START`
+`SYNC_EVENT_LOG`
 
 <img src="images/evt-sync.svg" width="320" alt="Mock chat showing history replayed from the server" />
 
@@ -112,11 +112,9 @@ Send whenever page / cart / filter state changes so responses stay relevant. Pas
   limit?: number }               // default 500, max 500
 ```
 
-Send on initial mount and after every **New chat**, for a brand-new `chatId` as well as an existing one. Reopening a chat replays its past events back through the response stream — including user messages; de-duplicate by `_id` since they may already exist locally. A brand-new `chatId` has nothing to replay, and the server answers with the `ADD_MESSAGE.ASSISTANT.COLD_START` welcome message instead, which is the only way that message arrives.
+Send on initial mount and after every **New chat**, for a brand-new `chatId` as well as an existing one. Reopening a chat replays its past events back through the response stream — including user messages; de-duplicate by `_id` since they may already exist locally. A chat whose shopper was greeted but has not written yet replays that greeting (no `SYNC_EVENT_LOG.META`: there is nothing to page yet). A brand-new `chatId` has nothing to replay and gets an empty array; greet it with a [cold start](02-basic-events.md#welcome--cold-start-both).
 
 `limit` caps how many of the **newest** events come back. A long conversation is not replayed in full: the server clamps that page to 500 events, and everything older is reached through [history paging](#history-paging-inbound) below. Ask for less than the default if your UI only renders the last few turns on open — a smaller page is faster to paint, and nothing is lost as long as you page.
-
-`PERSIST_COLD_START` stores welcome-screen events so they can be replayed later. Use it to persist the `ADD_MESSAGE.ASSISTANT.COLD_START` welcome message; sending the cold-start event itself does not save it.
 
 ## History paging <sup>`Inbound`</sup>
 

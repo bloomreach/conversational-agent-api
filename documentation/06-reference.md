@@ -40,13 +40,12 @@ Network drops are normal during streaming — handle `TypeError: network error` 
 | `ADD_MESSAGE.USER.FEEDBACK` | Out | Rate a response / conversation. |
 | `SYNC_EVENT_LOG` | Out | Request conversation history replay. |
 | `SYNC_EVENT_LOG.META` | In | Opens a sync response: `hasMore`, the history cursor, and folded chat state. Not a message — do not render. |
-| `PERSIST_COLD_START` | Out | Persist welcome state for replay. |
 | `FE.SET_CONTEXT` | Both | Current page / cart / filter / currency state. |
 | `SELECTED_ITEMS` | Both | Selected products (compare). |
 | `ADD_MESSAGE.ASSISTANT.TEXT` | In | Assistant text message (markdown). |
 | `APPEND_LAST_ASSISTANT_MESSAGE` | In | Streaming chunk to fold into last text. |
 | `ADD_MESSAGE.ASSISTANT.NOTIFICATION` | In | In-place progress indicator. |
-| `ADD_MESSAGE.ASSISTANT.COLD_START` | Both | Welcome / initial message. |
+| `ADD_MESSAGE.ASSISTANT.COLD_START` | Both | Asks for the greeting; echoed back. Render the `ADD_MESSAGE.ASSISTANT.TEXT` that follows, not the echo. |
 | `ADD_MESSAGE.ASSISTANT.CAROUSEL` | In | List of products. |
 | `ADD_MESSAGE.ASSISTANT.QUICK_REPLY` | In | Selectable suggestion buttons. |
 | `ERROR` | In | Non-fatal telemetry — do not surface. |

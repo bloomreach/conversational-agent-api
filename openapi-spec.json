@@ -597,6 +597,14 @@
                         "additionalProperties": {}
                       }
                     }
+                  },
+                  "openingInputs": {
+                    "nullable": true,
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/AddMessageAssistantColdStartEvent"
+                    },
+                    "description": "Optional, on the first turns of a chat: the ADD_MESSAGE.ASSISTANT.COLD_START events the client is showing, oldest first. When the greeting the server kept has expired, the newest one is run again and stored in front of the conversation. Entries that are not cold-start events are ignored; the field never fails a request."
                   }
                 },
                 "required": [
@@ -2591,7 +2599,7 @@
           "sentDate",
           "text"
         ],
-        "description": "Actual welcome/cold-start message rendered by the UI and replayed later. Sending ADD_MESSAGE.ASSISTANT.COLD_START directly does not persist it in conversation history. To save the welcome state for future replay, send PERSIST_COLD_START with this event in its events payload."
+        "description": "Welcome/cold-start message. Send it with the welcome `text` to greet the shopper; the server echoes it and streams the greeting. `initialContext` is only recorded with the greeting: send the shopper's context with FE.SET_CONTEXT right before the first message. A greeting nobody answers creates no chat: the server keeps it for 24 hours, a SYNC_EVENT_LOG of the chat in that time returns it, and the shopper's first message stores it in front of the conversation."
       },
       "AddMessageAssistantNotificationEvent": {
         "type": "object",
@@ -3975,43 +3983,6 @@
           "userMessage"
         ]
       },
-      "PersistColdStartEvent": {
-        "type": "object",
-        "properties": {
-          "_id": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "PERSIST_COLD_START"
-            ]
-          },
-          "sentDate": {},
-          "chatId": {
-            "nullable": true,
-            "type": "string"
-          },
-          "id": {
-            "nullable": true,
-            "type": "string"
-          },
-          "events": {
-            "nullable": true,
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/ReplayEvent"
-            },
-            "description": "Welcome/cold-start events to persist for future replay, including the ADD_MESSAGE.ASSISTANT.COLD_START message shown on the blank-slate screen."
-          }
-        },
-        "required": [
-          "_id",
-          "type",
-          "sentDate"
-        ],
-        "description": "Persists welcome/cold-start events for future replay. Use this event to save the ADD_MESSAGE.ASSISTANT.COLD_START message; sending the cold-start message itself does not store it in conversation history."
-      },
       "SelectedItemsEvent": {
         "type": "object",
         "properties": {
@@ -4426,9 +4397,6 @@
             "$ref": "#/components/schemas/SelectedItemsEvent"
           },
           {
-            "$ref": "#/components/schemas/PersistColdStartEvent"
-          },
-          {
             "$ref": "#/components/schemas/AddMessageAssistantColdStartEvent"
           },
           {
@@ -4445,7 +4413,6 @@
             "ADD_MESSAGE.USER.FEEDBACK": "#/components/schemas/AddMessageUserFeedbackEvent",
             "SYNC_EVENT_LOG": "#/components/schemas/SyncEventLogEvent",
             "SELECTED_ITEMS": "#/components/schemas/SelectedItemsEvent",
-            "PERSIST_COLD_START": "#/components/schemas/PersistColdStartEvent",
             "ADD_MESSAGE.ASSISTANT.COLD_START": "#/components/schemas/AddMessageAssistantColdStartEvent",
             "ADD_MESSAGE.ASSISTANT.TEXT": "#/components/schemas/AddMessageAssistantTextEvent"
           }
@@ -4522,75 +4489,6 @@
             "FATAL_ERROR": "#/components/schemas/FatalErrorEvent",
             "ERROR": "#/components/schemas/ErrorEvent",
             "SYNC_EVENT_LOG.META": "#/components/schemas/SyncEventLogMetaEvent"
-          }
-        }
-      },
-      "ReplayEvent": {
-        "oneOf": [
-          {
-            "$ref": "#/components/schemas/AppendLastAssistantMessageEvent"
-          },
-          {
-            "$ref": "#/components/schemas/SelectedItemsEvent"
-          },
-          {
-            "$ref": "#/components/schemas/AddMessageUserGenByBtnEvent"
-          },
-          {
-            "$ref": "#/components/schemas/AddMessageUserTextEvent"
-          },
-          {
-            "$ref": "#/components/schemas/AddMessageUserDirectCallEvent"
-          },
-          {
-            "$ref": "#/components/schemas/AddMessageUserCompareEvent"
-          },
-          {
-            "$ref": "#/components/schemas/MetadataSelectAgentEvent"
-          },
-          {
-            "$ref": "#/components/schemas/AddMessageAssistantTextEvent"
-          },
-          {
-            "$ref": "#/components/schemas/AddMessageAssistantCarouselEvent"
-          },
-          {
-            "$ref": "#/components/schemas/AddMessageAssistantQuickReplyEvent"
-          },
-          {
-            "$ref": "#/components/schemas/AddMessageAssistantNotificationEvent"
-          },
-          {
-            "$ref": "#/components/schemas/AddMessageAssistantColdStartEvent"
-          },
-          {
-            "$ref": "#/components/schemas/FeSetContextEvent"
-          },
-          {
-            "$ref": "#/components/schemas/FatalErrorEvent"
-          },
-          {
-            "$ref": "#/components/schemas/ErrorEvent"
-          }
-        ],
-        "discriminator": {
-          "propertyName": "type",
-          "mapping": {
-            "APPEND_LAST_ASSISTANT_MESSAGE": "#/components/schemas/AppendLastAssistantMessageEvent",
-            "SELECTED_ITEMS": "#/components/schemas/SelectedItemsEvent",
-            "ADD_MESSAGE.USER.GEN_BY_BTN": "#/components/schemas/AddMessageUserGenByBtnEvent",
-            "ADD_MESSAGE.USER.TEXT": "#/components/schemas/AddMessageUserTextEvent",
-            "ADD_MESSAGE.USER.DIRECT_CALL": "#/components/schemas/AddMessageUserDirectCallEvent",
-            "ADD_MESSAGE.USER.COMPARE": "#/components/schemas/AddMessageUserCompareEvent",
-            "METADATA.SELECT_AGENT": "#/components/schemas/MetadataSelectAgentEvent",
-            "ADD_MESSAGE.ASSISTANT.TEXT": "#/components/schemas/AddMessageAssistantTextEvent",
-            "ADD_MESSAGE.ASSISTANT.CAROUSEL": "#/components/schemas/AddMessageAssistantCarouselEvent",
-            "ADD_MESSAGE.ASSISTANT.QUICK_REPLY": "#/components/schemas/AddMessageAssistantQuickReplyEvent",
-            "ADD_MESSAGE.ASSISTANT.NOTIFICATION": "#/components/schemas/AddMessageAssistantNotificationEvent",
-            "ADD_MESSAGE.ASSISTANT.COLD_START": "#/components/schemas/AddMessageAssistantColdStartEvent",
-            "FE.SET_CONTEXT": "#/components/schemas/FeSetContextEvent",
-            "FATAL_ERROR": "#/components/schemas/FatalErrorEvent",
-            "ERROR": "#/components/schemas/ErrorEvent"
           }
         }
       },

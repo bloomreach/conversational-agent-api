@@ -31,24 +31,26 @@ Then visit <http://localhost:8000>. Origin will be `http://localhost:8000`. Some
 
 3. Fetches authenticated `GET .../general-settings` to apply the agent's name, logo, and input placeholder. Persona branding (`assistantName`, `assistantLogo`, and `description`) should be configured in the CoCoAaS backend persona configuration; the client only uses local defaults when those fields are omitted. The response is cached in `localStorage` for 6 hours, keyed by `agentId`; reloads within the TTL reuse the cache and skip the network call, and a matching cached response can still be used if a later refresh fails so branding does not disappear entirely.
 
-4. Sends `SYNC_EVENT_LOG` to hydrate any existing conversation tied to the persisted `chatId`. It asks for a deliberately small page (`limit: 20`, against a server default of 500) so that paging is exercised on an ordinary chat rather than only on a very long one; a production client can omit `limit`. The response opens with `SYNC_EVENT_LOG.META`, and the client reads `hasMore` / `nextCursor` from it to show the **Load earlier messages** button. Older pages come from a plain REST call, `GET .../history?after=<cursor>`, with `SYNC_EVENT_LOG.META` supplying the first cursor.
+4. Sends `SYNC_EVENT_LOG` to hydrate any existing conversation tied to the persisted `chatId`. It asks for a deliberately small page (`limit: 20`, against a server default of 500) so that paging is exercised on an ordinary chat rather than only on a very long one; a production client can omit `limit`. The response opens with `SYNC_EVENT_LOG.META`, and the client reads `hasMore` / `nextCursor` from it to show the **Load earlier messages** button. Older pages come from a plain REST call, `GET .../history?after=<cursor>`, with `SYNC_EVENT_LOG.META` supplying the first cursor. A chat that was greeted but not answered yet replays its greeting.
 
-5. Shows default starter questions below the input box and Send button on an empty chat. Once the user types at least two characters, the client fetches search-triggered Clarity Search suggestions and replaces the defaults with returned conversation-starter questions. Tapping any starter sends it as `ADD_MESSAGE.USER.TEXT`.
+5. When the sync returns nothing (a brand-new `chatId`), sends `ADD_MESSAGE.ASSISTANT.COLD_START` with `translated.welcomeMessage`, and renders the greeting that comes back. Opening the client stores nothing on the server: no `FE.SET_CONTEXT` is sent on mount. Right before the shopper's first message of a chat it sends `FE.SET_CONTEXT`, and that first message carries the cold start as `openingInputs`.
 
-6. Lets you chat. The client handles all documented event types:
+6. Shows default starter questions below the input box and Send button until the shopper writes. Once the user types at least two characters, the client fetches search-triggered Clarity Search suggestions and replaces the defaults with returned conversation-starter questions. Tapping any starter sends it as `ADD_MESSAGE.USER.TEXT`.
+
+7. Lets you chat. The client handles all documented event types:
    - User → server: `ADD_MESSAGE.USER.TEXT` (composer input and conversation starters), `ADD_MESSAGE.USER.DIRECT_CALL` (every quick-reply tap — always DIRECT_CALL, never USER.TEXT, copying any `target`/`payload` verbatim)
-   - Server → client: `ADD_MESSAGE.ASSISTANT.TEXT` (and `APPEND_LAST_ASSISTANT_MESSAGE` streaming chunks), `ADD_MESSAGE.ASSISTANT.CAROUSEL`, `ADD_MESSAGE.ASSISTANT.QUICK_REPLY`, `ADD_MESSAGE.ASSISTANT.COLD_START`, `ADD_MESSAGE.ASSISTANT.NOTIFICATION`, per-turn echoed/replayed user events, `METADATA.SELECT_AGENT`. Other event types are accepted silently and visible in the debug panel — that is required behaviour, not incidental: the stream also carries internal event types excluded from `../openapi-spec.json`, and new ones may be added without that counting as a breaking change, so an unrecognised `type` must never raise.
+   - Server → client: `ADD_MESSAGE.ASSISTANT.TEXT` (and `APPEND_LAST_ASSISTANT_MESSAGE` streaming chunks), `ADD_MESSAGE.ASSISTANT.CAROUSEL`, `ADD_MESSAGE.ASSISTANT.QUICK_REPLY`, `ADD_MESSAGE.ASSISTANT.COLD_START` (the echo of the greeting request — a marker, not a bubble), `ADD_MESSAGE.ASSISTANT.NOTIFICATION`, per-turn echoed/replayed user events, `METADATA.SELECT_AGENT`. Other event types are accepted silently and visible in the debug panel — that is required behaviour, not incidental: the stream also carries internal event types excluded from `../openapi-spec.json`, and new ones may be added without that counting as a breaking change, so an unrecognised `type` must never raise.
    - `ADD_MESSAGE.ASSISTANT.TEXT` is markdown. `mdRender()` supports a deliberately small subset — bold, italic, unordered/ordered lists and links — and builds DOM nodes rather than an HTML string, so assistant text is only ever inserted as a text node. Link URLs are accepted only for `http:`, `https:` and `mailto:`; anything else (`javascript:`, `data:`, …) is left as literal text. If you extend it, keep that shape: switching to `innerHTML` turns a formatting helper into an XSS surface.
    - `SYNC_EVENT_LOG.META` is read but never displayed, because it describes the sync response rather than the conversation. It carries `hasMore` and `nextCursor`, which are the only way to request older history. A client that ignores this event shows just the most recent part of a long chat, with nothing to indicate that earlier messages exist.
    - `ERROR` events are backend telemetry (non-fatal warnings such as `AGENT.ERROR`); the client logs them to the debug panel and does **not** show them to the user.
    - `FATAL_ERROR` events render the agent's `translated.errorMsg` fallback and disable the composer. The raw `event.text` is never shown to the user.
    - `ADD_MESSAGE.ASSISTANT.NOTIFICATION` events are rendered as a single, in-place progress chip that updates as new notifications arrive. A "Thinking…" placeholder is shown immediately on submit; the chip stays visible while messages stream in and is cleared only when the request completes (all response events received).
 
-7. **Request concurrency.** While a `send-event` request is in flight, the composer, quick-reply buttons, and conversation-starter buttons are disabled. The client matches the backend's 60-second server timeout with an `AbortController`. On timeout, a fallback error is shown and the composer is re-enabled.
+8. **Request concurrency.** While a `send-event` request is in flight, the composer, quick-reply buttons, and conversation-starter buttons are disabled. The client matches the backend's 60-second server timeout with an `AbortController`. On timeout, a fallback error is shown and the composer is re-enabled.
 
-8. Streaming responses are parsed using the JSON-array-stream pattern documented in `documentation/01-how-the-chat-integration-works.md` (buffer + try-parse + try-parse-with-closing-bracket).
+9. Streaming responses are parsed using the JSON-array-stream pattern documented in `documentation/01-how-the-chat-integration-works.md` (buffer + try-parse + try-parse-with-closing-bracket).
 
-9. **History paging.** When `SYNC_EVENT_LOG.META` reports `hasMore`, a **Load earlier messages** button appears at the top of the thread. It calls `GET .../chats/{chatId}/history?after=<cursor>&limit=20`, walking backwards one page at a time. Pages arrive oldest-first and are inserted *above* the existing thread, with the scroll position adjusted so the shopper keeps looking at the same message. The button is driven by `hasMore`, never by how many events a page returned — a page can be short, or empty, while history remains.
+10. **History paging.** When `SYNC_EVENT_LOG.META` reports `hasMore`, a **Load earlier messages** button appears at the top of the thread. It calls `GET .../chats/{chatId}/history?after=<cursor>&limit=20`, walking backwards one page at a time. Pages arrive oldest-first and are inserted *above* the existing thread, with the scroll position adjusted so the shopper keeps looking at the same message. The button is driven by `hasMore`, never by how many events a page returned — a page can be short, or empty, while history remains.
 
 ## UI controls
 
@@ -96,7 +98,7 @@ Clear all of them via your browser's DevTools → Application → Local Storage 
 ## Known simplifications
 
 - Uses UUID v4 (`crypto.randomUUID()`) for event and chat IDs. The docs recommend UUID v7 for sortability; v4 works because the server doesn't validate the version.
-- Sends only `FE.SET_CONTEXT.currency` proactively. The value comes from onboarding and must be a valid ISO 4217 code. Add item/product context if you want to exercise PDP/PLP-specific behavior.
+- Sends only `currency` as context (in the cold start and before the first message). The value comes from onboarding and must be a valid ISO 4217 code. Add item/product context if you want to exercise PDP/PLP-specific behavior.
 - Does not implement file upload, surveys, live-agent handoff, or `customerSettings.customized_ui_attributes` rendering hints.
 - Renders product cards with a generic field set (image, title, price, link). To exercise `customized_ui_attributes`, extend `makeCard()`.
 
@@ -105,7 +107,9 @@ Clear all of them via your browser's DevTools → Application → Local Storage 
 Run through these once against a real backend to confirm the docs are sufficient:
 
 - [ ] `general-settings` returns and the assistant name/logo/placeholder all populate from the response.
-- [ ] A brand-new empty chat shows default starter questions below the input/Send row.
+- [ ] A brand-new chat shows the greeting once (one bubble) and default starter questions below the input/Send row.
+- [ ] Opening a chat without writing stores no chat on the server; reloading it shows the same greeting (one `SYNC_EVENT_LOG`, no second cold start).
+- [ ] The first message is preceded by `FE.SET_CONTEXT` and carries `openingInputs`; the stored transcript starts with the greeting.
 - [ ] Typing at least two characters in the composer fetches search-triggered conversation-starter buttons below the input/Send row when suggestions are available.
 - [ ] Tapping a conversation-starter button sends that question as a normal user message.
 - [ ] A "hello" message produces a streaming reply rendered as a single bubble (multiple `APPEND_LAST_ASSISTANT_MESSAGE` chunks aggregating into one `ADD_MESSAGE.ASSISTANT.TEXT`).

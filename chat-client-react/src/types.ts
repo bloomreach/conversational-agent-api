@@ -258,13 +258,19 @@ export interface SelectedItemsEvent extends EventEnvelope {
   isSelectedFromLastBotResponse?: Record<string, boolean> | null
 }
 
-export interface PersistColdStartEvent extends EventEnvelope {
-  type: 'PERSIST_COLD_START'
-  events?: ChatEvent[] | null
+/**
+ * The cold-start request: asks for the greeting, with the page-load context. The server echoes it
+ * and streams the greeting as ADD_MESSAGE.ASSISTANT.TEXT (+ carousel / quick replies).
+ */
+export interface ColdStartEvent extends EventEnvelope {
+  type: 'ADD_MESSAGE.ASSISTANT.COLD_START'
+  text: string
+  /** Recorded with the greeting only; the agent's context comes from FE.SET_CONTEXT. */
+  initialContext?: Omit<SetContextEvent, keyof EventEnvelope | 'type'> | null
 }
 
 export interface AssistantTextEvent extends EventEnvelope {
-  type: 'ADD_MESSAGE.ASSISTANT.TEXT' | 'ADD_MESSAGE.ASSISTANT.COLD_START' | 'APPEND_LAST_ASSISTANT_MESSAGE'
+  type: 'ADD_MESSAGE.ASSISTANT.TEXT' | 'APPEND_LAST_ASSISTANT_MESSAGE'
   text: string
   marker?: string | null
   skipToneOfVoice?: boolean | null
@@ -325,7 +331,7 @@ export type OutboundEvent =
   | SyncEventLogEvent
   | SetContextEvent
   | SelectedItemsEvent
-  | PersistColdStartEvent
+  | ColdStartEvent
   | ErrorEvent
   | AssistantTextEvent
 

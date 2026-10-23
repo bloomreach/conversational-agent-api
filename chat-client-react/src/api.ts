@@ -4,6 +4,7 @@ import { LS, readJSON, writeJSON } from './storage'
 import type {
   ChatHistoryPage,
   ClaritySearchResponse,
+  ColdStartEvent,
   GeneralSettings,
   OnboardingConfig,
   OutboundEvent,
@@ -242,12 +243,15 @@ export async function sendEventStream({
   chatId,
   endCustomerId,
   event,
+  openingInputs = [],
   onEvent,
 }: {
   config: OnboardingConfig
   chatId: string
   endCustomerId: string
   event: OutboundEvent
+  /** The cold starts on screen, sent with the first turns of a chat — see App's openingInputs. */
+  openingInputs?: ColdStartEvent[]
   onEvent: (event: unknown) => Promise<void> | void
 }): Promise<void> {
   const abort = new AbortController()
@@ -266,6 +270,7 @@ export async function sendEventStream({
           url: window.location.href,
           localeTime: new Date().toISOString(),
           endCustomerId,
+          ...(openingInputs.length ? { openingInputs } : {}),
         }),
         signal: abort.signal,
       })
