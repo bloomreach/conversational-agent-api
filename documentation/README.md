@@ -60,7 +60,7 @@ A successful response confirms that the API URL and agent ID are correct. Use th
 
 ### Initialization flow
 
-Bringing the chat client to life is a short, ordered sequence. First, gather your [required integration configuration](#static-setup-and-runtime-identifiers) — the API URL, agent ID, API token, and storefront currency. Then, as the chat client mounts, run three steps in order: [fetch branding & translations](#step-1--fetch-branding--translations-inbound) so the UI is fully localized before it paints, [push the current storefront context](#step-2--set-the-current-context-outbound) so replies are relevant to what is shown in the outer storefront page, and [sync the event log](#step-3--restore-existing-history-outbound), which replays past messages for a conversation already under way and returns the cold-start welcome for a new one.
+Bringing the chat client to life is a short, ordered sequence. First, gather your [required integration configuration](#static-setup-and-runtime-identifiers) — the API URL, agent ID, API token, and storefront currency. Then, as the chat client mounts, run three steps in order: [fetch branding & translations](#step-1--fetch-branding--translations-inbound) so the UI is fully localized before it paints, [sync the event log](#step-2--restore-existing-history-outbound), which replays past messages for a conversation already under way, and — when it returns nothing — [greet the new chat](#step-3--greet-a-new-chat-outbound) with a cold start. [Context](#before-the-first-message--set-the-current-context-outbound) is then sent right before the shopper's first message: opening the chat surface stores nothing until the shopper writes.
 
 A long conversation replays only its newest page, so the sync response opens with the cursor to everything older, and a **Load earlier messages** button walks backwards through the rest one page at a time. [Chapter 1 · From mount to history](01-how-the-chat-integration-works.md#from-mount-to-history) draws the whole sequence, paging loop included.
 
@@ -136,16 +136,14 @@ applyBrandingAndI18n(await getGeneralSettingsCached())
 
 > **Cache** the response in `localStorage` for up to **6 hours**, keyed by `agentId`. On failure, fall back to a stale entry rather than losing branding.
 
-### Step 2 — Set the current context <sup>`Outbound`</sup>
+### Step 2 — Restore existing history <sup>`Outbound`</sup>
 
-`FE.SET_CONTEXT` via send-event
+`SYNC_EVENT_LOG` via send-event
 
-Tell the assistant what is shown in the outer storefront page so replies stay relevant. Pass the configured `currency` here, plus whatever the surface knows about (product IDs, cart contents, category, filters). See [`FE.SET_CONTEXT`](04-advanced-cases.md#set-context-both) for the full field list.
-
-Steps 2 and 3 both post to `send-event`, so define one small helper to reuse:
+Steps 2 and 3, and every chat turn after them, post to `send-event`, so define one small helper to reuse:
 
 ```js
-const sendEvent = (eventBody) =>
+const sendEvent = (eventBody, extra = {}) =>
   fetch(`${apiUrl}/ca/v1/agents/${AGENT_ID}/chats/${chatId}/send-event`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json',
@@ -154,30 +152,52 @@ const sendEvent = (eventBody) =>
       event: { _id: v7(), sentDate: new Date().toISOString(), ...eventBody },
       url: window.location.href,
       endCustomerId,
+      ...extra,
     }),
   })
 ```
 
-```js
-sendEvent({
-  type: 'FE.SET_CONTEXT',
-  currentItemIds: ['prod-123'],
-  currentItemIdsType: 'product_id',
-  currency: 'USD',
-})
-```
-
-### Step 3 — Restore existing history <sup>`Outbound`</sup>
-
-`SYNC_EVENT_LOG` via send-event
-
-Send this on every mount, and again after every **New chat** — for a brand-new `chatId` as much as an existing one. What differs is the answer, not whether you ask. Reopening a conversation replays its past events so the thread is restored; de-duplicate them by `_id`, since they may already exist locally. A brand-new `chatId` has nothing to replay, and the server answers with the [cold-start welcome message](02-basic-events.md#welcome--cold-start-both) instead — skip the sync and the shopper opens a blank chat. See [`SYNC_EVENT_LOG`](04-advanced-cases.md#history-restoration-outbound) for details.
+Send the sync on every mount, and again after every **New chat** — for a brand-new `chatId` as much as an existing one. What differs is the answer, not whether you ask. Reopening a conversation replays its past events so the thread is restored; de-duplicate them by `_id`, since they may already exist locally. A chat whose shopper was greeted but has not written yet replays that greeting (the server keeps it for 24 hours). A brand-new `chatId` has nothing to replay and gets an empty array — greet it in Step 3. See [`SYNC_EVENT_LOG`](04-advanced-cases.md#history-restoration-outbound) for details.
 
 ```js
 sendEvent({ type: 'SYNC_EVENT_LOG' })
 ```
 
 A sync replays only the newest page of a long conversation, so the response opens with a `SYNC_EVENT_LOG.META` event carrying `hasMore` and a cursor for everything older. Handle it — otherwise a shopper returning to a long chat sees a truncated thread that looks complete. See [History paging](04-advanced-cases.md#history-paging-inbound).
+
+### Step 3 — Greet a new chat <sup>`Outbound`</sup>
+
+`ADD_MESSAGE.ASSISTANT.COLD_START` via send-event
+
+When the sync returned nothing, ask for the greeting: send a cold start with the welcome text from `general-settings` (`translated.welcomeMessage`). The server echoes the request and streams the greeting as `ADD_MESSAGE.ASSISTANT.TEXT` (plus quick replies or products, depending on the agent). Render the greeting, not the echo. See [Welcome / cold start](02-basic-events.md#welcome--cold-start-both).
+
+```js
+const coldStart = { _id: v7(), sentDate: new Date().toISOString(),
+  type: 'ADD_MESSAGE.ASSISTANT.COLD_START',
+  text: settings.translated.welcomeMessage }
+sendEvent(coldStart)
+```
+
+A greeting nobody answers creates no conversation: nothing is stored, and it expires after 24 hours. The shopper's first message stores it in front of the conversation. Send the cold starts on screen as `openingInputs` with that first message, so the greeting is stored even if it has expired in the meantime:
+
+```js
+sendEvent({ type: 'ADD_MESSAGE.USER.TEXT', text }, { openingInputs: [coldStart] })
+```
+
+### Before the first message — set the current context <sup>`Outbound`</sup>
+
+`FE.SET_CONTEXT` via send-event
+
+Tell the assistant what is shown in the outer storefront page so replies stay relevant: the configured `currency`, plus whatever the surface knows about (product IDs, cart contents, category, filters). Send it **right before the shopper's first message**, and again whenever the page or cart changes after that — **never on mount**. See [`FE.SET_CONTEXT`](04-advanced-cases.md#set-context-both) for the full field list.
+
+```js
+await sendEvent({
+  type: 'FE.SET_CONTEXT',
+  currentItemIds: ['prod-123'],
+  currentItemIdsType: 'product_id',
+  currency: 'USD',
+})
+```
 
 ---
 

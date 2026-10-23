@@ -8,6 +8,8 @@ A TypeScript React implementation of the Conversational Agent API client describ
 - Optional Vite env defaults via `.env`
 - `GET /general-settings` with 6-hour `localStorage` cache and stale-cache fallback
 - `POST /chat/{chatId}/send-event` streaming JSON-array parser
+- Greeting via `ADD_MESSAGE.ASSISTANT.COLD_START` (welcome text) when the sync of a new chat returns nothing; nothing is stored until the shopper writes
+- `FE.SET_CONTEXT` right before the first message of a chat (never on mount), which carries the cold start as `openingInputs`
 - `GET /chats/{chatId}/history` backwards paging: a **Load earlier messages** button driven by the `SYNC_EVENT_LOG.META` cursor, prepending pages without moving the shopper's scroll position
 - Public Clarity Search API helpers for PDP, PLP, and search-triggered conversation-starter endpoints
 - Search-sample fallback starter questions on an empty search chat

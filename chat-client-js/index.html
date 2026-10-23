@@ -586,6 +586,13 @@
       historyLoading: false,      // a /history request is in flight
       historyAbort: null,         // AbortController for that request, so a chat switch cancels it
       historyError: null,         // retryable paging failure, shown by the loader, not in the thread
+      // The opening of a chat whose shopper has not written yet. The server keeps the greeting
+      // it streamed and stores it with the first message; these cold starts go along as
+      // `openingInputs` in case that kept greeting has expired in the meantime.
+      openingInputs: [],
+      // Context is sent right before the shopper's first message of a chat, never on mount:
+      // a context-only request is not a shopper action and must not start a stored chat.
+      contextSentForChatId: null,
     };
 
     // =====================================================================
@@ -692,31 +699,34 @@
         return;
       }
 
-      // Tell the backend the FE-configured currency (used for response shaping)
-      // before we sync history. Best-effort — don't block startup on this.
-      if (state.onboarding.currency) {
-        try {
-          await sendEvent({
-            type: 'FE.SET_CONTEXT',
-            currency: state.onboarding.currency,
-          }, { showOptimistic: false, userInitiated: false });
-        } catch (err) {
-          console.warn('FE.SET_CONTEXT failed; continuing without it', err);
-        }
-      }
+      await openChat();
+      document.getElementById('composer-input').focus();
+    }
 
-      // Hydrate any existing conversation. For a brand-new chatId the
-      // server typically replies with a cold start; for an existing one
-      // it replays the newest SYNC_EVENT_LOG_LIMIT events. The response opens
-      // with SYNC_EVENT_LOG.META, which is where the cursor to anything older
-      // comes from — see loadOlderHistory().
-      await sendEvent(
+    // Shared by startChat and New chat. The sync replays an existing conversation (its newest
+    // SYNC_EVENT_LOG_LIMIT events, opened by SYNC_EVENT_LOG.META, which is where the cursor to
+    // anything older comes from — see loadOlderHistory()), or the greeting of a chat whose
+    // shopper has not written yet. A brand-new chatId gets nothing back: the greeting is then
+    // asked for with a cold start; the context goes with FE.SET_CONTEXT right before the first message.
+    async function openChat() {
+      state.openingInputs = [];
+      const synced = await sendEvent(
         { type: 'SYNC_EVENT_LOG', limit: SYNC_EVENT_LOG_LIMIT },
         { showOptimistic: false, userInitiated: false }
       );
+      // Only an answered, empty sync is a new chat; a failed one leaves its error to retry from.
+      const welcomeText = t('welcomeMessage', '');
+      if (synced && isThreadEmpty() && welcomeText) {
+        const coldStart = {
+          _id: uuid(),
+          sentDate: new Date().toISOString(),
+          type: 'ADD_MESSAGE.ASSISTANT.COLD_START',
+          text: welcomeText,
+        };
+        state.openingInputs = [coldStart];
+        await sendEvent(coldStart, { showOptimistic: false, userInitiated: false });
+      }
       renderDefaultConversationStartersIfEmpty();
-
-      document.getElementById('composer-input').focus();
     }
 
     function bindChatControls() {
@@ -765,10 +775,7 @@
       resetComposerState();
       resetHistoryPaging();
 
-      sendEvent(
-        { type: 'SYNC_EVENT_LOG', limit: SYNC_EVENT_LOG_LIMIT },
-        { showOptimistic: false, userInitiated: false }
-      ).finally(() => renderDefaultConversationStartersIfEmpty());
+      openChat();
       document.getElementById('composer-input').focus();
     }
 
@@ -870,6 +877,7 @@
     // =====================================================================
     // send-event
     // =====================================================================
+    // Answers whether the request completed; a failure is already shown in the thread.
     async function sendEvent(eventBody, opts = {}) {
       const { showOptimistic = true, userInitiated = undefined } = opts;
       const { apiUrl, agentId } = state.onboarding;
@@ -884,7 +892,7 @@
       // Guard: never let two user-initiated requests run concurrently.
       if (isUserInitiated && state.composerInflight) {
         console.warn('Ignoring user event while a request is in flight');
-        return;
+        return false;
       }
 
       const event = {
@@ -892,13 +900,28 @@
         sentDate: new Date().toISOString(),
         ...eventBody,
       };
+      const openingInputs = isUserInitiated ? state.openingInputs : [];
 
-      if (showOptimistic && event.type.startsWith('ADD_MESSAGE.USER.')) {
-        renderUserBubble(event);
-      }
+      const optimisticBubble = showOptimistic && event.type.startsWith('ADD_MESSAGE.USER.')
+        ? renderUserBubble(event)
+        : null;
 
       if (isUserInitiated) {
         setComposerInflight(true);
+        if (state.contextSentForChatId !== state.chatId) {
+          // The message goes only with its context: a failed context request is shown, ends the
+          // turn without the message (its bubble goes too), and is sent again with the next one.
+          const contextSent = await sendEvent(
+            { type: 'FE.SET_CONTEXT', currency: state.onboarding.currency },
+            { showOptimistic: false, userInitiated: false }
+          );
+          if (!contextSent) {
+            optimisticBubble?.remove();
+            setComposerInflight(false);
+            return false;
+          }
+          state.contextSentForChatId = state.chatId;
+        }
         // Show initial "Thinking…" indicator immediately, before any
         // NOTIFICATION event arrives.
         showProgress(t('notificationThinking',
@@ -925,6 +948,7 @@
               url: window.location.href,
               localeTime: new Date().toISOString(),
               endCustomerId: state.endCustomerId,
+              ...(openingInputs.length ? { openingInputs } : {}),
             }),
             signal: abort.signal,
           });
@@ -959,9 +983,13 @@
         }
 
         if (lastHttpError) throw lastHttpError;
+        // the first message stored the opening with it
+        if (openingInputs.length) state.openingInputs = [];
+        return true;
       } catch (err) {
         console.error('send-event request failed', err);
         renderError(getUserFacingErrorMessage(err), false);
+        return false;
       } finally {
         clearTimeout(timer);
         // Clear the progress indicator now that the whole turn is complete
@@ -1101,7 +1129,12 @@
       );
     }
 
+    // Starters stay under the greeting until the shopper writes.
     function isChatEmptyForStarters() {
+      return !messagesEl().querySelector('.message.user');
+    }
+
+    function isThreadEmpty() {
       // #messages always keeps the (possibly hidden) history loader as its
       // first child, so an empty thread is "only the loader", not zero children.
       const loader = historyLoaderEl();
@@ -1402,7 +1435,11 @@
           break;
 
         case 'ADD_MESSAGE.ASSISTANT.COLD_START':
-          state.lastAssistantBubble = renderAssistantBubble(event);
+          // The echo of the cold-start request, not a message: the greeting itself follows as
+          // ADD_MESSAGE.ASSISTANT.TEXT (plus carousel / quick replies). A sync of a chat whose
+          // shopper has not written yet replays it in front of the greeting it opened.
+          state.lastAssistantBubble = null;
+          if (isReplay) state.openingInputs = [event];
           break;
 
         case 'ADD_MESSAGE.ASSISTANT.CAROUSEL':

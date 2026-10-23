@@ -10,7 +10,7 @@ The chat client itself has **two main views**. The **Welcome view** is the blank
 
 **Conversation starters** are pre-chat suggestion chips fetched from public Clarity Search endpoints — tuned to whatever the shopper is looking at (a product page, a listing page, or a search query). Selecting one simply sends its text as the first user message. See [Chapter 5 · Conversation starters](05-conversation-starters.md) for the endpoints and payloads.
 
-Throughout, the assistant relies on **context**: a snapshot of what is shown in the outer storefront page (product IDs, cart contents, active category or filters, and currency). Keeping this in sync is what lets replies stay relevant — e.g. answering "is it waterproof?" about the exact product on screen. Context is pushed to the backend whenever the page or cart state changes via the [`FE.SET_CONTEXT`](04-advanced-cases.md#set-context-both) event.
+Throughout, the assistant relies on **context**: a snapshot of what is shown in the outer storefront page (product IDs, cart contents, active category or filters, and currency). Keeping this in sync is what lets replies stay relevant — e.g. answering "is it waterproof?" about the exact product on screen. Context goes to the backend via the [`FE.SET_CONTEXT`](04-advanced-cases.md#set-context-both) event right before the shopper's first message, and whenever the page or cart changes once the conversation is under way. Opening the chat surface stores nothing: a conversation exists only once the shopper writes.
 
 The two wireframes below show each view as the chat client docked inside the outer storefront layer, and label which event drives each region and in which direction it flows.
 
@@ -24,10 +24,10 @@ Outer layer: the storefront page (PDP / PLP / search). Inner layer: the Conversa
 |---|---|---|
 | Agent Logo (header) | `GET general-settings` | Inbound |
 | Agent name & description | `GET general-settings` | Inbound |
-| New chat | `SYNC_EVENT_LOG` (new `chatId`) | Outbound |
+| New chat | `SYNC_EVENT_LOG` (new `chatId`), then `ADD_MESSAGE.ASSISTANT.COLD_START` | Outbound |
 | Close chat | UI only — no event | — |
 | Agent Logo (large, welcome) | `GET general-settings` | Inbound |
-| Welcome message | `ADD_MESSAGE.ASSISTANT.COLD_START` | Both |
+| Welcome message | `ADD_MESSAGE.ASSISTANT.TEXT`, answering `ADD_MESSAGE.ASSISTANT.COLD_START` | Both |
 | Starter questions 1–3 | Conversation starters → `ADD_MESSAGE.USER.TEXT` | Inbound |
 | Chat input box | `ADD_MESSAGE.USER.TEXT` | Outbound |
 
@@ -85,7 +85,7 @@ That exception is `FATAL_ERROR`. It belongs to the control family but is the one
 
 ## From mount to history
 
-The model above says what the pieces are; this section says how the client gets hold of them, and in what order. Three steps bring the client up: fetch branding, push context, then sync. The sync goes out every time — what comes back is what differs, a replayed page for a chat that has history and a cold-start welcome for a brand-new one. Everything older than that first page is then reached one cursor at a time.
+The model above says what the pieces are; this section says how the client gets hold of them, and in what order. Three steps bring the client up: fetch branding, sync, then greet. The sync goes out every time — what comes back is what differs: a replayed page for a chat that has history, and nothing for a brand-new one, which the client then greets with a cold start. No context is sent on mount. Everything older than that first page is then reached one cursor at a time.
 
 ![Sequence diagram of chat client initialization and history paging](images/chat-init-sequence.svg)
 
@@ -93,8 +93,9 @@ The model above says what the pieces are; this section says how the client gets 
 |---|---|---|
 | Resolve `chatId` | none — `localStorage` or a fresh UUID v7 | Every mount |
 | [Branding & translations](README.md#step-1--fetch-branding--translations-inbound) | `GET general-settings` | Once per session, cached 6 h |
-| [Current context](04-advanced-cases.md#set-context-both) | `FE.SET_CONTEXT` via `send-event` | Every mount, then on every page / cart change |
-| [History restoration](04-advanced-cases.md#history-restoration-outbound) | `SYNC_EVENT_LOG` via `send-event` | Every mount and every **New chat** — a fresh `chatId` gets a cold start back |
+| [History restoration](04-advanced-cases.md#history-restoration-outbound) | `SYNC_EVENT_LOG` via `send-event` | Every mount and every **New chat** |
+| [Greeting](README.md#step-3--greet-a-new-chat-outbound) | `ADD_MESSAGE.ASSISTANT.COLD_START` via `send-event` | When the sync returned nothing |
+| [Current context](04-advanced-cases.md#set-context-both) | `FE.SET_CONTEXT` via `send-event` | Right before the shopper's first message, then on every page / cart change |
 | [Older pages](04-advanced-cases.md#history-paging-inbound) | `GET history?after=<cursor>` | While `hasMore`, behind **Load earlier messages** |
 
 The `loop` frame is the `Page → Cursor` association from the domain model, walked backwards: every response hands back the cursor for the page before it, and `hasMore` — never the number of events returned — decides whether the button stays.
@@ -110,7 +111,8 @@ The `loop` frame is the `Page → Cursor` association from the domain model, wal
   url: "https://shop/pdp",   // required
   endCustomerId: "cookie",
   localeTime?, conversationId?,
-  directToAgent?, agentPayload?
+  directToAgent?, agentPayload?,
+  openingInputs?             // first message only: the cold starts on screen
 }
 ```
 
@@ -124,6 +126,7 @@ For merchant integrations, send `event`, `url`, and `endCustomerId` on every req
 | `url` | Current outer storefront page URL. |
 | `endCustomerId` | Stable shopper/end-user identifier, usually a cookie value. |
 | `directToAgent` / `agentPayload` | Skip routing and dispatch straight to a named agent. |
+| `openingInputs` | The `ADD_MESSAGE.ASSISTANT.COLD_START` events on screen, sent with the shopper's first message. If the greeting the server kept has expired, it is run again and stored in front of the conversation. See [Welcome / cold start](02-basic-events.md#welcome--cold-start-both). |
 
 Some product-carousel events include `_metadata.queries`: the exact search queries the assistant used. There is no "See all results" button by default; if a merchant has configured one, pass those queries to your storefront search page so it can show the same result set. Treat other metadata fields, such as `engVer`, as diagnostic and do not render them to shoppers.
 

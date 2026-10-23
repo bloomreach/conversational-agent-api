@@ -20,6 +20,7 @@ import type {
   AssistantQuickReplyEvent,
   AssistantTextEvent,
   ChatEvent,
+  ColdStartEvent,
   GeneralSettings,
   HistoryEvent,
   MetadataSelectAgentEvent,
@@ -118,8 +119,11 @@ async function historyEventsToMessages(
   for (const event of events) {
     switch (event.type) {
       case 'ADD_MESSAGE.ASSISTANT.TEXT':
-      case 'ADD_MESSAGE.ASSISTANT.COLD_START':
         messages.push({ id: event._id, kind: 'assistant', text: (event as AssistantTextEvent).text || '', raw: event })
+        break
+
+      // The echo of a cold-start request, not a message: its greeting follows as ASSISTANT.TEXT.
+      case 'ADD_MESSAGE.ASSISTANT.COLD_START':
         break
 
       case 'APPEND_LAST_ASSISTANT_MESSAGE': {
@@ -207,12 +211,20 @@ export default function App() {
   // conversation into the freshly cleared thread and install ITS cursor.
   const threadGeneration = useRef(0)
   const startupRanFor = useRef<string | null>(null)
+  // The opening of a chat whose shopper has not written yet. The server keeps the greeting it
+  // streamed and stores it with the first message; these cold starts go along as `openingInputs`
+  // in case that kept greeting has expired in the meantime.
+  const openingInputs = useRef<ColdStartEvent[]>([])
+  // Context is sent right before the shopper's first message of a chat, never on mount: a
+  // context-only request is not a shopper action and must not start a stored chat.
+  const contextSentForChatId = useRef<string | null>(null)
 
   const disabled = inflight || fatal
   const trimmedComposerText = composerText.trim()
+  // Starters stay under the greeting until the shopper writes.
   const displayedStarters = trimmedComposerText
     ? suggestionStarters
-    : messages.length === 0
+    : !messages.some((message) => message.kind === 'user')
       ? SEARCH_FALLBACK_STARTER_QUESTIONS
       : []
   const startersHeading = trimmedComposerText ? 'Conversation starters' : 'Try asking'
@@ -258,11 +270,18 @@ export default function App() {
       input: OutboundEventInput,
       options: { showOptimistic?: boolean; userInitiated?: boolean } = {},
     ) => {
-      if (!config) return
+      if (!config) return null
       const isUserInitiated = options.userInitiated ?? input.type.startsWith('ADD_MESSAGE.USER.')
-      if (isUserInitiated && inflight) return
+      if (isUserInitiated && inflight) return null
 
       const event = makeEvent(input)
+      const turnOpeningInputs = isUserInitiated ? openingInputs.current : []
+      // events of the response other than SYNC_EVENT_LOG.META (a sync of a brand-new chat has none);
+      // answered as null when the request failed, which is no proof of anything
+      let received = 0
+      let failed = false
+      // false until the event itself goes out: a failed context request ends the turn before it
+      let isEventSent = false
       if (options.showOptimistic !== false && event.type.startsWith('ADD_MESSAGE.USER.')) {
         appendMessage({ id: event._id, kind: 'user', text: userEventText(event), raw: event })
       }
@@ -273,15 +292,36 @@ export default function App() {
       }
 
       try {
+        // The message goes only with its context: a failed context request ends the turn without
+        // the message (its bubble goes too), and is sent again with the next one.
+        if (isUserInitiated && contextSentForChatId.current !== chatId) {
+          await sendEventStream({
+            config,
+            chatId,
+            endCustomerId,
+            event: makeEvent({ type: 'FE.SET_CONTEXT', currency: config.currency }),
+            onEvent: (item) => handleInboundEvent(item as ChatEvent),
+          })
+          contextSentForChatId.current = chatId
+        }
+        isEventSent = true
         await sendEventStream({
           config,
           chatId,
           endCustomerId,
           event,
+          openingInputs: turnOpeningInputs,
           // A SYNC_EVENT_LOG response replays the stored log, so its events describe the past.
-          onEvent: (item) => handleInboundEvent(item as ChatEvent, event.type === 'SYNC_EVENT_LOG'),
+          onEvent: (item) => {
+            if ((item as ChatEvent | null)?.type !== 'SYNC_EVENT_LOG.META') received += 1
+            return handleInboundEvent(item as ChatEvent, event.type === 'SYNC_EVENT_LOG')
+          },
         })
+        // the first message stored the opening with it
+        if (turnOpeningInputs.length) openingInputs.current = []
       } catch (error) {
+        failed = true
+        if (!isEventSent) setMessages((current) => current.filter((message) => message.id !== event._id))
         const message = getUserFacingErrorMessage(error, t)
         appendMessage({ id: uuidv7(), kind: 'error', text: message })
       } finally {
@@ -292,6 +332,7 @@ export default function App() {
         setProgressText(null)
         if (isUserInitiated) setInflight(false)
       }
+      return failed ? null : received
     },
     // handleInboundEvent intentionally reads latest state through React setters and stable helpers.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -310,8 +351,14 @@ export default function App() {
           break
 
         case 'ADD_MESSAGE.ASSISTANT.TEXT':
-        case 'ADD_MESSAGE.ASSISTANT.COLD_START':
           appendMessage({ id: event._id, kind: 'assistant', text: (event as AssistantTextEvent).text || '', raw: event })
+          break
+
+        // The echo of the cold-start request, not a message: the greeting itself follows as
+        // ADD_MESSAGE.ASSISTANT.TEXT (plus carousel / quick replies). A sync of a chat whose
+        // shopper has not written yet replays it in front of the greeting it opened.
+        case 'ADD_MESSAGE.ASSISTANT.COLD_START':
+          if (isReplay) openingInputs.current = [event as ColdStartEvent]
           break
 
         case 'APPEND_LAST_ASSISTANT_MESSAGE':
@@ -490,14 +537,25 @@ export default function App() {
         settingsRef.current = loadedSettings
         setSettings(loadedSettings)
         setOnboardingError(null)
-        await sendEvent({ type: 'FE.SET_CONTEXT', currency: activeConfig.currency }, { showOptimistic: false, userInitiated: false })
-        // The response opens with SYNC_EVENT_LOG.META, which is where the cursor to anything
+        openingInputs.current = []
+        // Replays an existing conversation, or the greeting of a chat whose shopper has not written
+        // yet. The response opens with SYNC_EVENT_LOG.META, which is where the cursor to anything
         // older than this page comes from — see loadOlderHistory().
-        if (!isStale()) {
-          await sendEvent(
-            { type: 'SYNC_EVENT_LOG', limit: SYNC_EVENT_LOG_LIMIT },
-            { showOptimistic: false, userInitiated: false },
-          )
+        if (isStale()) return
+        const received = await sendEvent(
+          { type: 'SYNC_EVENT_LOG', limit: SYNC_EVENT_LOG_LIMIT },
+          { showOptimistic: false, userInitiated: false },
+        )
+        // A brand-new chatId gets nothing back: ask for the greeting (context goes with FE.SET_CONTEXT). A
+        // failed sync (null) is no new chat; its error stays to retry from.
+        const welcomeText = translate(loadedSettings, 'welcomeMessage', '')
+        if (received === 0 && welcomeText && !isStale()) {
+          const coldStart = makeEvent({
+            type: 'ADD_MESSAGE.ASSISTANT.COLD_START',
+            text: welcomeText,
+          }) as ColdStartEvent
+          openingInputs.current = [coldStart]
+          await sendEvent(coldStart, { showOptimistic: false, userInitiated: false })
         }
       } catch (error) {
         if (isStale()) return
