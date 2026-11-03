@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "version": "v1.0.0",
+    "version": "v1.2.0",
     "title": "Conversational agent API"
   },
   "servers": [
@@ -299,6 +299,9 @@
                         },
                         "formMaxLength": {
                           "type": "string"
+                        },
+                        "agentSurveyTitle": {
+                          "type": "string"
                         }
                       },
                       "required": [
@@ -381,7 +384,8 @@
                         "formFieldRequired",
                         "formInvalidEmail",
                         "formMinLength",
-                        "formMaxLength"
+                        "formMaxLength",
+                        "agentSurveyTitle"
                       ]
                     },
                     "menuSettings": {
