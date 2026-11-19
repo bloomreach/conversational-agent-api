@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "version": "v1.2.0",
+    "version": "v1.2.1",
     "title": "Conversational agent API"
   },
   "servers": [
@@ -670,7 +670,7 @@
             "apiToken": []
           }
         ],
-        "description": "Send one event to the chat and receive a streaming JSON array of events in response.\n\nThe response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same id to avoid showing the shopper's message twice."
+        "description": "Send one event to the chat and receive a streaming JSON array of events in response.\n\nThe response stream includes the same user event that the client sent. If the UI already rendered that message optimistically, ignore the streamed copy with the same id to avoid showing the shopper's message twice.\n\n**Sending while an earlier one on the same chat is still streaming.** A user message (`ADD_MESSAGE.USER.TEXT`, `ADD_MESSAGE.USER.DIRECT_CALL`, `ADD_MESSAGE.USER.GEN_BY_BTN`) interrupts the running turn if its answer has not started yet: the earlier request ends with `200` and no assistant events (and no `FATAL_ERROR`), its message stays in the chat, and the newest message is answered on its own request with the earlier ones in its history. Messages that queued in between stay in the chat unanswered. Once the earlier answer has started, it is completed and the newer message is answered right after it. Any other event (`FE.SET_CONTEXT`, `ADD_MESSAGE.USER.COMPARE`, a message sent with `directToAgent` or attachments) never interrupts: it waits for the running turn. A waiting request can stay open for up to 120 seconds; one that cannot be served (more than 10 events waiting on the chat, or a longer wait) ends with `FATAL_ERROR`."
       }
     },
     "/ca/v1/agents/{agentId}/chats/{chatId}/history": {

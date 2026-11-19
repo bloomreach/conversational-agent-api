@@ -2,7 +2,7 @@
 
 Documentation and reference test clients for the Bloomreach Conversational Agent API (also referred to as CoCoAaS — Conversational Commerce as a Service). This repo is meant to help frontend integrators understand the API contract and validate their integration against a real backend.
 
-Refer to the [Bloomreach documentation](https://documentation.bloomreach.com/clarity/reference/get-started) for an interactive API reference and getting started guide.
+Refer to the [Bloomreach documentation](https://documentation.bloomreach.com/clarity/reference/get-started) for an interactive API reference and getting started guide. To embed the ready-made chat widget on your website instead of building your own chat UI, see [conversational-agent-web-integration](https://github.com/bloomreach/conversational-agent-web-integration).
 
 **Try it live:** the vanilla JS chat client is hosted at <https://bloomreach.github.io/conversational-agent-api/> — nothing to install or build. It asks for your `apiUrl`, `agentId` and API token on first open, then calls your own backend straight from the browser. Read the [note on browser versus server-side integration](./documentation/README.md#create-an-api-token-and-find-the-agent-id) before pasting a production token.
 
