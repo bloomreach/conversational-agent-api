@@ -190,6 +190,20 @@ It groups whole events, which is independent of `APPEND_LAST_ASSISTANT_MESSAGE` 
 
 > ⚠️ **Timeout:** the backend holds the connection up to **60 seconds**. Match it with an `AbortController` so a stalled stream can't lock the UI.
 
+### Sending while a turn is still streaming
+
+One request at a time is still the recommended flow for a chat UI. Some channels cannot hold the shopper back, though — a messaging bridge forwards every message as it arrives, and a second device or tab can send on the same chat. The backend accepts such a send instead of refusing it:
+
+| Event sent while the earlier turn runs | Earlier turn has not started its answer | Earlier turn is already answering |
+|---|---|---|
+| User message — `ADD_MESSAGE.USER.TEXT`, `.DIRECT_CALL`, `.GEN_BY_BTN` | **Interrupts it.** The earlier request ends with `200`, its echoed user event and no assistant events. The newer message is answered with the earlier one in its history. | Waits. The earlier answer completes, then the newer message is answered. |
+| Anything else — `FE.SET_CONTEXT`, `ADD_MESSAGE.USER.COMPARE`, a message with `directToAgent` or attachments | Waits for the earlier turn. | Waits for the earlier turn. |
+
+- **An interrupted request is not an error.** It carries no `FATAL_ERROR` and no reply, and its user message stays in the chat. Clear its progress indicator and show nothing more: the answer arrives on the newer request.
+- **A burst of messages is answered once.** When three messages come in while a turn runs, the newest one is answered with all three in its history. The ones in between stay in the chat unanswered, and their requests end the same way as an interrupted one.
+- **A waiting request takes longer.** It stays open until the earlier turn ends and then for its own turn, up to **120 seconds** in total. If you send concurrently, give those requests that much time before aborting them.
+- **Some sends are still refused.** More than 10 events waiting on one chat, or a longer wait, ends the request with `FATAL_ERROR`.
+
 ---
 
 [← Getting Started](README.md) · [Chapter 2 — Basic event types →](02-basic-events.md)
